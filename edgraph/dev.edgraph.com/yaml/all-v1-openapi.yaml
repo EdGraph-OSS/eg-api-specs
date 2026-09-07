@@ -8252,12 +8252,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
-  '/tenants/{tenantId}/enrollmentadmin/applications/{applicationId}':
+  '/tenants/{tenantId}/enrollmentadmin/responses/{responseId}':
     get:
       tags:
-        - Enrollment Admin Applications
-      summary: Gets an Enrollment Application.
-      operationId: GetEnrollmentApplication
+        - Enrollment Admin Responses
+      summary: Gets an Enrollment Application Response.
+      operationId: GetEnrollmentApplicationResponse
       parameters:
         - name: tenantId
           in: path
@@ -8265,7 +8265,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: applicationId
+        - name: responseId
           in: path
           description: ''
           required: true
@@ -8302,12 +8302,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
-  '/tenants/{tenantId}/enrollmentadmin/applications':
+  '/tenants/{tenantId}/enrollmentadmin/responses':
     get:
       tags:
-        - Enrollment Admin Applications
-      summary: Searches Enrollment Applications.
-      operationId: GetEnrollmentApplications
+        - Enrollment Admin Responses
+      summary: Searches Enrollment Application Responses.
+      operationId: GetEnrollmentApplicationResponses
       parameters:
         - name: tenantId
           in: path
@@ -52388,7 +52388,7 @@ components:
           type: integer
           format: int32
       additionalProperties: false
-    EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationProfileMessage:
+    EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationPathwayMessage:
       type: object
       properties:
         id:
@@ -52398,8 +52398,8 @@ components:
           type: string
           nullable: true
         version:
-          type: number
-          format: double
+          type: string
+          nullable: true
       additionalProperties: false
     EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationResponseContactMessage:
       type: object
@@ -52429,14 +52429,15 @@ components:
         tenantId:
           type: string
           nullable: true
-        applicationProfile:
-          $ref: '#/components/schemas/EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationProfileMessage'
-        currentStepCode:
+        applicationPathway:
+          $ref: '#/components/schemas/EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationPathwayMessage'
+        currentScreenCode:
           type: string
           nullable: true
-        completedProgress:
-          type: number
-          format: double
+        progress:
+          type: string
+          description: "Decimal progress (0-100, 2dp) carried as an invariant-culture string,\r\nmirroring the legacy enrollmentresults.proto completedProgress convention."
+          nullable: true
         studentId:
           type: string
           nullable: true
@@ -52449,10 +52450,10 @@ components:
             $ref: '#/components/schemas/EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationResponseContactMessage'
           nullable: true
           readOnly: true
-        steps:
+        screens:
           type: array
           items:
-            $ref: '#/components/schemas/EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationResponseStepMessage'
+            $ref: '#/components/schemas/EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationResponseScreenMessage'
           nullable: true
           readOnly: true
         createdBy:
@@ -52476,8 +52477,26 @@ components:
         isDeleted:
           type: boolean
           nullable: true
+        status:
+          type: string
+          nullable: true
+        studentFirstName:
+          type: string
+          nullable: true
+        studentLastName:
+          type: string
+          nullable: true
+        studentLocalId:
+          type: string
+          nullable: true
+        nextSchoolCode:
+          type: string
+          nullable: true
+        nextSchoolName:
+          type: string
+          nullable: true
       additionalProperties: false
-    EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationResponseStepMessage:
+    EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationResponseScreenMessage:
       type: object
       properties:
         index:
