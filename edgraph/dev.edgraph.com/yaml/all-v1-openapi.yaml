@@ -7241,6 +7241,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/unlock':
+    post:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: 'Unlocks a contact''s sign-in, resetting exhausted parent-verification tries.'
+      description: "Idempotent: unlocking an already-unlocked contact, or one with no rows at all, is a 200 with\r\n`resetCount: 0`, not an error."
+      operationId: UnlockEnrollmentContactSignIn
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: 'The contact''s sign-in was unlocked, or there was nothing to unlock.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactSignInUnlockedResultDto'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/contacts/{id}':
     get:
       tags:
@@ -7415,6 +7467,11 @@ paths:
           schema:
             type: string
             default: ''
+        - name: locked
+          in: query
+          description: Narrows to contacts by sign-in lock status. Unset returns every contact.
+          schema:
+            type: boolean
       responses:
         '401':
           description: Unauthorized
@@ -44270,6 +44327,8 @@ components:
         signInStatus:
           type: string
           nullable: true
+        isLocked:
+          type: boolean
         createdBy:
           type: string
           nullable: true
@@ -44309,6 +44368,27 @@ components:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactResponseDto'
           nullable: true
       additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactSignInUnlockedResultDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+        isLocked:
+          type: boolean
+        signInStatus:
+          type: string
+          nullable: true
+        resetCount:
+          type: integer
+          format: int32
+      additionalProperties: false
+      description: 'What an unlock reports back, so the caller can re-render without a second GET.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactStudentResponseDto:
       type: object
       properties:
