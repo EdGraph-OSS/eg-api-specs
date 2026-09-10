@@ -1,0 +1,2075 @@
+openapi: 3.0.1
+info:
+  title: Enrollment Admin Api
+  description: Enrollment Admin Api - v1.0
+  version: v1.0
+servers:
+  - url: https://api.int.txedexchange.net/tenant
+paths:
+  '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/email-override':
+    delete:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: 'Removes a contact''s email override, letting the SIS value show through again.'
+      description: The removal is itself recorded in the history - the superseded value stays recoverable.
+      operationId: RemoveEnrollmentContactEmailOverride
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: studentId
+          in: query
+          description: The student whose screen the removal was made from.
+          schema:
+            type: string
+            default: ''
+        - name: expectedVersion
+          in: query
+          description: The `lastUpdatedDateTime` this edit started from.
+          schema:
+            type: string
+            default: ''
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: 'The override was removed, or there was none to remove.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactOverrideResultDto'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '412':
+          description: The contact changed while it was being edited; the write was refused.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+    put:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: Overrides a contact's email address.
+      description: "The override is an enrollment-local annotation over SIS data, not a writeback. The SIS value\r\nis kept and returned alongside it, and the correction keeps winning over later SIS imports\r\nuntil staff revisit it.\r\n<br>\r\nThe corrected value is shared by every student linked to the contact. `studentId` in the\r\nbody only records whose screen the edit came from.\r\n"
+      operationId: OverrideEnrollmentContactEmail
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactEmailOverrideRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactEmailOverrideRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactEmailOverrideRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactEmailOverrideRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The override was applied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactOverrideResultDto'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '412':
+          description: The contact changed while it was being edited; the write was refused.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/overrides':
+    get:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: 'Reads a contact''s override history, newest first.'
+      description: "<br>\r\n            Eventually consistent. A change reaches the log through Enrollment's outbox, so an entry can\r\n            be a few seconds behind a write that has already succeeded. Render the current value from the\r\n            contact itself and use this for what preceded it.\r\n            \r\n<br>\r\n            One route for both details, unlike the writes: this is a single ordered log and each entry\r\n            names its own detail, so splitting it would mean two requests to render one contact's\r\n            timeline and two page counts to reconcile.\r\n            "
+      operationId: GetEnrollmentContactOverrides
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: pageSize
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+            default: 20
+        - name: pageIndex
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: studentId
+          in: query
+          description: Narrows to changes affecting one linked student.
+          schema:
+            type: string
+            default: ''
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactOverrideHistoryEntryDtoPaginatedItemsViewModel'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/phone-override':
+    delete:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: 'Removes a contact''s phone override, letting the SIS value show through again.'
+      description: The removal is itself recorded in the history - the superseded value stays recoverable.
+      operationId: RemoveEnrollmentContactPhoneOverride
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: studentId
+          in: query
+          description: The student whose screen the removal was made from.
+          schema:
+            type: string
+            default: ''
+        - name: expectedVersion
+          in: query
+          description: The `lastUpdatedDateTime` this edit started from.
+          schema:
+            type: string
+            default: ''
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: 'The override was removed, or there was none to remove.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactOverrideResultDto'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '412':
+          description: The contact changed while it was being edited; the write was refused.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+    put:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: Overrides a contact's phone number.
+      description: "The override is an enrollment-local annotation over SIS data, not a writeback. The SIS value\r\nis kept and returned alongside it, and the correction keeps winning over later SIS imports\r\nuntil staff revisit it.\r\n<br>\r\nThe corrected value is shared by every student linked to the contact. `studentId` in the\r\nbody only records whose screen the edit came from.\r\n"
+      operationId: OverrideEnrollmentContactPhone
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactPhoneOverrideRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactPhoneOverrideRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactPhoneOverrideRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactPhoneOverrideRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The override was applied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactOverrideResultDto'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '412':
+          description: The contact changed while it was being edited; the write was refused.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/contacts/{id}':
+    get:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: 'Gets an Enrollment Contact by its record id, with its linked students.'
+      operationId: GetEnrollmentContactById
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactResponseDto'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+    put:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: Updates an Enrollment Contact name and its linked students.
+      description: "<br>\r\n            The student list is REPLACED, not merged: a student omitted from the body is unlinked from the\r\n            contact.\r\n            \r\n<br>\r\n            Email and phone cannot be changed here. Correcting either is an override, which records who\r\n            changed it and keeps the SIS value beside the correction; a body carrying `email` or\r\n            `phone` is rejected with a 400 naming the route to use instead. Note that a contact whose\r\n            email is overridden keeps that override across this call - an update to the name leaves a\r\n            standing correction alone.\r\n            "
+      operationId: UpdateEnrollmentContact
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateContactRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateContactRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateContactRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateContactRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The contact was updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactMutationResultDto'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/contacts':
+    get:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: Searches Enrollment Contacts.
+      operationId: GetEnrollmentContacts
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: pageSize
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+            default: 50
+        - name: pageIndex
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: orderBy
+          in: query
+          description: ''
+          schema:
+            type: string
+            default: ''
+        - name: filter
+          in: query
+          description: ''
+          schema:
+            type: string
+            default: ''
+        - name: search
+          in: query
+          description: 'Free-text match on contact name, email, or phone.'
+          schema:
+            type: string
+            default: ''
+        - name: schoolCode
+          in: query
+          description: Narrows to contacts with at least one linked student at this school.
+          schema:
+            type: string
+            default: ''
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactResponseDtoPaginatedItemsViewModel'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+    post:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: Creates an Enrollment Contact.
+      description: "`email` and `phone` here are the SIS-sourced values, which is what a contact starts\r\n            with. Changing either afterwards is an override rather than an update - see the\r\n            `email-override` and `phone-override` routes."
+      operationId: CreateEnrollmentContact
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateContactRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateContactRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateContactRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateContactRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '201':
+          description: The contact was created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactMutationResultDto'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/schools/{id}':
+    get:
+      tags:
+        - Enrollment Admin / Schools
+      summary: 'Gets an Enrollment School by its record id, with the programs it runs.'
+      operationId: GetEnrollmentSchoolById
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolResponseDto'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/schools/code/{code}/enabled':
+    put:
+      tags:
+        - Enrollment Admin / Schools
+      summary: Enables or disables an Enrollment School.
+      operationId: SetEnrollmentSchoolEnabled
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: code
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetSchoolEnabledRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetSchoolEnabledRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetSchoolEnabledRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetSchoolEnabledRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The resource was successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolEnabledResponseDto'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/schools/code/{code}':
+    get:
+      tags:
+        - Enrollment Admin / Schools
+      summary: 'Gets an Enrollment School by its school code, with the programs it runs.'
+      operationId: GetEnrollmentSchool
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: code
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolResponseDto'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/schools':
+    get:
+      tags:
+        - Enrollment Admin / Schools
+      summary: Searches Enrollment Schools.
+      operationId: GetEnrollmentSchools
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: pageSize
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+            default: 50
+        - name: pageIndex
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: orderBy
+          in: query
+          description: ''
+          schema:
+            type: string
+            default: ''
+        - name: filter
+          in: query
+          description: ''
+          schema:
+            type: string
+            default: ''
+        - name: search
+          in: query
+          description: Free-text match on school name or school code.
+          schema:
+            type: string
+            default: ''
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolListItemResponseDtoPaginatedItemsViewModel'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/applications/{applicationId}':
+    get:
+      tags:
+        - Enrollment Admin Applications
+      summary: Gets an Enrollment Application.
+      operationId: GetEnrollmentApplication
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: applicationId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationResponseResponse'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/applications':
+    get:
+      tags:
+        - Enrollment Admin Applications
+      summary: Searches Enrollment Applications.
+      operationId: GetEnrollmentApplications
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: pageIndex
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+        - name: pageSize
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+        - name: filter
+          in: query
+          description: ''
+          schema:
+            type: string
+        - name: orderBy
+          in: query
+          description: ''
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationResponsesSearchResponse'
+  '/tenants/{tenantId}/enrollmentadmin/students/{studentId}':
+    get:
+      tags:
+        - Enrollment Admin Students
+      summary: Gets an Enrollment Student.
+      operationId: GetEnrollmentStudent
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: studentId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentApi.EnrollmentStudents.V1.StudentResponse'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/students':
+    get:
+      tags:
+        - Enrollment Admin Students
+      summary: Searches Enrollment Students.
+      operationId: GetEnrollmentStudents
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: pageIndex
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+        - name: pageSize
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+        - name: filter
+          in: query
+          description: ''
+          schema:
+            type: string
+        - name: orderBy
+          in: query
+          description: ''
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentApi.EnrollmentStudents.V1.StudentsSearchResponse'
+components:
+  schemas:
+    EdGraph.Common.Errors.Core.ProblemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        status:
+          type: integer
+          format: int32
+        title:
+          type: string
+          nullable: true
+        details:
+          type: string
+          nullable: true
+        instance:
+          type: string
+          nullable: true
+        extensions:
+          type: object
+          additionalProperties:
+            nullable: true
+          nullable: true
+          readOnly: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ContactStudentRequestDto:
+      type: object
+      properties:
+        studentId:
+          type: string
+          nullable: true
+        firstName:
+          type: string
+          nullable: true
+        middleName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: A student to link the contact to.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateContactRequestDto:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          description: Must match the tenant in the route.
+          format: uuid
+        contactId:
+          type: string
+          description: "The contact's identifier in the source system. Distinct from the record id, which the service\r\nassigns and returns in the response."
+          nullable: true
+        firstName:
+          type: string
+          description: Required. Never overridable - only email and phone are.
+          nullable: true
+        lastName:
+          type: string
+          description: Required. Never overridable - only email and phone are.
+          nullable: true
+        email:
+          type: string
+          description: "The SIS-sourced email. Correcting it later is an override and goes through the\r\n`email-override` route instead - see EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateContactRequestDto."
+          nullable: true
+        phone:
+          type: string
+          description: 'The SIS-sourced phone, on the same terms as Email.'
+          nullable: true
+        students:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ContactStudentRequestDto'
+          description: "The students to link the contact to. Optional; omit or send an empty list for a contact with no\r\nlinks yet."
+          nullable: true
+      additionalProperties: false
+      description: The body of a contact creation.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetSchoolEnabledRequestDto:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+        code:
+          type: string
+          nullable: true
+        isEnabled:
+          type: boolean
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateContactRequestDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        students:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ContactStudentRequestDto'
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: The body of a contact update.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactEmailOverrideRequestDto:
+      type: object
+      properties:
+        value:
+          type: string
+          description: The corrected detail. The DELETE route removes an override instead; this is never blank.
+          nullable: true
+        studentId:
+          type: string
+          description: "The student whose screen the edit was made from. Recorded on the history entry so it can be\r\nfiltered per student. It does NOT scope the override — every student linked to the contact shares\r\none corrected value."
+          nullable: true
+        expectedVersion:
+          type: string
+          description: "The `lastUpdatedDateTime` the client read, round-tripped back. When it no longer matches the\r\nwrite is refused with 412 rather than winning because it arrived second. Omit to skip the check."
+          nullable: true
+      additionalProperties: false
+      description: The body of an override write.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactMutationResultDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+      additionalProperties: false
+      description: What a contact create or update reports back.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactOverrideHistoryEntryDto:
+      type: object
+      properties:
+        eventId:
+          type: string
+          nullable: true
+        detail:
+          type: string
+          description: 'Which detail this entry is about: `email` or `phone`.'
+          nullable: true
+        action:
+          type: string
+          description: '`set` or `removed`. A removal returns the detail to its SIS value.'
+          nullable: true
+        previousValue:
+          type: string
+          description: 'The value this entry superseded, if any. Superseded values are kept, never deleted.'
+          nullable: true
+        newValue:
+          type: string
+          nullable: true
+        sisValue:
+          type: string
+          nullable: true
+        overriddenBy:
+          type: string
+          nullable: true
+        overriddenAt:
+          type: string
+          format: date-time
+          nullable: true
+        actingStudentId:
+          type: string
+          description: 'The student whose screen the change was made from, when one was recorded.'
+          nullable: true
+        studentIds:
+          type: array
+          items:
+            type: string
+          nullable: true
+      additionalProperties: false
+      description: One entry in a contact's override history.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactOverrideHistoryEntryDtoPaginatedItemsViewModel:
+      type: object
+      properties:
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactOverrideHistoryEntryDto'
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactOverrideResultDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+        lastUpdatedDateTime:
+          type: string
+          description: 'The new version, for a client that keeps editing without re-reading.'
+          format: date-time
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactPhoneOverrideRequestDto:
+      type: object
+      properties:
+        value:
+          type: string
+          nullable: true
+        studentId:
+          type: string
+          nullable: true
+        expectedVersion:
+          type: string
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+        contactId:
+          type: string
+          nullable: true
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        students:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactStudentResponseDto'
+          nullable: true
+        relationship:
+          type: string
+          nullable: true
+        studentCount:
+          type: integer
+          format: int32
+        isPhoneOverride:
+          type: boolean
+          nullable: true
+        isEmailOverride:
+          type: boolean
+          nullable: true
+        sisEmail:
+          type: string
+          nullable: true
+        sisPhone:
+          type: string
+          nullable: true
+        emailOverriddenBy:
+          type: string
+          nullable: true
+        emailOverriddenAt:
+          type: string
+          format: date-time
+          nullable: true
+        phoneOverriddenBy:
+          type: string
+          nullable: true
+        phoneOverriddenAt:
+          type: string
+          format: date-time
+          nullable: true
+        signInStatus:
+          type: string
+          nullable: true
+        createdBy:
+          type: string
+          nullable: true
+        createdDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        lastModifiedBy:
+          type: string
+          nullable: true
+        lastModifiedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        lastUpdatedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        isDeleted:
+          type: boolean
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactResponseDtoPaginatedItemsViewModel:
+      type: object
+      properties:
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactResponseDto'
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactStudentResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        studentId:
+          type: string
+          nullable: true
+        firstName:
+          type: string
+          nullable: true
+        middleName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolEnabledResponseDto:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+        code:
+          type: string
+          nullable: true
+        isEnabled:
+          type: boolean
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolListItemResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+        code:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        district:
+          type: string
+          nullable: true
+        campusId:
+          type: string
+          nullable: true
+        teaIdNumber:
+          type: string
+          nullable: true
+        gradesServed:
+          type: array
+          items:
+            type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        lat:
+          type: number
+          format: double
+          nullable: true
+        lon:
+          type: number
+          format: double
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        isEnabled:
+          type: boolean
+        programCount:
+          type: integer
+          format: int32
+        createdBy:
+          type: string
+          nullable: true
+        createdDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        lastModifiedBy:
+          type: string
+          nullable: true
+        lastModifiedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        lastUpdatedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolListItemResponseDtoPaginatedItemsViewModel:
+      type: object
+      properties:
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolListItemResponseDto'
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolProgramResponseDto:
+      type: object
+      properties:
+        programCode:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        gradeLow:
+          type: string
+          nullable: true
+        gradeHigh:
+          type: string
+          nullable: true
+        programType:
+          type: string
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolResponseDto:
+      type: object
+      properties:
+        programs:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolProgramResponseDto'
+          nullable: true
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+        code:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        district:
+          type: string
+          nullable: true
+        campusId:
+          type: string
+          nullable: true
+        teaIdNumber:
+          type: string
+          nullable: true
+        gradesServed:
+          type: array
+          items:
+            type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        lat:
+          type: number
+          format: double
+          nullable: true
+        lon:
+          type: number
+          format: double
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        isEnabled:
+          type: boolean
+        programCount:
+          type: integer
+          format: int32
+        createdBy:
+          type: string
+          nullable: true
+        createdDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        lastModifiedBy:
+          type: string
+          nullable: true
+        lastModifiedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        lastUpdatedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: false
+    EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationProfileMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        type:
+          type: string
+          nullable: true
+        version:
+          type: number
+          format: double
+      additionalProperties: false
+    EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationResponseContactMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        sourceId:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+      additionalProperties: false
+    EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationResponseResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        tenantId:
+          type: string
+          nullable: true
+        applicationProfile:
+          $ref: '#/components/schemas/EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationProfileMessage'
+        currentStepCode:
+          type: string
+          nullable: true
+        completedProgress:
+          type: number
+          format: double
+        studentId:
+          type: string
+          nullable: true
+        languageCode:
+          type: string
+          nullable: true
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationResponseContactMessage'
+          nullable: true
+          readOnly: true
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationResponseStepMessage'
+          nullable: true
+          readOnly: true
+        createdBy:
+          type: string
+          nullable: true
+        createdDateTime:
+          type: string
+          nullable: true
+        lastModifiedBy:
+          type: string
+          nullable: true
+        lastModifiedDateTime:
+          type: string
+          nullable: true
+        deletedBy:
+          type: string
+          nullable: true
+        deletedDateTime:
+          type: string
+          nullable: true
+        isDeleted:
+          type: boolean
+          nullable: true
+      additionalProperties: false
+    EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationResponseStepMessage:
+      type: object
+      properties:
+        index:
+          type: integer
+          format: int32
+        code:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        createdBy:
+          type: string
+          nullable: true
+        createdDateTime:
+          type: string
+          nullable: true
+        updatedBy:
+          type: string
+          nullable: true
+        updatedDateTime:
+          type: string
+          nullable: true
+        data:
+          $ref: '#/components/schemas/Google.Protobuf.WellKnownTypes.Struct'
+      additionalProperties: false
+    EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationResponsesSearchResponse:
+      type: object
+      properties:
+        pageSize:
+          type: integer
+          format: int32
+        pageIndex:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentApi.EnrollmentApplicationResponses.V1.ApplicationResponseResponse'
+          nullable: true
+          readOnly: true
+      additionalProperties: false
+    EnrollmentApi.EnrollmentStudents.V1.AllowedApplicationProfileIdMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+      additionalProperties: false
+    EnrollmentApi.EnrollmentStudents.V1.StudentContactMessage:
+      type: object
+      properties:
+        contactId:
+          type: string
+          nullable: true
+        priority:
+          type: integer
+          format: int32
+          nullable: true
+        fullName:
+          type: string
+          nullable: true
+        relationship:
+          type: string
+          nullable: true
+        livesWithStudent:
+          type: boolean
+          nullable: true
+        hasLegalCustody:
+          type: boolean
+          nullable: true
+        canPickUp:
+          type: boolean
+          nullable: true
+        isEmergency:
+          type: boolean
+          nullable: true
+        personId:
+          type: string
+          nullable: true
+      additionalProperties: false
+    EnrollmentApi.EnrollmentStudents.V1.StudentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        tenantId:
+          type: string
+          nullable: true
+        studentId:
+          type: string
+          nullable: true
+        allowedApplicationProfileIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentApi.EnrollmentStudents.V1.AllowedApplicationProfileIdMessage'
+          nullable: true
+          readOnly: true
+        firstName:
+          type: string
+          nullable: true
+        middleName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        birthdate:
+          type: string
+          nullable: true
+        localId:
+          type: string
+          nullable: true
+        peimsId:
+          type: string
+          nullable: true
+        last4SSN:
+          type: string
+          nullable: true
+        nextAddress:
+          type: string
+          nullable: true
+        nextGradeLevel:
+          type: string
+          nullable: true
+        nextSchoolCode:
+          type: string
+          nullable: true
+        nextSchoolName:
+          type: string
+          nullable: true
+        nextSchoolAddress:
+          type: string
+          nullable: true
+        eligibilityCode:
+          type: string
+          nullable: true
+        eligibilityDescription:
+          type: string
+          nullable: true
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentApi.EnrollmentStudents.V1.StudentContactMessage'
+          nullable: true
+          readOnly: true
+        createdBy:
+          type: string
+          nullable: true
+        createdDateTime:
+          type: string
+          nullable: true
+        lastModifiedBy:
+          type: string
+          nullable: true
+        lastModifiedDateTime:
+          type: string
+          nullable: true
+        deletedBy:
+          type: string
+          nullable: true
+        deletedDateTime:
+          type: string
+          nullable: true
+        isDeleted:
+          type: boolean
+          nullable: true
+      additionalProperties: false
+    EnrollmentApi.EnrollmentStudents.V1.StudentsSearchResponse:
+      type: object
+      properties:
+        pageSize:
+          type: integer
+          format: int32
+        pageIndex:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentApi.EnrollmentStudents.V1.StudentResponse'
+          nullable: true
+          readOnly: true
+      additionalProperties: false
+    Google.Protobuf.WellKnownTypes.ListValue:
+      type: object
+      properties:
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/Google.Protobuf.WellKnownTypes.Value'
+          nullable: true
+          readOnly: true
+      additionalProperties: false
+    Google.Protobuf.WellKnownTypes.NullValue:
+      enum:
+        - NullValue
+      type: string
+    Google.Protobuf.WellKnownTypes.Struct:
+      type: object
+      properties:
+        fields:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Google.Protobuf.WellKnownTypes.Value'
+          nullable: true
+          readOnly: true
+      additionalProperties: false
+    Google.Protobuf.WellKnownTypes.Value:
+      type: object
+      properties:
+        nullValue:
+          $ref: '#/components/schemas/Google.Protobuf.WellKnownTypes.NullValue'
+        hasNullValue:
+          type: boolean
+          readOnly: true
+        numberValue:
+          type: number
+          format: double
+        hasNumberValue:
+          type: boolean
+          readOnly: true
+        stringValue:
+          type: string
+          nullable: true
+        hasStringValue:
+          type: boolean
+          readOnly: true
+        boolValue:
+          type: boolean
+        hasBoolValue:
+          type: boolean
+          readOnly: true
+        structValue:
+          $ref: '#/components/schemas/Google.Protobuf.WellKnownTypes.Struct'
+        listValue:
+          $ref: '#/components/schemas/Google.Protobuf.WellKnownTypes.ListValue'
+        kindCase:
+          $ref: '#/components/schemas/Google.Protobuf.WellKnownTypes.Value+KindOneofCase'
+      additionalProperties: false
+    Google.Protobuf.WellKnownTypes.Value+KindOneofCase:
+      enum:
+        - None
+        - NullValue
+        - NumberValue
+        - StringValue
+        - BoolValue
+        - StructValue
+        - ListValue
+      type: string
+    Microsoft.AspNetCore.Mvc.ProblemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        status:
+          type: integer
+          format: int32
+          nullable: true
+        detail:
+          type: string
+          nullable: true
+        instance:
+          type: string
+          nullable: true
+      additionalProperties: { }
+    Microsoft.AspNetCore.Mvc.ValidationProblemDetails:
+      type: object
+      properties:
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          nullable: true
+        type:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        status:
+          type: integer
+          format: int32
+          nullable: true
+        detail:
+          type: string
+          nullable: true
+        instance:
+          type: string
+          nullable: true
+      additionalProperties: { }
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      description: Use bearer token generated from an OpenId server
+      flows:
+        clientCredentials:
+          tokenUrl: http://localhost:5305/connect/token
+          scopes:
+            https://api.edgraph.com/auth/tenant: EdGraph Platform - Tenant Api
+security:
+  - oauth2:
+      - https://api.edgraph.com/auth/tenant
