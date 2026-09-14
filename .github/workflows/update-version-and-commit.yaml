@@ -21,7 +21,7 @@ jobs:
           app-id: ${{ vars.PUBLISHER_APP_ID }}
           private-key: ${{ secrets.PUBLISHER_APP_PRIVATE_KEY }}
           owner: EdGraph-OSS
-          repositories: api-specs
+          repositories: eg-api-specs
 
       - uses: actions/checkout@v7
         with:
