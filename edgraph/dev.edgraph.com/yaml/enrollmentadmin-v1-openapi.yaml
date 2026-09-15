@@ -2196,12 +2196,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
-  '/tenants/{tenantId}/enrollmentadmin/schools/{id}':
-    get:
+  '/tenants/{tenantId}/enrollmentadmin/schools/{id}/disable':
+    put:
       tags:
         - Enrollment Admin / Schools
-      summary: 'Gets an Enrollment School by its record id, with the programs it runs.'
-      operationId: GetEnrollmentSchoolById
+      summary: Disables an Enrollment School.
+      operationId: DisableEnrollmentSchool
       parameters:
         - name: tenantId
           in: path
@@ -2236,23 +2236,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
         '200':
-          description: The requested resource was successfully retrieved.
+          description: The resource was successfully updated.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolResponseDto'
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolEnabledResponseDto'
         '404':
           description: The resource could not be found.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-  '/tenants/{tenantId}/enrollmentadmin/schools/code/{code}/enabled':
+  '/tenants/{tenantId}/enrollmentadmin/schools/{id}/enable':
     put:
       tags:
         - Enrollment Admin / Schools
-      summary: Enables or disables an Enrollment School.
-      operationId: SetEnrollmentSchoolEnabled
+      summary: Enables an Enrollment School.
+      operationId: EnableEnrollmentSchool
       parameters:
         - name: tenantId
           in: path
@@ -2260,27 +2260,13 @@ paths:
           required: true
           schema:
             type: string
-        - name: code
+        - name: id
           in: path
           description: ''
           required: true
           schema:
             type: string
-      requestBody:
-        description: ''
-        content:
-          application/json-patch+json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetSchoolEnabledRequestDto'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetSchoolEnabledRequestDto'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetSchoolEnabledRequestDto'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetSchoolEnabledRequestDto'
+            format: uuid
       responses:
         '401':
           description: Unauthorized
@@ -2306,24 +2292,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolEnabledResponseDto'
-        '400':
-          description: Bad Request. The request was invalid and cannot be completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
         '404':
           description: The resource could not be found.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-  '/tenants/{tenantId}/enrollmentadmin/schools/code/{code}':
-    get:
+  '/tenants/{tenantId}/enrollmentadmin/schools/{id}':
+    delete:
       tags:
         - Enrollment Admin / Schools
-      summary: 'Gets an Enrollment School by its school code, with the programs it runs.'
-      operationId: GetEnrollmentSchool
+      summary: Deletes an Enrollment School.
+      operationId: DeleteEnrollmentSchool
       parameters:
         - name: tenantId
           in: path
@@ -2331,12 +2311,59 @@ paths:
           required: true
           schema:
             type: string
-        - name: code
+        - name: id
           in: path
           description: ''
           required: true
           schema:
             type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '204':
+          description: The resource was successfully deleted.
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+    get:
+      tags:
+        - Enrollment Admin / Schools
+      summary: 'Gets an Enrollment School by its record id, with the programs it runs.'
+      operationId: GetEnrollmentSchoolById
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         '401':
           description: Unauthorized
@@ -2438,6 +2465,65 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolListItemResponseDtoPaginatedItemsViewModel'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+    post:
+      tags:
+        - Enrollment Admin / Schools
+      summary: Creates or updates an Enrollment School by its `code`.
+      description: "Upsert semantics: unique per `code`. A first call creates the school; a later call for the\r\nsame `code` overwrites its fields. `isEnabled` is never moved by this call - use\r\n`PUT .../schools/{id}/enable` or `.../disable` instead."
+      operationId: UpsertEnrollmentSchool
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertSchoolRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertSchoolRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertSchoolRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertSchoolRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '201':
+          description: The school was created or updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolMutationResultDto'
         '400':
           description: Bad Request. The request was invalid and cannot be completed.
           content:
@@ -3341,19 +3427,6 @@ components:
           nullable: true
       additionalProperties: false
       description: A contact carried on a Registration create call.
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetSchoolEnabledRequestDto:
-      type: object
-      properties:
-        tenantId:
-          type: string
-          format: uuid
-        code:
-          type: string
-          nullable: true
-        isEnabled:
-          type: boolean
-          nullable: true
-      additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateContactRequestDto:
       type: object
       properties:
@@ -3583,6 +3656,59 @@ components:
           nullable: true
       additionalProperties: false
       description: "The body of a student update. As EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertStudentRequestDto, contact association is\r\nmanaged exclusively through the `/students/{id}/contacts` sub-resource, not through this call."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertSchoolRequestDto:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          description: Must match the tenant in the route.
+          format: uuid
+        code:
+          type: string
+          description: "Unique per tenant. A first call for a given Code creates the school; a later\r\ncall for the same code overwrites it."
+          nullable: true
+        name:
+          type: string
+          description: Required.
+          nullable: true
+        district:
+          type: string
+          description: ''
+          nullable: true
+        campusId:
+          type: string
+          description: ''
+          nullable: true
+        teaIdNumber:
+          type: string
+          description: ''
+          nullable: true
+        gradesServed:
+          type: array
+          items:
+            type: string
+          description: ''
+          nullable: true
+        address:
+          type: string
+          description: ''
+          nullable: true
+        lat:
+          type: number
+          description: ''
+          format: double
+          nullable: true
+        lon:
+          type: number
+          description: ''
+          format: double
+          nullable: true
+        phone:
+          type: string
+          description: ''
+          nullable: true
+      additionalProperties: false
+      description: The body of a school creation or update.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertStudentRequestDto:
       type: object
       properties:
@@ -4248,8 +4374,9 @@ components:
           type: string
           format: uuid
           nullable: true
-        code:
+        id:
           type: string
+          format: uuid
           nullable: true
         isEnabled:
           type: boolean
@@ -4318,10 +4445,6 @@ components:
           type: string
           format: date-time
           nullable: true
-        lastUpdatedDateTime:
-          type: string
-          format: date-time
-          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolListItemResponseDtoPaginatedItemsViewModel:
       type: object
@@ -4339,6 +4462,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolListItemResponseDto'
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolMutationResultDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolProgramResponseDto:
@@ -4426,10 +4561,6 @@ components:
           type: string
           nullable: true
         lastModifiedDateTime:
-          type: string
-          format: date-time
-          nullable: true
-        lastUpdatedDateTime:
           type: string
           format: date-time
           nullable: true
