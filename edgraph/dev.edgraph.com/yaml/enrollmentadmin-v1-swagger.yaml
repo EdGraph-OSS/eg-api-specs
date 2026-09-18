@@ -2899,6 +2899,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/settings/publish':
+    post:
+      tags:
+        - Enrollment Admin / Settings
+      summary: "Publishes the tenant's current enrollment settings (custom branding, global configuration,\r\npolicy acknowledgement URLs) to the public enrollment site."
+      operationId: PublishEnrollmentSettings
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.PublishEnrollmentSettingsResultDto'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/students/{id}/contacts/{contactId}':
     delete:
       tags:
@@ -3655,7 +3699,7 @@ components:
         tenantId:
           type: string
           format: uuid
-        applicationPathwayId:
+        pathwayId:
           type: string
           nullable: true
         studentId:
@@ -4730,6 +4774,12 @@ components:
           nullable: true
       additionalProperties: false
       description: "What a program catalog entry or school program create/update/delete reports back - just the\r\nidentity, not the row. Compare ContactMutationResultDto: a client that needs the saved state\r\nre-reads the program."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.PublishEnrollmentSettingsResultDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+      additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementDto:
       type: object
       properties:
@@ -5159,7 +5209,7 @@ components:
         - District
         - School
       type: string
-    EnrollmentApi.EnrollmentRegistrations.V1.ApplicationPathwayMessage:
+    EnrollmentApi.EnrollmentRegistrations.V1.PathwayMessage:
       type: object
       properties:
         id:
@@ -5172,7 +5222,7 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-      description: "ApplicationPathway (the pathway/screen catalog entity) is unrelated to the Registration/Application\r\nrename and is not touched here - only the message name below stays as-is."
+      description: "Pathway (the pathway/screen catalog entity) is unrelated to the Registration/Application\r\nrename and is not touched here - only the message name below stays as-is."
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationApplicationMessage:
       type: object
       properties:
@@ -5187,6 +5237,19 @@ components:
           nullable: true
         programScope:
           $ref: '#/components/schemas/EnrollmentApi.EnrollmentPrograms.V1.ProgramScope'
+        rank:
+          type: integer
+          description: "The family's preference order within the round. 1-based and contiguous across the\r\nregistration - the matcher's contract. Assigned server-side, never supplied by a caller."
+          format: int32
+        priority:
+          type: integer
+          description: 'The priority tier - sibling, staff, feeder, PreK. Unset until the priority engine stamps it.'
+          format: int32
+          nullable: true
+        applicationRoundId:
+          type: string
+          description: Foreign key into the application round this entry was submitted to.
+          nullable: true
       additionalProperties: false
       description: "One Program-seat choice on a Registration - zero-to-many, independently approvable. See\r\nApproveRegistrationApplication / GetRegistrationApplications."
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationApplicationsListResponse:
@@ -5241,8 +5304,8 @@ components:
         tenantId:
           type: string
           nullable: true
-        applicationPathway:
-          $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.ApplicationPathwayMessage'
+        pathway:
+          $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.PathwayMessage'
         currentScreenCode:
           type: string
           nullable: true
