@@ -8671,6 +8671,13 @@ components:
         operationalContextUri:
           type: string
           nullable: true
+        years:
+          type: array
+          items:
+            type: integer
+            format: int32
+          nullable: true
+          readOnly: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.EdFiApplicationListResponsePaginatedItemsViewModel:
       type: object
@@ -9246,6 +9253,9 @@ components:
         state:
           type: string
           nullable: true
+        requiresSchoolYearSelection:
+          type: boolean
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceApiClientCreatedResponse:
       type: object
@@ -9678,6 +9688,9 @@ components:
         state:
           type: string
           nullable: true
+        requiresSchoolYearSelection:
+          type: boolean
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceListModelPaginatedItemsViewModel:
       type: object
@@ -9720,6 +9733,13 @@ components:
         odsBackupDescription:
           type: string
           nullable: true
+        pendingApplicationAccessIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+          nullable: true
+          readOnly: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceResourcesCountJsonResponse:
       type: object
