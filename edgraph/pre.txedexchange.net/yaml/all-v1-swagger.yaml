@@ -17230,12 +17230,6 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: year
-          in: query
-          description: ''
-          schema:
-            type: integer
-            format: int32
         - name: loadEducationOrganizations
           in: query
           description: ''
@@ -52017,6 +52011,14 @@ components:
         odsBackupCode:
           type: string
           nullable: true
+        applicationIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+          description: "Per-year pending grants are applied only after this ODS finishes provisioning.\r\nKeep field 4 aligned in every source and consumer copy to preserve the wire contract."
+          nullable: true
+          readOnly: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.AddSchoolYearRequest:
       type: object
@@ -52036,6 +52038,13 @@ components:
         odsBackupCode:
           type: string
           nullable: true
+        applicationIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+          nullable: true
+          readOnly: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.ApplicationEndpoint:
       type: object
@@ -52263,6 +52272,13 @@ components:
         operationalContextUri:
           type: string
           nullable: true
+        years:
+          type: array
+          items:
+            type: integer
+            format: int32
+          nullable: true
+          readOnly: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.CreateEdFiConnectionRequest:
       type: object
@@ -52855,6 +52871,13 @@ components:
         operationalContextUri:
           type: string
           nullable: true
+        years:
+          type: array
+          items:
+            type: integer
+            format: int32
+          nullable: true
+          readOnly: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.EdFiConnection:
       type: object
@@ -54770,6 +54793,9 @@ components:
         year:
           type: integer
           format: int32
+        tenantId:
+          type: string
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.UpdateEdFiApplicationRequest:
       type: object
@@ -54801,6 +54827,13 @@ components:
         operationalContextUri:
           type: string
           nullable: true
+        years:
+          type: array
+          items:
+            type: integer
+            format: int32
+          nullable: true
+          readOnly: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.UpdateEdFiConnectionRequest:
       type: object
