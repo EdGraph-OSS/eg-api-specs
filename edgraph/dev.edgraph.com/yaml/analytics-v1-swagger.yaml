@@ -3444,6 +3444,9 @@ components:
         state:
           type: string
           nullable: true
+        requiresSchoolYearSelection:
+          type: boolean
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceApiClientProfileResponse:
       type: object
@@ -3601,6 +3604,13 @@ components:
         odsBackupDescription:
           type: string
           nullable: true
+        pendingApplicationAccessIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+          nullable: true
+          readOnly: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceType:
       enum:

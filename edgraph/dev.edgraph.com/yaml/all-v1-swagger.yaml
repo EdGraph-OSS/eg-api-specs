@@ -17230,12 +17230,6 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: year
-          in: query
-          description: ''
-          schema:
-            type: integer
-            format: int32
         - name: loadEducationOrganizations
           in: query
           description: ''
@@ -29871,6 +29865,77 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/observations/observers':
+    get:
+      tags:
+        - Observations
+      summary: Get paginated observers
+      operationId: GetPaginatedObservers
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: pageSize
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+            default: 10
+        - name: pageIndex
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: orderBy
+          in: query
+          description: ''
+          schema:
+            type: string
+            default: ''
+        - name: filter
+          in: query
+          description: ''
+          schema:
+            type: string
+            default: ''
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.Evaluations.AppraiserResponseGetPaginatedItemsResponse'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed. See the response body for specific validation errors. This will typically be an issue with the query parameters or the request body values.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
   '/tenants/{tenantId}/observations/search/evaluees':
     get:
       tags:
@@ -30064,6 +30129,12 @@ paths:
             type: string
             default: ''
         - name: to
+          in: query
+          description: ''
+          schema:
+            type: string
+            default: ''
+        - name: observerId
           in: query
           description: ''
           schema:
@@ -47407,6 +47478,24 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.Evaluations.AppraiserResponseGetPaginatedItemsResponse:
+      type: object
+      properties:
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.Evaluations.AppraiserResponse'
+          nullable: true
+        count:
+          type: integer
+          format: int64
+      additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.Evaluations.AppraiserSearchStatus:
       enum:
         - Unknown
@@ -51922,6 +52011,14 @@ components:
         odsBackupCode:
           type: string
           nullable: true
+        applicationIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+          description: "Per-year pending grants are applied only after this ODS finishes provisioning.\r\nKeep field 4 aligned in every source and consumer copy to preserve the wire contract."
+          nullable: true
+          readOnly: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.AddSchoolYearRequest:
       type: object
@@ -51941,6 +52038,13 @@ components:
         odsBackupCode:
           type: string
           nullable: true
+        applicationIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+          nullable: true
+          readOnly: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.ApplicationEndpoint:
       type: object
@@ -52168,6 +52272,13 @@ components:
         operationalContextUri:
           type: string
           nullable: true
+        years:
+          type: array
+          items:
+            type: integer
+            format: int32
+          nullable: true
+          readOnly: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.CreateEdFiConnectionRequest:
       type: object
@@ -52708,6 +52819,13 @@ components:
         operationalContextUri:
           type: string
           nullable: true
+        years:
+          type: array
+          items:
+            type: integer
+            format: int32
+          nullable: true
+          readOnly: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.EdFiApplicationListResponsePaginatedItemsViewModel:
       type: object
@@ -52760,6 +52878,13 @@ components:
         operationalContextUri:
           type: string
           nullable: true
+        years:
+          type: array
+          items:
+            type: integer
+            format: int32
+          nullable: true
+          readOnly: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.EdFiConnection:
       type: object
@@ -53276,6 +53401,9 @@ components:
         state:
           type: string
           nullable: true
+        requiresSchoolYearSelection:
+          type: boolean
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceApiClientCreatedResponse:
       type: object
@@ -53708,6 +53836,9 @@ components:
         state:
           type: string
           nullable: true
+        requiresSchoolYearSelection:
+          type: boolean
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceListModelPaginatedItemsViewModel:
       type: object
@@ -53750,6 +53881,13 @@ components:
         odsBackupDescription:
           type: string
           nullable: true
+        pendingApplicationAccessIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+          nullable: true
+          readOnly: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceResourcesCountJsonResponse:
       type: object
@@ -54675,6 +54813,9 @@ components:
         year:
           type: integer
           format: int32
+        tenantId:
+          type: string
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.UpdateEdFiApplicationRequest:
       type: object
@@ -54706,6 +54847,13 @@ components:
         operationalContextUri:
           type: string
           nullable: true
+        years:
+          type: array
+          items:
+            type: integer
+            format: int32
+          nullable: true
+          readOnly: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.UpdateEdFiConnectionRequest:
       type: object
@@ -55112,6 +55260,7 @@ components:
       properties:
         id:
           type: string
+          description: "The contact entry's id, and the link to the contact roster: submission overwrites whatever\r\nthe caller sent with the resolved or auto-created EnrollmentContact document's own id, so\r\nthis is the key a join back to that roster goes through."
           nullable: true
         sourceId:
           type: string
@@ -55127,7 +55276,7 @@ components:
           nullable: true
         contactId:
           type: string
-          description: "The linked EnrollmentContact document's id - resolved/auto-created server-side at\r\nsubmission time. Absent on documents written before this field existed."
+          description: "The external SIS-side contact code, not the link to the EnrollmentContact document - that is\r\nid (field 1). Registrations written before AB#18541 stored the link here instead; those\r\nvalues are being nulled, so treat a value in this field as legacy rather than as the link."
           nullable: true
       additionalProperties: false
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationCreatedResponse:
