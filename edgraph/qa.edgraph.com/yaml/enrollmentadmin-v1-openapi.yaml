@@ -5267,6 +5267,7 @@ components:
       properties:
         id:
           type: string
+          description: "The contact entry's id, and the link to the contact roster: submission overwrites whatever\r\nthe caller sent with the resolved or auto-created EnrollmentContact document's own id, so\r\nthis is the key a join back to that roster goes through."
           nullable: true
         sourceId:
           type: string
@@ -5282,7 +5283,7 @@ components:
           nullable: true
         contactId:
           type: string
-          description: "The linked EnrollmentContact document's id - resolved/auto-created server-side at\r\nsubmission time. Absent on documents written before this field existed."
+          description: "The external SIS-side contact code, not the link to the EnrollmentContact document - that is\r\nid (field 1). Registrations written before AB#18541 stored the link here instead; those\r\nvalues are being nulled, so treat a value in this field as legacy rather than as the link."
           nullable: true
       additionalProperties: false
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationCreatedResponse:
