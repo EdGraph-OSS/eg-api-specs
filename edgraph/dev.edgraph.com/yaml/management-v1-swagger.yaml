@@ -33635,6 +33635,8 @@ components:
         deletedAt:
           type: string
           nullable: true
+        onboarding:
+          $ref: '#/components/schemas/TenantApi.Tenant.V1.SubscriptionOnboarding'
       additionalProperties: false
     TenantApi.Tenant.V1.SubscriptionListResponsePaginatedItemsViewModel:
       type: object
@@ -33774,6 +33776,8 @@ components:
         deletedAt:
           type: string
           nullable: true
+        onboarding:
+          $ref: '#/components/schemas/TenantApi.Tenant.V1.SubscriptionOnboarding'
       additionalProperties: false
     TenantApi.Tenant.V1.SubscriptionRejectedResponse:
       type: object
