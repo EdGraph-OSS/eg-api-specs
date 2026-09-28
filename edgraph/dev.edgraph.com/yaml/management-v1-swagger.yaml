@@ -32628,6 +32628,20 @@ components:
           readOnly: true
         partnershipSync:
           $ref: '#/components/schemas/TenantApi.Partnership.V1.CreatePartnershipRequest+Types+CreatePartnershipSyncRequest'
+        roleMappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantApi.Partnership.V1.RoleMappingDTO'
+          nullable: true
+          readOnly: true
+        scope:
+          $ref: '#/components/schemas/TenantApi.Partnership.V1.PartnershipScope'
+        optedOutTenantIds:
+          type: array
+          items:
+            type: string
+          nullable: true
+          readOnly: true
       additionalProperties: false
     TenantApi.Partnership.V1.CreatePartnershipRequest+Types+CreatePartnershipSyncRequest:
       type: object
@@ -32741,6 +32755,20 @@ components:
         isDeleted:
           type: boolean
           nullable: true
+        roleMappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantApi.Partnership.V1.RoleMappingDTO'
+          nullable: true
+          readOnly: true
+        scope:
+          $ref: '#/components/schemas/TenantApi.Partnership.V1.PartnershipScope'
+        optedOutTenantIds:
+          type: array
+          items:
+            type: string
+          nullable: true
+          readOnly: true
       additionalProperties: false
     TenantApi.Partnership.V1.PartnershipCreatedResponse:
       type: object
@@ -32796,7 +32824,26 @@ components:
         isDeleted:
           type: boolean
           nullable: true
+        roleMappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantApi.Partnership.V1.RoleMappingDTO'
+          nullable: true
+          readOnly: true
+        scope:
+          $ref: '#/components/schemas/TenantApi.Partnership.V1.PartnershipScope'
+        optedOutTenantIds:
+          type: array
+          items:
+            type: string
+          nullable: true
+          readOnly: true
       additionalProperties: false
+    TenantApi.Partnership.V1.PartnershipScope:
+      enum:
+        - RelatedTenantsOnly
+        - AllActiveTenants
+      type: string
     TenantApi.Partnership.V1.PartnershipSyncDTO:
       type: object
       properties:
@@ -32827,6 +32874,16 @@ components:
       type: object
       properties:
         id:
+          type: string
+          nullable: true
+      additionalProperties: false
+    TenantApi.Partnership.V1.RoleMappingDTO:
+      type: object
+      properties:
+        partnerRole:
+          type: string
+          nullable: true
+        grantedRole:
           type: string
           nullable: true
       additionalProperties: false
@@ -32864,6 +32921,20 @@ components:
           readOnly: true
         partnershipSync:
           $ref: '#/components/schemas/TenantApi.Partnership.V1.UpdatePartnershipRequest+Types+UpdatePartnershipSyncRequest'
+        roleMappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantApi.Partnership.V1.RoleMappingDTO'
+          nullable: true
+          readOnly: true
+        scope:
+          $ref: '#/components/schemas/TenantApi.Partnership.V1.PartnershipScope'
+        optedOutTenantIds:
+          type: array
+          items:
+            type: string
+          nullable: true
+          readOnly: true
       additionalProperties: false
     TenantApi.Partnership.V1.UpdatePartnershipRequest+Types+UpdatePartnershipSyncRequest:
       type: object
