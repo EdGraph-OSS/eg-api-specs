@@ -5182,6 +5182,137 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  /impersonation/end:
+    post:
+      tags:
+        - Impersonation
+      summary: Ends the caller's own active impersonation session.
+      operationId: End
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.EndImpersonationRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.EndImpersonationRequest'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.EndImpersonationRequest'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.EndImpersonationRequest'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '403':
+          description: "The request was refused. This is deliberately the same generic response as a refused\r\n`start`/`renew` call - it carries no detail about which check failed."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '204':
+          description: The session was ended (or had already ended).
+  /impersonation/renew:
+    post:
+      tags:
+        - Impersonation
+      summary: Renews the caller's own active impersonation session.
+      operationId: Renew
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.RenewImpersonationRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.RenewImpersonationRequest'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.RenewImpersonationRequest'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.RenewImpersonationRequest'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '403':
+          description: "The request was refused. This is deliberately the same generic response as a refused\r\n`start` call - it carries no detail about which check failed."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The impersonation token was renewed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.Impersonation.ImpersonationTokenResponse'
+  /impersonation/start:
+    post:
+      tags:
+        - Impersonation
+      summary: Starts an impersonation session for the given target user/tenant.
+      operationId: Start
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.StartImpersonationRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.StartImpersonationRequest'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.StartImpersonationRequest'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.StartImpersonationRequest'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '403':
+          description: "The request was refused. This is deliberately the same generic response for every refusal\r\nreason - it carries no detail about which check failed."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The impersonation token was minted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.Impersonation.ImpersonationTokenResponse'
   /instances:
     get:
       tags:
@@ -24956,6 +25087,36 @@ components:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.StaffClassificationLicenseRequest'
           nullable: true
       additionalProperties: false
+    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.EndImpersonationRequest:
+      type: object
+      properties:
+        impersonationSessionId:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: Body for `POST impersonation/end`.
+    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.RenewImpersonationRequest:
+      type: object
+      properties:
+        impersonationSessionId:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: Body for `POST impersonation/renew`.
+    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.StartImpersonationRequest:
+      type: object
+      properties:
+        targetUserId:
+          type: string
+          nullable: true
+        targetTenantId:
+          type: string
+          nullable: true
+        reason:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: "Body for `POST impersonation/start`. The caller's own admin access token is never part of\r\nthis body - it is read from the request's `Authorization` header, exactly as every other\r\nManagement call already works."
     EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Role:
       type: object
       properties:
@@ -25671,6 +25832,24 @@ components:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.IdentityResourceResponse'
           nullable: true
       additionalProperties: false
+    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.Impersonation.ImpersonationTokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          nullable: true
+        expiresIn:
+          type: integer
+          format: int32
+        impersonationSessionId:
+          type: string
+          nullable: true
+        impersonationExpiresAt:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: false
+      description: "The success payload for `POST impersonation/start` and `POST impersonation/renew`.\r\nDeliberately carries only what EdGraph.HttpAggregators.Management.Api.Services.Impersonation.ImpersonationTokenResult\r\nitself carries on success - no error detail exists anywhere upstream of this type, so none can\r\nleak through it."
     EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.Role:
       type: object
       properties:
