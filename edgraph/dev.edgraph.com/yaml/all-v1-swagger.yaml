@@ -8458,7 +8458,7 @@ paths:
     put:
       tags:
         - Enrollment Admin / Programs
-      summary: "Updates a school program's grades/capacity/zone/coordinates, and - only when it is\r\nschool-specific - its own ProgramId/ProgramName/ProgramType/EligibilityCriteria/Requirements."
+      summary: "Updates a school program's grades/capacity/zone/coordinates, and - only when it is\r\nschool-specific - its own ProgramId/ProgramName/ProgramType/EligibilityCriteria/RequiredDocuments."
       operationId: UpdateSchoolProgram
       parameters:
         - name: tenantId
@@ -45215,10 +45215,10 @@ components:
         eligibilityCriteria:
           type: string
           nullable: true
-        requirements:
+        requiredDocuments:
           type: array
           items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramRequirementRequestDto'
+            type: string
           nullable: true
         internalDisplayName:
           type: string
@@ -45279,10 +45279,10 @@ components:
         eligibilityCriteria:
           type: string
           nullable: true
-        requirements:
+        requiredDocuments:
           type: array
           items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramRequirementRequestDto'
+            type: string
           nullable: true
         grades:
           type: array
@@ -45309,7 +45309,7 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-      description: "Covers two cases, distinguished by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateSchoolProgramRequestDto.DistrictProgramId: adding an existing\r\ndistrict catalog entry to a school (a \"school association\" - EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateSchoolProgramRequestDto.ProgramId/\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateSchoolProgramRequestDto.ProgramName/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateSchoolProgramRequestDto.ProgramType/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateSchoolProgramRequestDto.EligibilityCriteria/\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateSchoolProgramRequestDto.Requirements/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateSchoolProgramRequestDto.ProgramScope are inherited and must be left\r\nunset), or creating a brand new school-specific program (those same fields are required)."
+      description: "Covers two cases, distinguished by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateSchoolProgramRequestDto.DistrictProgramId: adding an existing\r\ndistrict catalog entry to a school (a \"school association\" - EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateSchoolProgramRequestDto.ProgramId/\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateSchoolProgramRequestDto.ProgramName/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateSchoolProgramRequestDto.ProgramType/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateSchoolProgramRequestDto.EligibilityCriteria/\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateSchoolProgramRequestDto.RequiredDocuments/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateSchoolProgramRequestDto.ProgramScope are inherited and must be left\r\nunset), or creating a brand new school-specific program (those same fields are required)."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.GradeCapacityRequestDto:
       type: object
       properties:
@@ -45325,25 +45325,6 @@ components:
           format: int32
           nullable: true
       additionalProperties: false
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramRequirementRequestDto:
-      type: object
-      properties:
-        code:
-          type: string
-          nullable: true
-        title:
-          type: string
-          nullable: true
-        description:
-          type: string
-          nullable: true
-        required:
-          type: boolean
-        type:
-          type: string
-          nullable: true
-      additionalProperties: false
-      description: "One thing a program asks of a family beyond the application itself. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramRequirementRequestDto.Type is\r\n`upload` (a file), `url` (completed elsewhere) or `event` (attended in person,\r\narranged by the school); EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramRequirementRequestDto.Code is its stable identity across programs."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApproveChoiceDto:
       type: object
       properties:
@@ -45488,10 +45469,10 @@ components:
         eligibilityCriteria:
           type: string
           nullable: true
-        requirements:
+        requiredDocuments:
           type: array
           items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramRequirementRequestDto'
+            type: string
           nullable: true
         internalDisplayName:
           type: string
@@ -45544,10 +45525,10 @@ components:
         eligibilityCriteria:
           type: string
           nullable: true
-        requirements:
+        requiredDocuments:
           type: array
           items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramRequirementRequestDto'
+            type: string
           nullable: true
         grades:
           type: array
@@ -45571,7 +45552,7 @@ components:
           format: double
           nullable: true
       additionalProperties: false
-      description: "EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateSchoolProgramRequestDto.ProgramId/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateSchoolProgramRequestDto.ProgramName/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateSchoolProgramRequestDto.ProgramType/\r\n            EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateSchoolProgramRequestDto.EligibilityCriteria/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateSchoolProgramRequestDto.Requirements only apply when the row being\r\n            updated is school-specific; on a row linked to a catalog entry they are inherited and a request\r\n            that sets them is rejected - server-side, since the aggregator does not know which case an id\r\n            names until it reads the row."
+      description: "EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateSchoolProgramRequestDto.ProgramId/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateSchoolProgramRequestDto.ProgramName/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateSchoolProgramRequestDto.ProgramType/\r\n            EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateSchoolProgramRequestDto.EligibilityCriteria/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateSchoolProgramRequestDto.RequiredDocuments only apply when the row being\r\n            updated is school-specific; on a row linked to a catalog entry they are inherited and a request\r\n            that sets them is rejected - server-side, since the aggregator does not know which case an id\r\n            names until it reads the row."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateStudentContactRequestDto:
       type: object
       properties:
@@ -52370,6 +52351,9 @@ components:
             type: string
           nullable: true
           readOnly: true
+        year:
+          type: integer
+          format: int32
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.CreateInstanceApiClientRequest:
       type: object
@@ -52504,6 +52488,9 @@ components:
             type: string
           nullable: true
           readOnly: true
+        year:
+          type: integer
+          format: int32
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.CreateVendorRequest:
       type: object
@@ -54945,6 +54932,9 @@ components:
             type: string
           nullable: true
           readOnly: true
+        year:
+          type: integer
+          format: int32
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.UpdateInstanceApiClientRequest:
       type: object
@@ -55065,6 +55055,9 @@ components:
             type: string
           nullable: true
           readOnly: true
+        year:
+          type: integer
+          format: int32
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.UpdateVendorRequest:
       type: object
@@ -61083,20 +61076,6 @@ components:
         isDeleted:
           type: boolean
           nullable: true
-        roleMappings:
-          type: array
-          items:
-            $ref: '#/components/schemas/TenantApi.Partnership.V1.RoleMappingDTO'
-          nullable: true
-          readOnly: true
-        scope:
-          $ref: '#/components/schemas/TenantApi.Partnership.V1.PartnershipScope'
-        optedOutTenantIds:
-          type: array
-          items:
-            type: string
-          nullable: true
-          readOnly: true
       additionalProperties: false
     TenantApi.Partnership.V1.PartnershipResponse:
       type: object
@@ -61138,26 +61117,7 @@ components:
         isDeleted:
           type: boolean
           nullable: true
-        roleMappings:
-          type: array
-          items:
-            $ref: '#/components/schemas/TenantApi.Partnership.V1.RoleMappingDTO'
-          nullable: true
-          readOnly: true
-        scope:
-          $ref: '#/components/schemas/TenantApi.Partnership.V1.PartnershipScope'
-        optedOutTenantIds:
-          type: array
-          items:
-            type: string
-          nullable: true
-          readOnly: true
       additionalProperties: false
-    TenantApi.Partnership.V1.PartnershipScope:
-      enum:
-        - RelatedTenantsOnly
-        - AllActiveTenants
-      type: string
     TenantApi.Partnership.V1.PartnershipSyncDTO:
       type: object
       properties:
@@ -61184,16 +61144,6 @@ components:
         - Users
         - Reports
       type: string
-    TenantApi.Partnership.V1.RoleMappingDTO:
-      type: object
-      properties:
-        partnerRole:
-          type: string
-          nullable: true
-        grantedRole:
-          type: string
-          nullable: true
-      additionalProperties: false
     TenantApi.Partnership.V1.TenantType:
       enum:
         - Unknown
