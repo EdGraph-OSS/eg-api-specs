@@ -8203,6 +8203,9 @@ components:
             type: string
           nullable: true
           readOnly: true
+        year:
+          type: integer
+          format: int32
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.CreateInstanceApiClientRequest:
       type: object
@@ -8337,6 +8340,9 @@ components:
             type: string
           nullable: true
           readOnly: true
+        year:
+          type: integer
+          format: int32
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.CreateVendorRequest:
       type: object
@@ -10778,6 +10784,9 @@ components:
             type: string
           nullable: true
           readOnly: true
+        year:
+          type: integer
+          format: int32
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.UpdateInstanceApiClientRequest:
       type: object
@@ -10898,6 +10907,9 @@ components:
             type: string
           nullable: true
           readOnly: true
+        year:
+          type: integer
+          format: int32
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.UpdateVendorRequest:
       type: object
