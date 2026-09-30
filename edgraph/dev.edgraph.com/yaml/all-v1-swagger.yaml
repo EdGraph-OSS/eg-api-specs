@@ -6873,7 +6873,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
-  '/tenants/{tenantId}/enrollmentadmin/schools/{schoolCode}/capacity':
+  '/tenants/{tenantId}/enrollmentadmin/schools/{schoolLocalCode}/capacity':
     get:
       tags:
         - Enrollment Admin / Capacity
@@ -6886,7 +6886,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: schoolCode
+        - name: schoolLocalCode
           in: path
           description: Required - a seat count is meaningless without a school.
           required: true
@@ -7980,9 +7980,9 @@ paths:
           schema:
             type: string
             default: ''
-        - name: schoolCode
+        - name: nextSchoolStateShortCode
           in: query
-          description: Narrows to contacts with at least one linked student at this school.
+          description: Narrows to contacts with at least one linked student whose next school has this state short code.
           schema:
             type: string
             default: ''
@@ -46691,6 +46691,15 @@ components:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.DomainListResponseDto'
           nullable: true
       additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.AllowedPathwayIdDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+      additionalProperties: false
+      description: 'One allowed pathway on a student: the pathway record id.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityListItemDto:
       type: object
       properties:
@@ -46899,6 +46908,11 @@ components:
         studentCount:
           type: integer
           format: int32
+        studentLocalCodes:
+          type: array
+          items:
+            type: string
+          nullable: true
         isPhoneOverride:
           type: boolean
           nullable: true
@@ -46945,6 +46959,13 @@ components:
           format: date-time
           nullable: true
         lastUpdatedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        deletedBy:
+          type: string
+          nullable: true
+        deletedDateTime:
           type: string
           format: date-time
           nullable: true
@@ -47063,7 +47084,7 @@ components:
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactStudentResponseDto:
       type: object
       properties:
-        _id:
+        id:
           type: string
           format: uuid
           nullable: true
@@ -47411,7 +47432,7 @@ components:
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramTypeRefDto:
       type: object
       properties:
-        _id:
+        id:
           type: string
           format: uuid
           nullable: true
@@ -47433,7 +47454,7 @@ components:
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto:
       type: object
       properties:
-        _id:
+        id:
           type: string
           format: uuid
           nullable: true
@@ -47603,7 +47624,7 @@ components:
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolRefDto:
       type: object
       properties:
-        _id:
+        id:
           type: string
           format: uuid
           nullable: true
@@ -47618,7 +47639,7 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-      description: "The school a program runs at, as embedded on the program. `_id` is this entry's own\r\nidentity; EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolRefDto.SchoolId is the school row it was copied from."
+      description: "The school a program runs at, as embedded on the program. `id` is this entry's own\r\nidentity; EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolRefDto.SchoolId is the school row it was copied from."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolResponseDto:
       type: object
       properties:
@@ -47768,6 +47789,41 @@ components:
           nullable: true
       additionalProperties: false
       description: What removing a student-contact association reports back.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentContactResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        contactId:
+          type: string
+          format: uuid
+          nullable: true
+        priority:
+          type: integer
+          format: int32
+          nullable: true
+        fullName:
+          type: string
+          nullable: true
+        relationship:
+          type: string
+          nullable: true
+        livesWithStudent:
+          type: boolean
+          nullable: true
+        hasLegalCustody:
+          type: boolean
+          nullable: true
+        canPickUp:
+          type: boolean
+          nullable: true
+        isEmergency:
+          type: boolean
+          nullable: true
+      additionalProperties: false
+      description: "One contact link on a student. `id` is this entry's own identity; EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentContactResponseDto.ContactId is the\r\ncontact record it links to."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentMutationResultDto:
       type: object
       properties:
@@ -47800,6 +47856,11 @@ components:
           nullable: true
         externalDataSourceStudentId:
           type: string
+          nullable: true
+        allowedPathwayIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.AllowedPathwayIdDto'
           nullable: true
         firstName:
           type: string
@@ -47840,6 +47901,11 @@ components:
         eligibilityDescription:
           type: string
           nullable: true
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentContactResponseDto'
+          nullable: true
         createdBy:
           type: string
           nullable: true
@@ -47851,6 +47917,13 @@ components:
           type: string
           nullable: true
         lastModifiedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        deletedBy:
+          type: string
+          nullable: true
+        deletedDateTime:
           type: string
           format: date-time
           nullable: true
@@ -55837,7 +55910,7 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-      description: "The linked EnrollmentStudent aggregate. id is that aggregate's own id; studentId is the SIS id;\r\nstudentLocalId is the local id - passed through as-is, no aggregator-side logic.\r\nThe student a registration is for. studentId is the EnrollmentStudent record id, all zeros until\r\nthe registration is linked; the local/state/external ids and names are denormalized from the\r\nstudent or supplied by the registration flow. No id of its own."
+      description: "The student a registration is for. studentId is the EnrollmentStudent record id, all zeros until\r\nthe registration is linked; the local/state/external ids and names are denormalized from the\r\nstudent or supplied by the registration flow. No id of its own."
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationUpdatedResponse:
       type: object
       properties:
