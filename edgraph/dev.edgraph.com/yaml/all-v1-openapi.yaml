@@ -9753,7 +9753,7 @@ paths:
     post:
       tags:
         - Enrollment Admin / Requirements
-      summary: Creates a requirement. Leave `isRequired` out to create a required one.
+      summary: "Creates a requirement. Leave `isRequired` out to create a required one. A `url`\r\nrequirement needs `url`, an absolute http or https link."
       operationId: CreateRequirement
       parameters:
         - name: tenantId
@@ -45766,8 +45766,11 @@ components:
         isRequired:
           type: boolean
           nullable: true
+        url:
+          type: string
+          nullable: true
       additionalProperties: false
-      description: "The body of a requirement creation. The route names the tenant, so the body carries only the\r\nrequirement's own fields. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateRequirementRequestDto.RequirementType is one of `document`, `url`,\r\n`information` or `event`, lowercase as stored. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateRequirementRequestDto.IsRequired left out\r\ncreates a required requirement. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateRequirementRequestDto.IsUploadEnabled left out is false, and the service\r\nforces it false for anything but a `document`. A code already used in the tenant (deleted\r\nrows included) is refused with 409."
+      description: "The body of a requirement creation. The route names the tenant, so the body carries only the\r\nrequirement's own fields. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateRequirementRequestDto.RequirementType is one of `document`, `url`,\r\n`information` or `event`, lowercase as stored. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateRequirementRequestDto.IsRequired left out\r\ncreates a required requirement. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateRequirementRequestDto.IsUploadEnabled left out is false, and the service\r\nforces it false for a `url` or `information` requirement. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateRequirementRequestDto.Url is required\r\nfor a `url` requirement (an absolute http or https link) and not used for other types. A code\r\nalready used in the tenant (deleted rows included) is refused with 409."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.FeederPatternPropertiesRequestDto:
       type: object
       properties:
@@ -46106,8 +46109,11 @@ components:
         isRequired:
           type: boolean
           nullable: true
+        url:
+          type: string
+          nullable: true
       additionalProperties: false
-      description: "The body of a requirement update: every field is replaced, except EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateRequirementRequestDto.IsRequired, which\r\nkeeps the stored value when left out. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateRequirementRequestDto.IsUploadEnabled must be sent, because the\r\nservice reads a missing value as false. Programs keep the copy of a requirement taken when they\r\nwere last saved; changing a requirement does not rewrite those copies."
+      description: "The body of a requirement update: every field is replaced, except EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateRequirementRequestDto.IsRequired, which\r\nkeeps the stored value when left out. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateRequirementRequestDto.IsUploadEnabled must be sent, because the\r\nservice reads a missing value as false. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateRequirementRequestDto.Url is replaced like the title, under the create\r\nrule. Programs keep the copy of a requirement taken when they were last saved; changing a requirement\r\ndoes not rewrite those copies."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateSchoolRequestDto:
       type: object
       properties:
@@ -47957,8 +47963,11 @@ components:
           type: boolean
         isRequired:
           type: boolean
+        url:
+          type: string
+          nullable: true
       additionalProperties: false
-      description: "One requirement, as embedded on the program. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto.RequirementId is the requirements row.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto.IsRequired is copied from that row when the program is saved; false means optional."
+      description: "One requirement, as embedded on the program. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto.RequirementId is the requirements row.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto.IsRequired is copied from that row when the program is saved; false means optional.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto.Url is copied the same way, and set only on a `url` requirement."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementResponseDto:
       type: object
       properties:
@@ -47986,6 +47995,9 @@ components:
           type: boolean
         isRequired:
           type: boolean
+        url:
+          type: string
+          nullable: true
         createdBy:
           type: string
           nullable: true
@@ -48003,7 +48015,7 @@ components:
         isDeleted:
           type: boolean
       additionalProperties: false
-      description: "Something a family must satisfy for a program. Programs embed a copy of it\r\n(EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto), where `requirementId` is this row's EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementResponseDto.Id.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementResponseDto.RequirementType is one of `document`, `url`, `information` or\r\n`event`. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementResponseDto.IsUploadEnabled can only be true for a `document`.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementResponseDto.IsRequired false means the requirement is optional."
+      description: "Something a family must satisfy for a program. Programs embed a copy of it\r\n(EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto), where `requirementId` is this row's EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementResponseDto.Id.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementResponseDto.RequirementType is one of `document`, `url`, `information` or\r\n`event`. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementResponseDto.IsUploadEnabled can only be true for a `document` or an `event`.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementResponseDto.IsRequired false means the requirement is optional. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementResponseDto.Url is the online\r\nform of a `url` requirement, absent for other types."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolEnabledResponseDto:
       type: object
       properties:
