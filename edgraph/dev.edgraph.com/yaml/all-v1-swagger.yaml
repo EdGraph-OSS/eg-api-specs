@@ -47004,6 +47004,14 @@ components:
           type: string
           description: ''
           nullable: true
+        addressStateAbbreviation:
+          type: string
+          description: 'Two-letter US state code, e.g. `TX`. Required when AddressState is sent.'
+          nullable: true
+        addressState:
+          type: string
+          description: 'Full name of the state in AddressStateAbbreviation, e.g. `Texas`.'
+          nullable: true
       additionalProperties: false
       description: The body of a full school replace by id (not keyed on ExternalDataSourceSchoolId).
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateStudentContactRequestDto:
@@ -47152,6 +47160,14 @@ components:
         phone:
           type: string
           description: ''
+          nullable: true
+        addressStateAbbreviation:
+          type: string
+          description: 'Two-letter US state code, e.g. `TX`. Required when AddressState is sent.'
+          nullable: true
+        addressState:
+          type: string
+          description: 'Full name of the state in AddressStateAbbreviation, e.g. `Texas`.'
           nullable: true
       additionalProperties: false
       description: The body of a school creation or update.
@@ -48906,6 +48922,12 @@ components:
         phone:
           type: string
           nullable: true
+        addressStateAbbreviation:
+          type: string
+          nullable: true
+        addressState:
+          type: string
+          nullable: true
         isEnabled:
           type: boolean
         programCount:
@@ -49057,6 +49079,12 @@ components:
           format: double
           nullable: true
         phone:
+          type: string
+          nullable: true
+        addressStateAbbreviation:
+          type: string
+          nullable: true
+        addressState:
           type: string
           nullable: true
         isEnabled:
