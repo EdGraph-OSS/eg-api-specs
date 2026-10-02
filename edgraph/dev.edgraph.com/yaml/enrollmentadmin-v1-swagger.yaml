@@ -6243,7 +6243,11 @@ components:
           nullable: true
         isDeleted:
           type: boolean
+        registrationId:
+          type: string
+          nullable: true
       additionalProperties: false
+      description: "One Enrollment Student, from the list and the get-by-id route alike. `registrationId` is set only on\r\na list row that stands for a registration not yet linked to a student (a new student): that row's\r\n`id` is the registration's id, which the get-by-id route cannot resolve, so a client must not open a\r\nstudent profile from it. Absent on every real student."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentResponseDtoPaginatedItemsViewModel:
       type: object
       properties:
