@@ -804,13 +804,11 @@ components:
       properties:
         type:
           type: string
-          nullable: true
         status:
           type: integer
           format: int32
         title:
           type: string
-          nullable: true
         details:
           type: string
           nullable: true
@@ -821,7 +819,6 @@ components:
           type: object
           additionalProperties:
             nullable: true
-          nullable: true
           readOnly: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.Evaluations.AppraiserResponse:
@@ -1411,7 +1408,6 @@ components:
             type: array
             items:
               type: string
-          nullable: true
         type:
           type: string
           nullable: true

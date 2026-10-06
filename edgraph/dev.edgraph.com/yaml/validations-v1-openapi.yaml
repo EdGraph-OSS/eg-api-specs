@@ -3201,13 +3201,11 @@ components:
       properties:
         type:
           type: string
-          nullable: true
         status:
           type: integer
           format: int32
         title:
           type: string
-          nullable: true
         details:
           type: string
           nullable: true
@@ -3218,18 +3216,22 @@ components:
           type: object
           additionalProperties:
             nullable: true
-          nullable: true
           readOnly: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Jobs.JobCategory:
+      required:
+        - id
+        - subCategories
       type: object
       properties:
         id:
+          minLength: 1
           type: string
           format: uuid
         subCategories:
           type: array
           items:
+            minLength: 1
             type: string
             format: uuid
           nullable: true
@@ -3253,17 +3255,22 @@ components:
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Jobs.UpdateValidationJobRequest:
+      required:
+        - environmentId
+        - jobId
+        - name
+        - tenantId
       type: object
       properties:
         tenantId:
+          minLength: 1
           type: string
-          nullable: true
         jobId:
+          minLength: 1
           type: string
-          nullable: true
         name:
+          minLength: 1
           type: string
-          nullable: true
         schedule:
           $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Jobs.Schedule'
         notificationEmails:
@@ -3277,18 +3284,24 @@ components:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Jobs.JobCategory'
           nullable: true
         environmentId:
+          minLength: 1
           type: string
           format: uuid
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Validations.CreateValidationJobRequest:
+      required:
+        - environmentId
+        - name
+        - tenantId
       type: object
       properties:
         tenantId:
+          minLength: 1
           type: string
           format: uuid
         name:
+          minLength: 1
           type: string
-          nullable: true
         schedule:
           $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Jobs.Schedule'
         notificationEmails:
@@ -3300,8 +3313,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Jobs.JobCategory'
-          nullable: true
         environmentId:
+          minLength: 1
           type: string
           format: uuid
       additionalProperties: false
@@ -3445,7 +3458,6 @@ components:
             type: array
             items:
               type: string
-          nullable: true
         type:
           type: string
           nullable: true

@@ -8121,13 +8121,11 @@ components:
       properties:
         type:
           type: string
-          nullable: true
         status:
           type: integer
           format: int32
         title:
           type: string
-          nullable: true
         details:
           type: string
           nullable: true
@@ -8138,7 +8136,6 @@ components:
           type: object
           additionalProperties:
             nullable: true
-          nullable: true
           readOnly: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.CreateLocalUserRequest:
@@ -8437,6 +8434,7 @@ components:
           type: string
           format: uuid
         role:
+          maxLength: 12
           minLength: 1
           type: string
       additionalProperties: false
@@ -10639,14 +10637,19 @@ components:
           readOnly: true
       additionalProperties: false
     IdentityApi.User.V1.ResetPasswordRequest:
+      required:
+        - tenantId
+        - userId
       type: object
       properties:
         tenantId:
+          maxLength: 100
+          minLength: 1
           type: string
-          nullable: true
         userId:
+          maxLength: 100
+          minLength: 1
           type: string
-          nullable: true
         password:
           type: string
           nullable: true
@@ -10948,7 +10951,6 @@ components:
             type: array
             items:
               type: string
-          nullable: true
         type:
           type: string
           nullable: true

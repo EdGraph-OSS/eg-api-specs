@@ -6524,13 +6524,11 @@ components:
       properties:
         type:
           type: string
-          nullable: true
         status:
           type: integer
           format: int32
         title:
           type: string
-          nullable: true
         details:
           type: string
           nullable: true
@@ -6541,7 +6539,6 @@ components:
           type: object
           additionalProperties:
             nullable: true
-          nullable: true
           readOnly: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.UserBasicListResponse:
@@ -6658,15 +6655,20 @@ components:
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Services.StateReporting.v1.CreateConnectionRequest:
+      required:
+        - environmentId
+        - tenantId
+        - type
       type: object
       properties:
         type:
+          minLength: 1
           type: string
-          nullable: true
         tenantId:
+          minLength: 1
           type: string
-          nullable: true
         environmentId:
+          minLength: 1
           type: string
           format: uuid
         server:
@@ -8279,7 +8281,6 @@ components:
             type: array
             items:
               type: string
-          nullable: true
         type:
           type: string
           nullable: true

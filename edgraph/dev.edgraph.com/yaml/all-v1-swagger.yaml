@@ -7603,94 +7603,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-  '/tenants/{tenantId}/enrollmentadmin/schools/{schoolLocalCode}/capacity':
-    get:
-      tags:
-        - Enrollment Admin / Capacity
-      summary: Searches Capacity for one school - one row per program x grade x school year.
-      operationId: GetCapacity
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-        - name: schoolLocalCode
-          in: path
-          description: Required - a seat count is meaningless without a school.
-          required: true
-          schema:
-            type: string
-        - name: pageSize
-          in: query
-          description: ''
-          schema:
-            type: integer
-            format: int32
-            default: 50
-        - name: pageIndex
-          in: query
-          description: ''
-          schema:
-            type: integer
-            format: int32
-            default: 0
-        - name: orderBy
-          in: query
-          description: ''
-          schema:
-            type: string
-            default: ''
-        - name: filter
-          in: query
-          description: ''
-          schema:
-            type: string
-            default: ''
-        - name: grade
-          in: query
-          description: Optional exact match.
-          schema:
-            type: string
-            default: ''
-        - name: search
-          in: query
-          description: Free-text match on program name/code.
-          schema:
-            type: string
-            default: ''
-      responses:
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '200':
-          description: The requested resource was successfully retrieved.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityListItemDtoPaginatedItemsViewModel'
-        '400':
-          description: Bad Request. The request was invalid and cannot be completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/changelogs':
     get:
       tags:
@@ -8240,6 +8152,7 @@ paths:
       tags:
         - Enrollment Admin / Contacts
       summary: Updates a contact-student association's attributes.
+      description: Relationship attributes only; neither the contact nor the student record is changed.
       operationId: UpdateEnrollmentContactStudent
       parameters:
         - name: tenantId
@@ -8370,8 +8283,8 @@ paths:
     post:
       tags:
         - Enrollment Admin / Contacts
-      summary: Links a student to a contact.
-      description: "Send `studentId` (the SIS code) to resolve or create the linked EnrollmentStudent\r\ndocument server-side, or `id` (an existing student's own internal id, as returned by\r\nthis same route's GET) to link that exact student directly - `id` wins if both are\r\ngiven, and never creates anything, 404ing instead if it does not exist. Set the association\r\nattributes (priority, relationship, etc.) with a follow-up PUT to\r\n`.../students/{studentId}`."
+      summary: Upserts a student and links it to the contact.
+      description: "The body is the `POST .../students` body plus the link's relationship attributes. The student\r\nis upserted exactly as that route does - matched by `studentLocalCode`, overwritten when it\r\nexists, created otherwise - and then linked on both sides. The relationship attributes\r\n(`priority`, `relationship`, `livesWithStudent`, `hasLegalCustody`,\r\n`canPickUp`, `isEmergency`) are optional: a new link defaults them (priority to the next\r\nposition, the rest to empty/false), and on an already-linked student only the ones sent change."
       operationId: AddEnrollmentContactStudent
       parameters:
         - name: tenantId
@@ -9575,8 +9488,8 @@ paths:
     put:
       tags:
         - Enrollment Admin / Registrations
-      summary: 'Approves a single Application on a Registration, independently of its siblings.'
-      description: "Same request body shape as `PUT .../registrations/{id}/approve`. Future Phase 99:\r\n`PUT .../registrations/{id}/contacts/{id}/match` is out of scope and not implemented here."
+      summary: 'Sets a single Application''s status on a Registration, independently of its siblings.'
+      description: "`applicationStatus` defaults to Approved when the body or the field is absent. The\r\n            Registration's own status is not changed. Returns the identity only."
       operationId: ApproveEnrollmentRegistrationApplication
       parameters:
         - name: tenantId
@@ -9602,16 +9515,16 @@ paths:
         content:
           application/json-patch+json:
             schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApproveRequestDto'
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationApproveRequestDto'
           application/json:
             schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApproveRequestDto'
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationApproveRequestDto'
           text/json:
             schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApproveRequestDto'
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationApproveRequestDto'
           application/*+json:
             schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApproveRequestDto'
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationApproveRequestDto'
       responses:
         '401':
           description: Unauthorized
@@ -9636,7 +9549,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationResponse'
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationMutationResultDto'
         '400':
           description: Bad Request. The request was invalid and cannot be completed.
           content:
@@ -9702,7 +9615,7 @@ paths:
     post:
       tags:
         - Enrollment Admin / Registrations
-      summary: "Adds one Program-seat choice to an existing Registration - the standalone counterpart to\r\npassing initial choices at creation time."
+      summary: "Adds one Program-seat choice to an existing Registration - the standalone counterpart to\r\npassing initial choices at creation time. Returns the registration's identity and the new\r\n`applicationId`. The body's `tenantId` and `registrationId` must match the route."
       operationId: AddEnrollmentRegistrationApplication
       parameters:
         - name: tenantId
@@ -9756,9 +9669,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationResponse'
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationApplicationAddedResultDto'
         '400':
-          description: Bad Request. The request was invalid and cannot be completed.
+          description: 'Bad Request. The request was invalid, or a body id does not match the route.'
           content:
             application/json:
               schema:
@@ -9773,8 +9686,8 @@ paths:
     put:
       tags:
         - Enrollment Admin / Registrations
-      summary: Approves a Registration - assigns the linked Student and Contacts and flips its status.
-      description: "The `contacts` array replaces/merges into the Registration's existing Contacts collection,\r\nmatched by `contactId` (upsert semantics) - there is no separate scalar contactId field.\r\nThe `choices` array sets the status of the Registration's Applications; each Application is\r\nindependently approvable - see the `applications/{applicationId}/approve` route to approve\r\njust one without touching the others."
+      summary: Approves a Registration - sets its status to Approved. Takes no body.
+      description: "Only the status changes and an `EnrollmentRegistrationApprovedEvent` is published; the student\r\nand contacts are provisioned afterwards by `POST .../registrations/{id}/consolidate`. A Rejected\r\nregistration cannot be approved. Terminal: a later Update/UpdateScreen/StartOver progress recompute\r\ndoes not revert it. Returns the identity only. A request with a body is refused with a 400, so a\r\ncaller still sending the former student/contacts/applications payload is not approved without them."
       operationId: ApproveEnrollmentRegistration
       parameters:
         - name: tenantId
@@ -9789,21 +9702,6 @@ paths:
           required: true
           schema:
             type: string
-      requestBody:
-        description: ''
-        content:
-          application/json-patch+json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApproveRequestDto'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApproveRequestDto'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApproveRequestDto'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApproveRequestDto'
       responses:
         '401':
           description: Unauthorized
@@ -9828,9 +9726,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationResponse'
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationMutationResultDto'
         '400':
-          description: Bad Request. The request was invalid and cannot be completed.
+          description: The request has a body.
           content:
             application/json:
               schema:
@@ -9841,12 +9739,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-  '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/reject':
-    put:
+        '412':
+          description: The registration is Rejected.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/consolidate':
+    post:
       tags:
         - Enrollment Admin / Registrations
-      summary: "Explicitly rejects a Registration - sets its status to Rejected. Terminal, like approve: a\r\nlater Update/UpdateScreen/StartOver progress recompute does not revert it."
-      operationId: RejectEnrollmentRegistration
+      summary: "Consolidates an Approved Registration - provisions its Student, links its Contacts and sets its\r\nApplications' statuses."
+      description: "The registration must already be Approved (412 otherwise); its status is not changed. An\r\n`EnrollmentRegistrationConsolidatedEvent` is published.\r\nThe body's `tenantId` and `id` must match the route.\r\n`student` is required. The student record is matched by `studentId`, else\r\n`externalDataSourceStudentId`, else `studentLocalCode`, and updated; when none matches it\r\nis created from these fields plus the registration's screens (birth date, grade, address), which\r\nneeds `studentLocalCode`. Consolidating again with the returned `studentId` updates\r\nthe same student.\r\nThe `contacts` array merges into the Registration's existing Contacts collection, matched by\r\n`contactId`, else `externalDataSourceContactId` (upsert semantics); each contact that\r\nresolves to a contact record is linked to the student.\r\nThe `applications` array sets the status of the Registration's Applications.\r\nThe registration's `nextSchoolStateShortCode` and `nextSchoolName` are taken from the school\r\nof the top-ranked Approved application, and `languageCode`, while still `Unknown`, from the\r\nprimary-language screen answer.\r\nReturns the registration's identity and the `studentId` it provisioned or linked; re-read\r\nthe registration for its state."
+      operationId: ConsolidateEnrollmentRegistration
       parameters:
         - name: tenantId
           in: path
@@ -9865,16 +9770,78 @@ paths:
         content:
           application/json-patch+json:
             schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationRejectRequestDto'
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateRequestDto'
           application/json:
             schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationRejectRequestDto'
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateRequestDto'
           text/json:
             schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationRejectRequestDto'
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateRequestDto'
           application/*+json:
             schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationRejectRequestDto'
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The registration was consolidated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationConsolidatedResultDto'
+        '400':
+          description: 'Bad Request. The request was invalid, or a body id does not match the route.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '412':
+          description: The registration is not Approved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/reject':
+    put:
+      tags:
+        - Enrollment Admin / Registrations
+      summary: "Explicitly rejects a Registration - sets its status and every Application's status to Rejected.\r\nTakes no body. Terminal, like approve: a later Update/UpdateScreen/StartOver progress recompute\r\ndoes not revert it. Returns the identity only."
+      operationId: RejectEnrollmentRegistration
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
       responses:
         '401':
           description: Unauthorized
@@ -9899,7 +9866,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationResponse'
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationMutationResultDto'
         '400':
           description: Bad Request. The request was invalid and cannot be completed.
           content:
@@ -9916,7 +9883,7 @@ paths:
     put:
       tags:
         - Enrollment Admin / Registrations
-      summary: "Explicitly submits a Registration - sets its status to Submitted. Terminal, like approve: a\r\nlater Update/UpdateScreen/StartOver progress recompute does not revert it."
+      summary: "Explicitly submits a Registration - sets its status to Submitted. Terminal, like approve: a\r\nlater Update/UpdateScreen/StartOver progress recompute does not revert it. The body's\r\n`tenantId` and `id` must match the route. Returns the identity only."
       operationId: SubmitEnrollmentRegistration
       parameters:
         - name: tenantId
@@ -9970,9 +9937,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationResponse'
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationMutationResultDto'
         '400':
-          description: Bad Request. The request was invalid and cannot be completed.
+          description: 'Bad Request. The request was invalid, or a body id does not match the route.'
           content:
             application/json:
               schema:
@@ -10082,6 +10049,7 @@ paths:
       tags:
         - Enrollment Admin / Registrations
       summary: Updates a Registration.
+      description: "Updates the Registration's own fields only - `currentScreenCode` (required),\r\n`progress`, `studentLocalCode` and `languageCode`; a field left out keeps its stored\r\nvalue. It takes no screen answers: a screen's `status` and `data` are saved through the\r\nEnrollment aggregator's\r\n`PUT tenants/{tenantId}/registrations/{registrationId}/screens/{screenId}`."
       operationId: UpdateEnrollmentRegistration
       parameters:
         - name: tenantId
@@ -11125,6 +11093,7 @@ paths:
       tags:
         - Enrollment Admin / Students
       summary: Updates a student-contact association's attributes.
+      description: Relationship attributes only; neither the student nor the contact record is changed.
       operationId: UpdateEnrollmentStudentContact
       parameters:
         - name: tenantId
@@ -11255,8 +11224,8 @@ paths:
     post:
       tags:
         - Enrollment Admin / Students
-      summary: "Links a contact to a student, creating the contact first if its `contactId` does not\r\nalready exist."
-      description: "When a contact with that `contactId` already exists, the submitted name/email/phone are\r\nignored - this route only ever links an existing contact, never overwrites it. Use\r\n`.../contacts/{contactId}` instead when the contact is known to already exist and no\r\ncreation fallback is wanted."
+      summary: Upserts a contact and links it to the student.
+      description: "The body is the `POST .../contacts` body plus the link's relationship attributes. The contact\r\nis upserted exactly as that route does - matched by `externalDataSourceContactId`, overwritten\r\n(and its verification reset) when it exists, created otherwise - and then linked on both sides.\r\nThe relationship attributes (`priority`, `relationship`, `livesWithStudent`,\r\n`hasLegalCustody`, `canPickUp`, `isEmergency`) are optional: a new link defaults them\r\n(priority to the next position, the rest to empty/false), and on an already-linked contact only\r\nthe ones sent change. Use `.../contacts/{contactId}` to link an existing contact without\r\ntouching it."
       operationId: AddOrCreateEnrollmentStudentContact
       parameters:
         - name: tenantId
@@ -11499,6 +11468,7 @@ paths:
       tags:
         - Enrollment Admin / Students
       summary: Searches Enrollment Students.
+      description: "Lists student records together with the new students of registrations not yet consolidated. A row's\r\n`studentId` is null for a student who exists only on a registration; open its `registrationId`\r\ninstead. Such a row's contacts and allowed pathway come from that registration."
       operationId: GetEnrollmentStudents
       parameters:
         - name: tenantId
@@ -11557,7 +11527,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentResponseDtoPaginatedItemsViewModel'
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentListItemResponseDtoPaginatedItemsViewModel'
         '400':
           description: Bad Request. The request was invalid and cannot be completed.
           content:
@@ -47136,13 +47106,11 @@ components:
       properties:
         type:
           type: string
-          nullable: true
         status:
           type: integer
           format: int32
         title:
           type: string
-          nullable: true
         details:
           type: string
           nullable: true
@@ -47153,7 +47121,6 @@ components:
           type: object
           additionalProperties:
             nullable: true
-          nullable: true
           readOnly: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Connections.ConnectionMetadata:
@@ -47313,71 +47280,189 @@ components:
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddContactStudentRequestDto:
+      required:
+        - firstName
+        - lastName
+        - studentLocalCode
+        - tenantId
       type: object
       properties:
-        studentLocalCode:
+        tenantId:
+          minLength: 1
           type: string
-          description: "The student's SIS code. Required unless EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddContactStudentRequestDto.Id is given. If no student has this SIS\r\ncode yet, a new one is created under it."
-          nullable: true
-        id:
-          type: string
-          description: "An existing student's own internal id (as returned by, e.g., GET .../contacts/{id}/students).\r\nWhen given, this always wins over EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddContactStudentRequestDto.StudentLocalCode: that student is linked directly and\r\nnever auto-created - a 404 if it does not exist, rather than a blank duplicate."
           format: uuid
+        studentLocalCode:
+          maxLength: 100
+          minLength: 1
+          type: string
+        studentStateCode:
+          type: string
           nullable: true
-      additionalProperties: false
-      description: "The body of a contact-student link. Enrollment resolves or creates the linked EnrollmentStudent\r\ndocument server-side - no other student fields are accepted here."
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddOrCreateStudentContactRequestDto:
-      type: object
-      properties:
-        externalDataSourceContactId:
+        externalDataSourceStudentId:
           type: string
           nullable: true
         firstName:
+          minLength: 1
+          type: string
+        middleName:
           type: string
           nullable: true
         lastName:
+          minLength: 1
+          type: string
+        birthdate:
           type: string
           nullable: true
+        last4SSN:
+          type: string
+          nullable: true
+        nextAddress:
+          type: string
+          nullable: true
+        nextGradeLevel:
+          type: string
+          nullable: true
+        nextSchoolStateShortCode:
+          type: string
+          nullable: true
+        nextSchoolStateCode:
+          type: string
+          nullable: true
+        nextSchoolName:
+          type: string
+          nullable: true
+        nextSchoolAddress:
+          type: string
+          nullable: true
+        eligibilityCode:
+          type: string
+          nullable: true
+        eligibilityDescription:
+          type: string
+          nullable: true
+        priority:
+          maximum: 999
+          minimum: 0
+          type: integer
+          format: int32
+          nullable: true
+        relationship:
+          maxLength: 100
+          type: string
+          nullable: true
+        livesWithStudent:
+          type: boolean
+          nullable: true
+        hasLegalCustody:
+          type: boolean
+          nullable: true
+        canPickUp:
+          type: boolean
+          nullable: true
+        isEmergency:
+          type: boolean
+          nullable: true
+      additionalProperties: false
+      description: "The body of `POST .../contacts/{id}/students`: every field of EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertStudentRequestDto\r\n- the student is upserted by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddContactStudentRequestDto.StudentLocalCode exactly as `POST .../students` does -\r\nplus the link's relationship attributes. The attributes are optional: a new link defaults them\r\n(priority to the next position, the rest to empty/false) and an existing link keeps the ones left out."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddOrCreateStudentContactRequestDto:
+      required:
+        - externalDataSourceContactId
+        - firstName
+        - lastName
+        - tenantId
+      type: object
+      properties:
+        tenantId:
+          minLength: 1
+          type: string
+          format: uuid
+        externalDataSourceContactId:
+          maxLength: 100
+          minLength: 1
+          type: string
+        firstName:
+          minLength: 1
+          type: string
+        lastName:
+          minLength: 1
+          type: string
         email:
+          maxLength: 320
           type: string
           nullable: true
         phone:
+          maxLength: 50
           type: string
           nullable: true
+        priority:
+          maximum: 999
+          minimum: 0
+          type: integer
+          format: int32
+          nullable: true
+        relationship:
+          maxLength: 100
+          type: string
+          nullable: true
+        livesWithStudent:
+          type: boolean
+          nullable: true
+        hasLegalCustody:
+          type: boolean
+          nullable: true
+        canPickUp:
+          type: boolean
+          nullable: true
+        isEmergency:
+          type: boolean
+          nullable: true
       additionalProperties: false
-      description: "The body of a student-contact link where the contact is created if its\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddOrCreateStudentContactRequestDto.ExternalDataSourceContactId (the SIS id) does not already exist. When it does, the submitted name/email/phone are ignored - an existing\r\ncontact is only linked, never overwritten, by this route."
+      description: "The body of `POST .../students/{id}/contacts`: every field of EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateContactRequestDto\r\n- the contact is upserted by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddOrCreateStudentContactRequestDto.ExternalDataSourceContactId exactly as\r\n`POST .../contacts` does - plus the link's relationship attributes. The attributes are optional:\r\na new link defaults them (priority to the next position, the rest to empty/false) and an existing\r\nlink keeps the ones left out."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddRegistrationApplicationRequestDto:
+      required:
+        - programId
       type: object
       properties:
         tenantId:
           type: string
+          description: The tenant that owns the Registration.
+          format: uuid
+        registrationId:
+          type: string
+          description: The Registration's record id; must match the route id.
           format: uuid
         programId:
+          minLength: 1
           type: string
           description: "The target Program's record id (as returned in `ProgramMutationResultDto.Id` /\r\n`ProgramDetailDto.Id`), not its business ProgramId/code - unlike every other\r\n`ProgramId` field on the Programs DTOs."
-          nullable: true
       additionalProperties: false
       description: "The body of adding one Program-seat choice to an existing Registration. See\r\nEnrollmentAdminController.Registrations.AddEnrollmentRegistrationApplication."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateApplicationRoundRequestDto:
+      required:
+        - code
+        - grades
+        - schoolYear
+        - tenantId
       type: object
       properties:
         tenantId:
+          minLength: 1
           type: string
           format: uuid
         code:
+          minLength: 1
           type: string
-          nullable: true
         schoolYear:
+          minLength: 1
           type: string
-          nullable: true
         label:
           type: string
           nullable: true
         grades:
+          minItems: 1
           type: array
           items:
             type: string
-          nullable: true
         programTypeIds:
           type: array
           items:
@@ -47387,38 +47472,52 @@ components:
       additionalProperties: false
       description: 'Creates a round. Windows are added afterwards, one at a time.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateContactRequestDto:
+      required:
+        - externalDataSourceContactId
+        - firstName
+        - lastName
+        - tenantId
       type: object
       properties:
         tenantId:
+          minLength: 1
           type: string
           description: Must match the tenant in the route.
           format: uuid
         externalDataSourceContactId:
+          maxLength: 100
+          minLength: 1
           type: string
           description: "The contact's identifier in the source system (SIS). Distinct from the record id, which the\r\nservice assigns and returns in the response."
-          nullable: true
         firstName:
+          minLength: 1
           type: string
           description: Required. Never overridable - only email and phone are.
-          nullable: true
         lastName:
+          minLength: 1
           type: string
           description: Required. Never overridable - only email and phone are.
-          nullable: true
         email:
+          maxLength: 320
           type: string
           description: "The SIS-sourced email. Correcting it later is an override and goes through the\r\n`overrides/emails` route instead - see EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateContactRequestDto."
           nullable: true
         phone:
+          maxLength: 50
           type: string
           description: 'The SIS-sourced phone, on the same terms as Email.'
           nullable: true
       additionalProperties: false
       description: The body of a contact creation.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateFeederPatternRequestDto:
+      required:
+        - geometry
+        - properties
+        - tenantId
       type: object
       properties:
         tenantId:
+          minLength: 1
           type: string
           format: uuid
         geometry:
@@ -47427,21 +47526,29 @@ components:
           $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.FeederPatternPropertiesRequestDto'
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto:
+      required:
+        - grades
+        - programCode
+        - programName
+        - requirementIds
+        - schoolId
+        - tenantId
       type: object
       properties:
         tenantId:
+          minLength: 1
           type: string
           format: uuid
         schoolId:
+          minLength: 1
           type: string
           format: uuid
-          nullable: true
         programCode:
+          minLength: 1
           type: string
-          nullable: true
         programName:
+          minLength: 1
           type: string
-          nullable: true
         programTypeId:
           type: string
           format: uuid
@@ -47452,12 +47559,14 @@ components:
         requirementIds:
           type: array
           items:
+            minLength: 1
             type: string
             format: uuid
           nullable: true
         grades:
           type: array
           items:
+            minLength: 1
             type: string
           nullable: true
         capacityByGrade:
@@ -47479,14 +47588,19 @@ components:
       additionalProperties: false
       description: "The body of a Program creation. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.SchoolId, EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.ProgramTypeId and\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.RequirementIds are record ids of existing rows; the service copies their display\r\nfields onto the program and rejects an id it cannot find."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateRegistrationRequestDto:
+      required:
+        - contacts
+        - pathwayId
+        - tenantId
       type: object
       properties:
         tenantId:
+          minLength: 1
           type: string
           format: uuid
         pathwayId:
+          minLength: 1
           type: string
-          nullable: true
         studentLocalCode:
           type: string
           nullable: true
@@ -47501,18 +47615,30 @@ components:
       additionalProperties: false
       description: The body of a Registration creation.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateRequirementRequestDto:
+      required:
+        - requirementCode
+        - requirementTitle
+        - requirementType
       type: object
       properties:
         requirementType:
+          minLength: 1
+          enum:
+            - document
+            - url
+            - information
+            - event
           type: string
-          nullable: true
         requirementCode:
+          maxLength: 100
+          minLength: 1
           type: string
-          nullable: true
         requirementTitle:
+          maxLength: 200
+          minLength: 1
           type: string
-          nullable: true
         requirementDescription:
+          maxLength: 2000
           type: string
           nullable: true
         isUploadEnabled:
@@ -47527,33 +47653,41 @@ components:
       additionalProperties: false
       description: "The body of a requirement creation. The route names the tenant, so the body carries only the\r\nrequirement's own fields. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateRequirementRequestDto.RequirementType is one of `document`, `url`,\r\n`information` or `event`, lowercase as stored. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateRequirementRequestDto.IsRequired left out\r\ncreates a required requirement. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateRequirementRequestDto.IsUploadEnabled left out is false, and the service\r\nforces it false for a `url` or `information` requirement. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateRequirementRequestDto.Url is required\r\nfor a `url` requirement (an absolute http or https link) and not used for other types. A code\r\nalready used in the tenant (deleted rows included) is refused with 409."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.DuplicateApplicationRoundRequestDto:
+      required:
+        - schoolYear
       type: object
       properties:
         schoolYear:
+          minLength: 1
           type: string
-          nullable: true
       additionalProperties: false
       description: The school year the copy goes into.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto:
+      required:
+        - closesAt
+        - kind
+        - timeZone
       type: object
       properties:
         kind:
+          minLength: 1
           type: string
-          nullable: true
         opensAt:
           type: string
           nullable: true
         closesAt:
+          minLength: 1
           type: string
-          nullable: true
         timeZone:
+          minLength: 1
           type: string
-          nullable: true
         dependsOn:
           $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.WindowDependencyRequestDto'
       additionalProperties: false
       description: "A window as written. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto.OpensAt and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto.ClosesAt are ISO-8601 instants with\r\ntheir offset (\"2026-06-01T08:00:00-05:00\" or \"...Z\"); they are passed to the Enrollment Service\r\nverbatim, which refuses one without an offset. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto.OpensAt may be omitted only when\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto.DependsOn is set."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.FeederPatternPropertiesRequestDto:
+      required:
+        - feederPattern
       type: object
       properties:
         fid:
@@ -47570,14 +47704,17 @@ components:
           type: string
           nullable: true
         hsNum:
+          minimum: 0
           type: integer
           format: int32
           nullable: true
         esNum:
+          minimum: 0
           type: integer
           format: int32
           nullable: true
         msNum:
+          minimum: 0
           type: integer
           format: int32
           nullable: true
@@ -47591,8 +47728,8 @@ components:
           type: string
           nullable: true
         feederPattern:
+          minLength: 1
           type: string
-          nullable: true
         color:
           type: string
           nullable: true
@@ -47601,10 +47738,14 @@ components:
       type: object
       properties:
         longitude:
+          maximum: 180
+          minimum: -180
           type: number
           format: double
           nullable: true
         latitude:
+          maximum: 90
+          minimum: -90
           type: number
           format: double
           nullable: true
@@ -47645,26 +47786,45 @@ components:
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.PolygonRequestDto:
+      required:
+        - rings
       type: object
       properties:
         rings:
+          minItems: 1
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.LinearRingRequestDto'
-          nullable: true
       additionalProperties: false
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApproveChoiceDto:
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationApproveRequestDto:
+      type: object
+      properties:
+        applicationStatus:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationStatus'
+      additionalProperties: false
+      description: "The body of an application-level approve call. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationApproveRequestDto.ApplicationStatus defaults to Approved\r\nwhen absent."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationStatus:
+      enum:
+        - Pending
+        - Approved
+        - Rejected
+        - Waitlisted
+        - NotProcessed
+      type: string
+      description: "The status of one Application on a Registration. Mirrors the Enrollment service's\r\nRegistrationApplicationStatus; sent over gRPC by name."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateApplicationDto:
+      required:
+        - applicationStatus
       type: object
       properties:
         applicationId:
           type: string
           nullable: true
         applicationStatus:
-          type: string
-          nullable: true
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationStatus'
       additionalProperties: false
-      description: One Application choice's status as part of an approve call.
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApproveContactDto:
+      description: One Application's new status as part of a consolidate call.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateContactDto:
       type: object
       properties:
         contactId:
@@ -47680,38 +47840,70 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-      description: "One contact to upsert into the Registration's Contacts collection as part of an approve call,\r\nmatched by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApproveContactDto.ContactId - the EnrollmentContact record id. An entry without one is\r\nappended as a new contact."
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApproveRequestDto:
+      description: "One contact to upsert into the Registration's Contacts collection as part of a consolidate call,\r\nmatched by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateContactDto.ContactId - the EnrollmentContact record id - else by\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateContactDto.ExternalDataSourceContactId. An entry matching neither is appended as a new contact."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateRequestDto:
+      required:
+        - student
       type: object
       properties:
-        studentLocalCode:
+        tenantId:
           type: string
-          nullable: true
-        registrationStatus:
+          description: The tenant that owns the Registration; must match the route.
+          format: uuid
+        id:
           type: string
-          nullable: true
+          description: The Registration's record id; must match the route id.
+          format: uuid
+        student:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateStudentDto'
         contacts:
           type: array
           items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApproveContactDto'
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateContactDto'
+          description: The contacts to merge and link.
           nullable: true
-        choices:
+        applications:
           type: array
           items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApproveChoiceDto'
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateApplicationDto'
+          description: The Application statuses to set.
           nullable: true
       additionalProperties: false
-      description: The shared body shape for both the registration-level and application-level approve calls.
+      description: "The body of a Registration consolidate call: the student to provision, the contacts to link and the\r\nApplication statuses to set."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateStudentDto:
+      type: object
+      properties:
+        studentId:
+          type: string
+          format: uuid
+          nullable: true
+        studentLocalCode:
+          type: string
+          nullable: true
+        studentStateCode:
+          type: string
+          nullable: true
+        studentFirstName:
+          type: string
+          nullable: true
+        studentLastName:
+          type: string
+          nullable: true
+        externalDataSourceStudentId:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: "The student a consolidate call provisions. Matched by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateStudentDto.StudentId (the student record id),\r\nelse EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateStudentDto.ExternalDataSourceStudentId, else EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateStudentDto.StudentLocalCode; created when none\r\nmatches, which needs EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateStudentDto.StudentLocalCode."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationContactRequestDto:
       type: object
       properties:
-        id:
-          type: string
-          nullable: true
         contactId:
           type: string
           nullable: true
-        contactName:
+        firstName:
+          type: string
+          nullable: true
+        lastName:
           type: string
           nullable: true
         contactPhone:
@@ -47724,31 +47916,43 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-      description: "A contact carried on a Registration create call. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationContactRequestDto.Id is the entry's own id (minted when\r\nomitted); EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationContactRequestDto.ContactId is the EnrollmentContact record id, resolved server-side from the\r\nemail/phone when omitted; EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationContactRequestDto.ExternalDataSourceContactId is the SIS id, when known."
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationRejectRequestDto:
-      type: object
-      additionalProperties: false
+      description: "A contact carried on a Registration create call. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationContactRequestDto.ContactId is the EnrollmentContact record\r\nid, resolved server-side from the email/phone when omitted (an unmatched contact is created with\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationContactRequestDto.FirstName and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationContactRequestDto.LastName); EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationContactRequestDto.ExternalDataSourceContactId is the\r\nSIS id, when known."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationSubmitRequestDto:
       type: object
+      properties:
+        tenantId:
+          type: string
+          description: The tenant that owns the Registration.
+          format: uuid
+        id:
+          type: string
+          description: The Registration's record id.
+          format: uuid
       additionalProperties: false
-      description: "The body of a Registration submit call. Carries nothing today - Submit only ever sets Status,\r\nunlike Approve, which also links a student/contacts - but stays a distinct type, matching\r\nApproveEnrollmentRegistration's [FromBody] shape, so a future field has somewhere to go."
+      description: The body of a Registration submit call. Submit only ever sets Status; the ids must match the route.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateApplicationRoundRequestDto:
+      required:
+        - grades
+        - id
+        - tenantId
       type: object
       properties:
         id:
+          minLength: 1
           type: string
           format: uuid
         tenantId:
+          minLength: 1
           type: string
           format: uuid
         label:
           type: string
           nullable: true
         grades:
+          minItems: 1
           type: array
           items:
             type: string
-          nullable: true
         programTypeIds:
           type: array
           items:
@@ -47758,20 +47962,27 @@ components:
       additionalProperties: false
       description: "Replaces label, grades and program types. Code and school year are the round's identity and\r\ncannot change - duplicate the round into another school year instead."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateContactRequestDto:
+      required:
+        - firstName
+        - id
+        - lastName
+        - tenantId
       type: object
       properties:
         id:
+          minLength: 1
           type: string
           format: uuid
         tenantId:
+          minLength: 1
           type: string
           format: uuid
         firstName:
+          minLength: 1
           type: string
-          nullable: true
         lastName:
+          minLength: 1
           type: string
-          nullable: true
         email:
           type: string
           nullable: true
@@ -47781,36 +47992,47 @@ components:
       additionalProperties: false
       description: The body of a contact update.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateContactStudentRequestDto:
+      required:
+        - canPickUp
+        - hasLegalCustody
+        - isEmergency
+        - livesWithStudent
+        - priority
       type: object
       properties:
         priority:
+          maximum: 999
+          minimum: 0
           type: integer
           format: int32
-          nullable: true
         relationship:
+          maxLength: 100
           type: string
           nullable: true
         livesWithStudent:
           type: boolean
-          nullable: true
         hasLegalCustody:
           type: boolean
-          nullable: true
         canPickUp:
           type: boolean
-          nullable: true
         isEmergency:
           type: boolean
-          nullable: true
       additionalProperties: false
       description: "The body of a contact-student association update - the association attributes only. Neither the\r\ncontact nor the student themselves are editable through this route."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateFeederPatternRequestDto:
+      required:
+        - geometry
+        - id
+        - properties
+        - tenantId
       type: object
       properties:
         id:
+          minLength: 1
           type: string
           format: uuid
         tenantId:
+          minLength: 1
           type: string
           format: uuid
         geometry:
@@ -47819,20 +48041,29 @@ components:
           $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.FeederPatternPropertiesRequestDto'
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateProgramRequestDto:
+      required:
+        - grades
+        - id
+        - programCode
+        - programName
+        - requirementIds
+        - tenantId
       type: object
       properties:
         id:
+          minLength: 1
           type: string
           format: uuid
         tenantId:
+          minLength: 1
           type: string
           format: uuid
         programCode:
+          minLength: 1
           type: string
-          nullable: true
         programName:
+          minLength: 1
           type: string
-          nullable: true
         programTypeId:
           type: string
           format: uuid
@@ -47843,12 +48074,14 @@ components:
         requirementIds:
           type: array
           items:
+            minLength: 1
             type: string
             format: uuid
           nullable: true
         grades:
           type: array
           items:
+            minLength: 1
             type: string
           nullable: true
         capacityByGrade:
@@ -47870,17 +48103,22 @@ components:
       additionalProperties: false
       description: "The body of a Program update. The school never changes; the program type and the requirement\r\nset are replaced from the ids given here (an empty list clears the requirements)."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateRegistrationRequestDto:
+      required:
+        - currentScreenCode
+        - id
+        - tenantId
       type: object
       properties:
         id:
+          minLength: 1
           type: string
-          nullable: true
         tenantId:
+          minLength: 1
           type: string
           format: uuid
         currentScreenCode:
+          minLength: 1
           type: string
-          nullable: true
         progress:
           type: string
           nullable: true
@@ -47888,6 +48126,14 @@ components:
           type: string
           nullable: true
         languageCode:
+          enum:
+            - ar
+            - en
+            - es
+            - vi
+            - sw
+            - zh
+            - Unknown
           type: string
           nullable: true
         lastModifiedBy:
@@ -47896,23 +48142,35 @@ components:
       additionalProperties: false
       description: The body of a Registration update.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateRequirementRequestDto:
+      required:
+        - isUploadEnabled
+        - requirementCode
+        - requirementTitle
+        - requirementType
       type: object
       properties:
         requirementType:
+          minLength: 1
+          enum:
+            - document
+            - url
+            - information
+            - event
           type: string
-          nullable: true
         requirementCode:
+          maxLength: 100
+          minLength: 1
           type: string
-          nullable: true
         requirementTitle:
+          maxLength: 200
+          minLength: 1
           type: string
-          nullable: true
         requirementDescription:
+          maxLength: 2000
           type: string
           nullable: true
         isUploadEnabled:
           type: boolean
-          nullable: true
         isRequired:
           type: boolean
           nullable: true
@@ -47922,13 +48180,20 @@ components:
       additionalProperties: false
       description: "The body of a requirement update: every field is replaced, except EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateRequirementRequestDto.IsRequired, which\r\nkeeps the stored value when left out. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateRequirementRequestDto.IsUploadEnabled must be sent, because the\r\nservice reads a missing value as false. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateRequirementRequestDto.Url is replaced like the title, under the create\r\nrule. Programs keep the copy of a requirement taken when they were last saved; changing a requirement\r\ndoes not rewrite those copies."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateSchoolRequestDto:
+      required:
+        - id
+        - schoolName
+        - schoolStateShortCode
+        - tenantId
       type: object
       properties:
         id:
+          minLength: 1
           type: string
           description: Must match the id in the route.
           format: uuid
         tenantId:
+          minLength: 1
           type: string
           description: Must match the tenant in the route.
           format: uuid
@@ -47937,13 +48202,13 @@ components:
           description: ''
           nullable: true
         schoolStateShortCode:
+          minLength: 1
           type: string
           description: Required.
-          nullable: true
         schoolName:
+          minLength: 1
           type: string
           description: Required.
-          nullable: true
         districtStateShortCode:
           type: string
           description: ''
@@ -47993,46 +48258,171 @@ components:
           description: ''
           nullable: true
         addressStateAbbreviation:
+          enum:
+            - AL
+            - AK
+            - AZ
+            - AR
+            - CA
+            - CO
+            - CT
+            - DE
+            - FL
+            - GA
+            - HI
+            - ID
+            - IL
+            - IN
+            - IA
+            - KS
+            - KY
+            - LA
+            - ME
+            - MD
+            - MA
+            - MI
+            - MN
+            - MS
+            - MO
+            - MT
+            - NE
+            - NV
+            - NH
+            - NJ
+            - NM
+            - NY
+            - NC
+            - ND
+            - OH
+            - OK
+            - OR
+            - PA
+            - RI
+            - SC
+            - SD
+            - TN
+            - TX
+            - UT
+            - VT
+            - VA
+            - WA
+            - WV
+            - WI
+            - WY
+            - DC
+            - PR
+            - GU
+            - VI
+            - AS
+            - MP
           type: string
           description: 'Two-letter US state code, e.g. `TX`. Required when AddressState is sent.'
           nullable: true
         addressState:
+          enum:
+            - Alabama
+            - Alaska
+            - Arizona
+            - Arkansas
+            - California
+            - Colorado
+            - Connecticut
+            - Delaware
+            - Florida
+            - Georgia
+            - Hawaii
+            - Idaho
+            - Illinois
+            - Indiana
+            - Iowa
+            - Kansas
+            - Kentucky
+            - Louisiana
+            - Maine
+            - Maryland
+            - Massachusetts
+            - Michigan
+            - Minnesota
+            - Mississippi
+            - Missouri
+            - Montana
+            - Nebraska
+            - Nevada
+            - New Hampshire
+            - New Jersey
+            - New Mexico
+            - New York
+            - North Carolina
+            - North Dakota
+            - Ohio
+            - Oklahoma
+            - Oregon
+            - Pennsylvania
+            - Rhode Island
+            - South Carolina
+            - South Dakota
+            - Tennessee
+            - Texas
+            - Utah
+            - Vermont
+            - Virginia
+            - Washington
+            - West Virginia
+            - Wisconsin
+            - Wyoming
+            - District of Columbia
+            - Puerto Rico
+            - Guam
+            - U.S. Virgin Islands
+            - American Samoa
+            - Northern Mariana Islands
           type: string
           description: 'Full name of the state in AddressStateAbbreviation, e.g. `Texas`.'
           nullable: true
       additionalProperties: false
       description: The body of a full school replace by id (not keyed on ExternalDataSourceSchoolId).
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateStudentContactRequestDto:
+      required:
+        - canPickUp
+        - hasLegalCustody
+        - isEmergency
+        - livesWithStudent
+        - priority
       type: object
       properties:
         priority:
+          maximum: 999
+          minimum: 0
           type: integer
           format: int32
-          nullable: true
         relationship:
+          maxLength: 100
           type: string
           nullable: true
         livesWithStudent:
           type: boolean
-          nullable: true
         hasLegalCustody:
           type: boolean
-          nullable: true
         canPickUp:
           type: boolean
-          nullable: true
         isEmergency:
           type: boolean
-          nullable: true
       additionalProperties: false
       description: "The body of a student-contact association update - the association attributes only, on the same\r\nfull-replacement terms as EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateContactStudentRequestDto."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateStudentRequestDto:
+      required:
+        - firstName
+        - id
+        - lastName
+        - tenantId
       type: object
       properties:
         id:
+          minLength: 1
           type: string
           format: uuid
         tenantId:
+          minLength: 1
           type: string
           format: uuid
         studentStateCode:
@@ -48042,14 +48432,14 @@ components:
           type: string
           nullable: true
         firstName:
+          minLength: 1
           type: string
-          nullable: true
         middleName:
           type: string
           nullable: true
         lastName:
+          minLength: 1
           type: string
-          nullable: true
         birthdate:
           type: string
           nullable: true
@@ -48083,9 +48473,14 @@ components:
       additionalProperties: false
       description: "The body of a student update. As EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertStudentRequestDto, contact association is\r\nmanaged exclusively through the `/students/{id}/contacts` sub-resource, not through this call."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertSchoolRequestDto:
+      required:
+        - schoolName
+        - schoolStateShortCode
+        - tenantId
       type: object
       properties:
         tenantId:
+          minLength: 1
           type: string
           description: Must match the tenant in the route.
           format: uuid
@@ -48094,13 +48489,13 @@ components:
           description: "When present, the upsert is keyed on this id rather than SchoolStateShortCode:\r\na live school with a matching external id is updated; a soft-deleted one is refused (recover it\r\nfirst). When absent, a new school is always inserted, and a SchoolStateShortCode\r\ncollision on insert is rejected as AlreadyExists."
           nullable: true
         schoolStateShortCode:
+          minLength: 1
           type: string
           description: Required. Unique per tenant.
-          nullable: true
         schoolName:
+          minLength: 1
           type: string
           description: Required.
-          nullable: true
         districtStateShortCode:
           type: string
           description: ''
@@ -48150,24 +48545,145 @@ components:
           description: ''
           nullable: true
         addressStateAbbreviation:
+          enum:
+            - AL
+            - AK
+            - AZ
+            - AR
+            - CA
+            - CO
+            - CT
+            - DE
+            - FL
+            - GA
+            - HI
+            - ID
+            - IL
+            - IN
+            - IA
+            - KS
+            - KY
+            - LA
+            - ME
+            - MD
+            - MA
+            - MI
+            - MN
+            - MS
+            - MO
+            - MT
+            - NE
+            - NV
+            - NH
+            - NJ
+            - NM
+            - NY
+            - NC
+            - ND
+            - OH
+            - OK
+            - OR
+            - PA
+            - RI
+            - SC
+            - SD
+            - TN
+            - TX
+            - UT
+            - VT
+            - VA
+            - WA
+            - WV
+            - WI
+            - WY
+            - DC
+            - PR
+            - GU
+            - VI
+            - AS
+            - MP
           type: string
           description: 'Two-letter US state code, e.g. `TX`. Required when AddressState is sent.'
           nullable: true
         addressState:
+          enum:
+            - Alabama
+            - Alaska
+            - Arizona
+            - Arkansas
+            - California
+            - Colorado
+            - Connecticut
+            - Delaware
+            - Florida
+            - Georgia
+            - Hawaii
+            - Idaho
+            - Illinois
+            - Indiana
+            - Iowa
+            - Kansas
+            - Kentucky
+            - Louisiana
+            - Maine
+            - Maryland
+            - Massachusetts
+            - Michigan
+            - Minnesota
+            - Mississippi
+            - Missouri
+            - Montana
+            - Nebraska
+            - Nevada
+            - New Hampshire
+            - New Jersey
+            - New Mexico
+            - New York
+            - North Carolina
+            - North Dakota
+            - Ohio
+            - Oklahoma
+            - Oregon
+            - Pennsylvania
+            - Rhode Island
+            - South Carolina
+            - South Dakota
+            - Tennessee
+            - Texas
+            - Utah
+            - Vermont
+            - Virginia
+            - Washington
+            - West Virginia
+            - Wisconsin
+            - Wyoming
+            - District of Columbia
+            - Puerto Rico
+            - Guam
+            - U.S. Virgin Islands
+            - American Samoa
+            - Northern Mariana Islands
           type: string
           description: 'Full name of the state in AddressStateAbbreviation, e.g. `Texas`.'
           nullable: true
       additionalProperties: false
       description: The body of a school creation or update.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertStudentRequestDto:
+      required:
+        - firstName
+        - lastName
+        - studentLocalCode
+        - tenantId
       type: object
       properties:
         tenantId:
+          minLength: 1
           type: string
           format: uuid
         studentLocalCode:
+          maxLength: 100
+          minLength: 1
           type: string
-          nullable: true
         studentStateCode:
           type: string
           nullable: true
@@ -48175,14 +48691,14 @@ components:
           type: string
           nullable: true
         firstName:
+          minLength: 1
           type: string
-          nullable: true
         middleName:
           type: string
           nullable: true
         lastName:
+          minLength: 1
           type: string
-          nullable: true
         birthdate:
           type: string
           nullable: true
@@ -48416,14 +48932,19 @@ components:
         - Deltasincespecificdatetime
       type: string
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Jobs.JobCategory:
+      required:
+        - id
+        - subCategories
       type: object
       properties:
         id:
+          minLength: 1
           type: string
           format: uuid
         subCategories:
           type: array
           items:
+            minLength: 1
             type: string
             format: uuid
           nullable: true
@@ -48511,17 +49032,22 @@ components:
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Jobs.UpdateValidationJobRequest:
+      required:
+        - environmentId
+        - jobId
+        - name
+        - tenantId
       type: object
       properties:
         tenantId:
+          minLength: 1
           type: string
-          nullable: true
         jobId:
+          minLength: 1
           type: string
-          nullable: true
         name:
+          minLength: 1
           type: string
-          nullable: true
         schedule:
           $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Jobs.Schedule'
         notificationEmails:
@@ -48535,6 +49061,7 @@ components:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Jobs.JobCategory'
           nullable: true
         environmentId:
+          minLength: 1
           type: string
           format: uuid
       additionalProperties: false
@@ -48861,6 +49388,7 @@ components:
           type: string
           format: uuid
         role:
+          maxLength: 12
           minLength: 1
           type: string
       additionalProperties: false
@@ -48882,14 +49410,19 @@ components:
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Validations.CreateValidationJobRequest:
+      required:
+        - environmentId
+        - name
+        - tenantId
       type: object
       properties:
         tenantId:
+          minLength: 1
           type: string
           format: uuid
         name:
+          minLength: 1
           type: string
-          nullable: true
         schedule:
           $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Jobs.Schedule'
         notificationEmails:
@@ -48901,8 +49434,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Jobs.JobCategory'
-          nullable: true
         environmentId:
+          minLength: 1
           type: string
           format: uuid
       additionalProperties: false
@@ -48998,17 +49531,14 @@ components:
           type: array
           items:
             type: string
-          nullable: true
         programTypes:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramTypeRefDto'
-          nullable: true
         windows:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.EnrollmentWindowDto'
-          nullable: true
         state:
           type: string
           nullable: true
@@ -49065,65 +49595,22 @@ components:
           nullable: true
       additionalProperties: false
       description: What a window add/update/remove reports back.
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityListItemDto:
-      type: object
-      properties:
-        programCode:
-          type: string
-          nullable: true
-        programName:
-          type: string
-          nullable: true
-        grade:
-          type: string
-          nullable: true
-        schoolYear:
-          type: string
-          nullable: true
-        seatsAvailable:
-          type: integer
-          format: int32
-        submissionAllowed:
-          type: boolean
-        lotteryEligible:
-          type: boolean
-        lastUpdatedBy:
-          type: string
-          nullable: true
-        lastUpdatedAt:
-          type: string
-          format: date-time
-          nullable: true
-      additionalProperties: false
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityListItemDtoPaginatedItemsViewModel:
-      type: object
-      properties:
-        pageIndex:
-          type: integer
-          format: int32
-        pageSize:
-          type: integer
-          format: int32
-        count:
-          type: integer
-          format: int64
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityListItemDto'
-          nullable: true
-      additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactEmailOverrideRequestDto:
+      required:
+        - value
       type: object
       properties:
         value:
+          maxLength: 320
+          minLength: 1
           type: string
           description: The corrected detail. The DELETE route removes an override instead; this is never blank.
-          nullable: true
         studentLocalCode:
+          maxLength: 100
           type: string
           nullable: true
         expectedVersion:
+          maxLength: 50
           type: string
           description: "The `lastUpdatedDateTime` the client read, round-tripped back. When it no longer matches the\r\nwrite is refused with 412 rather than winning because it arrived second. Omit to skip the check."
           nullable: true
@@ -49181,7 +49668,6 @@ components:
           type: array
           items:
             type: string
-          nullable: true
         eventType:
           type: string
           description: "The change log's event type, e.g. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactOverrideHistoryExtensions.OverrideEventType\r\nor one of the created/updated/deleted event types. Lets a client distinguish entries in a combined\r\nchangelog feed - only override entries carry EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactOverrideHistoryEntryDto.Detail/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactOverrideHistoryEntryDto.Action and the\r\nvalue fields; the others read null there."
@@ -49224,15 +49710,20 @@ components:
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactPhoneOverrideRequestDto:
+      required:
+        - value
       type: object
       properties:
         value:
+          maxLength: 50
+          minLength: 1
           type: string
-          nullable: true
         studentLocalCode:
+          maxLength: 100
           type: string
           nullable: true
         expectedVersion:
+          maxLength: 50
           type: string
           nullable: true
       additionalProperties: false
@@ -49266,7 +49757,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactStudentResponseDto'
-          nullable: true
         relationship:
           type: string
           nullable: true
@@ -49277,7 +49767,6 @@ components:
           type: array
           items:
             type: string
-          nullable: true
         isPhoneOverride:
           type: boolean
           nullable: true
@@ -49306,7 +49795,6 @@ components:
           nullable: true
         signInStatus:
           type: string
-          nullable: true
         isLocked:
           type: boolean
         createdBy:
@@ -49338,7 +49826,6 @@ components:
           type: boolean
         verificationStatus:
           type: string
-          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactResponseDtoPaginatedItemsViewModel:
       type: object
@@ -49373,7 +49860,6 @@ components:
           type: boolean
         signInStatus:
           type: string
-          nullable: true
         resetCount:
           type: integer
           format: int32
@@ -49487,7 +49973,6 @@ components:
           nullable: true
         verificationStatus:
           type: string
-          nullable: true
       additionalProperties: false
       description: What a contact verification reports back.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.EnrollmentWindowDto:
@@ -49652,7 +50137,6 @@ components:
           nullable: true
         seatStatus:
           type: string
-          nullable: true
         seatsAvailable:
           type: integer
           format: int32
@@ -49671,7 +50155,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.GeoPositionDto'
-          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.PolygonDto:
       type: object
@@ -49680,7 +50163,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.LinearRingDto'
-          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramApplicationDto:
       type: object
@@ -49724,22 +50206,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto'
-          nullable: true
         school:
           $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolRefDto'
         grades:
           type: array
           items:
             type: string
-          nullable: true
         capacityByGrade:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.GradeCapacityDto'
-          nullable: true
         seatStatus:
           type: string
-          nullable: true
         zone:
           type: string
           nullable: true
@@ -49789,10 +50267,8 @@ components:
           type: array
           items:
             type: string
-          nullable: true
         seatStatus:
           type: string
-          nullable: true
         eligibilityCriteria:
           type: string
           nullable: true
@@ -49808,7 +50284,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto'
-          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramListItemDtoPaginatedItemsViewModel:
       type: object
@@ -49898,6 +50373,53 @@ components:
         success:
           type: boolean
       additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationApplicationAddedResultDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+        applicationId:
+          type: string
+          format: uuid
+          nullable: true
+      additionalProperties: false
+      description: "What adding an application to a registration reports back: the identity plus the new\r\napplication's id."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationConsolidatedResultDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+        studentId:
+          type: string
+          format: uuid
+          nullable: true
+      additionalProperties: false
+      description: "What a registration consolidate reports back: the identity plus the student record it provisioned or\r\nlinked."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationMutationResultDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+      additionalProperties: false
+      description: "What a registration approve, submit, reject or application approve reports back - just the identity, not\r\nthe registration. Compare ProgramMutationResultDto: a client that needs the saved state re-reads\r\nthe registration."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementMutationResultDto:
       type: object
       properties:
@@ -50021,10 +50543,8 @@ components:
           nullable: true
         schoolStateShortCode:
           type: string
-          nullable: true
         schoolName:
           type: string
-          nullable: true
         districtStateShortCode:
           type: string
           nullable: true
@@ -50047,7 +50567,6 @@ components:
           type: array
           items:
             type: string
-          nullable: true
         address:
           type: string
           nullable: true
@@ -50126,10 +50645,8 @@ components:
       properties:
         programCode:
           type: string
-          nullable: true
         name:
           type: string
-          nullable: true
         gradeLow:
           type: string
           nullable: true
@@ -50166,7 +50683,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolProgramResponseDto'
-          nullable: true
         id:
           type: string
           format: uuid
@@ -50180,10 +50696,8 @@ components:
           nullable: true
         schoolStateShortCode:
           type: string
-          nullable: true
         schoolName:
           type: string
-          nullable: true
         districtStateShortCode:
           type: string
           nullable: true
@@ -50206,7 +50720,6 @@ components:
           type: array
           items:
             type: string
-          nullable: true
         address:
           type: string
           nullable: true
@@ -50349,23 +50862,14 @@ components:
           nullable: true
       additionalProperties: false
       description: "One contact link on a student. `id` is this entry's own identity; EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentContactResponseDto.ContactId is the\r\ncontact record it links to."
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentMutationResultDto:
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentListItemResponseDto:
       type: object
       properties:
-        id:
+        studentId:
           type: string
           format: uuid
           nullable: true
-        tenantId:
-          type: string
-          format: uuid
-          nullable: true
-      additionalProperties: false
-      description: 'What a student upsert or update reports back - just the identity, mirroring ContactMutationResultDto.'
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentResponseDto:
-      type: object
-      properties:
-        id:
+        registrationId:
           type: string
           format: uuid
           nullable: true
@@ -50386,7 +50890,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.AllowedPathwayIdDto'
-          nullable: true
         firstName:
           type: string
           nullable: true
@@ -50430,7 +50933,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentContactResponseDto'
-          nullable: true
         createdBy:
           type: string
           nullable: true
@@ -50454,12 +50956,9 @@ components:
           nullable: true
         isDeleted:
           type: boolean
-        registrationId:
-          type: string
-          nullable: true
       additionalProperties: false
-      description: "One Enrollment Student, from the list and the get-by-id route alike. `registrationId` is set only on\r\na list row that stands for a registration not yet linked to a student (a new student): that row's\r\n`id` is the registration's id, which the get-by-id route cannot resolve, so a client must not open a\r\nstudent profile from it. Absent on every real student."
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentResponseDtoPaginatedItemsViewModel:
+      description: "One students roster row. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentListItemResponseDto.StudentId is the student record id, null for a student who so far\r\nexists only on a registration; EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentListItemResponseDto.RegistrationId is that registration, and null on a student record.\r\nBoth are always written, null included."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentListItemResponseDtoPaginatedItemsViewModel:
       type: object
       properties:
         pageIndex:
@@ -50474,8 +50973,112 @@ components:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentResponseDto'
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentListItemResponseDto'
           nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentMutationResultDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+      additionalProperties: false
+      description: 'What a student upsert or update reports back - just the identity, mirroring ContactMutationResultDto.'
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+        studentLocalCode:
+          type: string
+          nullable: true
+        studentStateCode:
+          type: string
+          nullable: true
+        externalDataSourceStudentId:
+          type: string
+          nullable: true
+        allowedPathwayIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.AllowedPathwayIdDto'
+        firstName:
+          type: string
+          nullable: true
+        middleName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        birthdate:
+          type: string
+          nullable: true
+        last4SSN:
+          type: string
+          nullable: true
+        nextAddress:
+          type: string
+          nullable: true
+        nextGradeLevel:
+          type: string
+          nullable: true
+        nextSchoolStateShortCode:
+          type: string
+          nullable: true
+        nextSchoolStateCode:
+          type: string
+          nullable: true
+        nextSchoolName:
+          type: string
+          nullable: true
+        nextSchoolAddress:
+          type: string
+          nullable: true
+        eligibilityCode:
+          type: string
+          nullable: true
+        eligibilityDescription:
+          type: string
+          nullable: true
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentContactResponseDto'
+        createdBy:
+          type: string
+          nullable: true
+        createdDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        lastModifiedBy:
+          type: string
+          nullable: true
+        lastModifiedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        deletedBy:
+          type: string
+          nullable: true
+        deletedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        isDeleted:
+          type: boolean
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.WindowDependencyDto:
       type: object
@@ -51800,29 +52403,37 @@ components:
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Services.Observations.CreateObservationRequest:
+      required:
+        - campus
+        - evalueeId
+        - formId
+        - formVersion
+        - observationDate
+        - observerId
+        - tenantId
       type: object
       properties:
         tenantId:
+          minLength: 1
           type: string
-          nullable: true
         observationDate:
+          minLength: 1
           type: string
-          nullable: true
         campus:
+          minLength: 1
           type: string
-          nullable: true
         observerId:
+          minLength: 1
           type: string
-          nullable: true
         evalueeId:
+          minLength: 1
           type: string
-          nullable: true
         formId:
+          minLength: 1
           type: string
-          nullable: true
         formVersion:
+          minLength: 1
           type: string
-          nullable: true
         campusClassId:
           type: string
           nullable: true
@@ -51935,16 +52546,19 @@ components:
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Services.Observations.FormConfigurationRequest:
+      required:
+        - formId
+        - versions
       type: object
       properties:
         formId:
+          minLength: 1
           type: string
-          nullable: true
         versions:
+          minItems: 1
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.FormVersionConfigurationRequest'
-          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Services.Observations.FormConfigurationResponse:
       type: object
@@ -51959,17 +52573,21 @@ components:
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Services.Observations.FormVersionConfigurationRequest:
+      required:
+        - activeStartingDate
+        - activeUntilDate
+        - version
       type: object
       properties:
         version:
+          minLength: 1
           type: string
-          nullable: true
         activeStartingDate:
+          minLength: 1
           type: string
-          nullable: true
         activeUntilDate:
+          minLength: 1
           type: string
-          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Services.Observations.FormVersionConfigurationResponse:
       type: object
@@ -52516,19 +53134,21 @@ components:
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Services.Observations.SetRoleConfigurationRequest:
+      required:
+        - assignedPersonaIdentifiers
+        - role
       type: object
       properties:
         tenantId:
           type: string
           nullable: true
         role:
+          minLength: 1
           type: string
-          nullable: true
         assignedPersonaIdentifiers:
           type: array
           items:
             type: string
-          nullable: true
         ignoreOrganization:
           type: boolean
       additionalProperties: false
@@ -53004,15 +53624,20 @@ components:
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Services.StateReporting.v1.CreateConnectionRequest:
+      required:
+        - environmentId
+        - tenantId
+        - type
       type: object
       properties:
         type:
+          minLength: 1
           type: string
-          nullable: true
         tenantId:
+          minLength: 1
           type: string
-          nullable: true
         environmentId:
+          minLength: 1
           type: string
           format: uuid
         server:
@@ -58636,13 +59261,7 @@ components:
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationContactMessage:
       type: object
       properties:
-        id:
-          type: string
-          nullable: true
         contactId:
-          type: string
-          nullable: true
-        contactName:
           type: string
           nullable: true
         contactPhone:
@@ -58654,8 +59273,14 @@ components:
         externalDataSourceContactId:
           type: string
           nullable: true
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
       additionalProperties: false
-      description: "One contact on a registration. id is the entry's own identity (minted once, never overwritten);\r\ncontactId is the EnrollmentContact record id the entry resolved to (the key every join goes\r\nthrough; unset until resolved); externalDataSourceContactId is the SIS-side code, when known."
+      description: "One contact on a registration. contactId is the EnrollmentContact record id the entry resolved to\r\n(the key every join goes through; unset until resolved); externalDataSourceContactId is the\r\nSIS-side code, when known."
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationCreatedResponse:
       type: object
       properties:
@@ -62548,14 +63173,19 @@ components:
           readOnly: true
       additionalProperties: false
     IdentityApi.User.V1.ResetPasswordRequest:
+      required:
+        - tenantId
+        - userId
       type: object
       properties:
         tenantId:
+          maxLength: 100
+          minLength: 1
           type: string
-          nullable: true
         userId:
+          maxLength: 100
+          minLength: 1
           type: string
-          nullable: true
         password:
           type: string
           nullable: true
@@ -63591,7 +64221,6 @@ components:
             type: array
             items:
               type: string
-          nullable: true
         type:
           type: string
           nullable: true
