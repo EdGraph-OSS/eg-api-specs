@@ -194,6 +194,117 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/applicationrounds/{id}/runs/{runId}':
+    get:
+      tags:
+        - Enrollment Admin / ApplicationRounds
+      summary: 'Gets one lottery run of the round, complete.'
+      operationId: GetApplicationRoundRunById
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: runId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundRunResponseDto'
+        '404':
+          description: 'The run could not be found, or is a run of another round.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/applicationrounds/{id}/runs':
+    get:
+      tags:
+        - Enrollment Admin / ApplicationRounds
+      summary: "Lists the round's lottery runs, newest first, each complete: status, timings, grades, the UJF\r\nexecution id, the inputs hash and the counts. A round that has never run has an empty list."
+      operationId: GetApplicationRoundRuns
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundRunResponseDto'
+        '404':
+          description: The round could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/applicationrounds/{id}/windows/{windowId}':
     delete:
       tags:
@@ -6312,6 +6423,82 @@ components:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto'
           nullable: true
       additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundRunResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+        applicationRoundId:
+          type: string
+          format: uuid
+          nullable: true
+        roundCode:
+          type: string
+          description: The round's code as it stood when the run started - a snapshot.
+          nullable: true
+        grades:
+          type: array
+          items:
+            type: string
+          description: 'The grades this run covered: the round''s, or a narrower set.'
+        executionId:
+          type: string
+          description: 'The UJF execution id, to find the job''s logs from here.'
+          nullable: true
+        status:
+          type: string
+          description: 'Running, Completed or Failed.'
+          nullable: true
+        startedAt:
+          type: string
+          format: date-time
+          nullable: true
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        inputsHash:
+          type: string
+          description: 'A hash of exactly the inputs the engine saw, so a run can be checked against the data.'
+          nullable: true
+        registrations:
+          type: integer
+          format: int32
+          nullable: true
+        offers:
+          type: integer
+          format: int32
+          nullable: true
+        waitlisted:
+          type: integer
+          format: int32
+          nullable: true
+        error:
+          type: string
+          description: Why the run failed; absent otherwise.
+          nullable: true
+        createdBy:
+          type: string
+          nullable: true
+        createdDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        lastModifiedBy:
+          type: string
+          nullable: true
+        lastModifiedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: false
+      description: "One lottery run of a round - the audit record of what was run, on what, and what came out. A round\r\nis run many times; each run is its own record. Every field the service holds is passed through."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundWindowMutationResultDto:
       type: object
       properties:
