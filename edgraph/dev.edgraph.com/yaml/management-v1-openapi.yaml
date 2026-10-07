@@ -5182,6 +5182,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  /impersonation/active:
+    post:
+      tags:
+        - Impersonation
+      summary: "Every refusal path - regardless of cause - returns this exact response: a bare 403 with no\r\nbody. Centralizing it here makes \"every refusal is identical\" structurally true rather than\r\nsomething that could drift per call site."
+      description: "Deliberately Microsoft.AspNetCore.Mvc.EmptyResult with the status code set directly on\r\nMicrosoft.AspNetCore.Mvc.ControllerBase.Response, not `StatusCode(403)`/`Forbid()`: both of\r\nthose implement `IClientErrorActionResult`, which `[ApiController]`'s\r\n`ClientErrorResultFilter` intercepts and rewrites into an auto-generated\r\n`ProblemDetails` body carrying a per-request `traceId` - which would make a refused\r\n`start` and a refused `renew` differ on the wire every time, defeating the one\r\nproperty this endpoint most needs to hold."
+      operationId: Active
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.ActiveImpersonationsRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.ActiveImpersonationsRequest'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.ActiveImpersonationsRequest'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.ActiveImpersonationsRequest'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '403':
+          description: 'The request was refused, or Identity could not be reached.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: A map of target user id to the number of active impersonation sessions; targets with none are absent.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
   /impersonation/end:
     post:
       tags:
@@ -25087,6 +25136,16 @@ components:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.StaffClassificationLicenseRequest'
           nullable: true
       additionalProperties: false
+    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.ActiveImpersonationsRequest:
+      type: object
+      properties:
+        targetUserIds:
+          type: array
+          items:
+            type: string
+          nullable: true
+      additionalProperties: false
+      description: 'Body for `POST impersonation/active`: the users the Management user list is showing. Identity answers with the ones being impersonated right now, and by how many admins.'
     EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.EndImpersonationRequest:
       type: object
       properties:
@@ -25194,6 +25253,10 @@ components:
         gracePeriodMfaExpiryDate:
           type: string
           format: date-time
+        acceptEdGraphPasskeys:
+          type: boolean
+          description: '"Accept EdGraph passkeys". Null (not sent) keeps the tenant''s stored value.'
+          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Tenants.TenantIdentityProviderId:
       enum:
@@ -28683,6 +28746,90 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    IdentityApi.Client.V1.ClientAdvancedSettings:
+      type: object
+      properties:
+        backChannelLogoutUri:
+          type: string
+          nullable: true
+        backChannelLogoutSessionRequired:
+          type: boolean
+          nullable: true
+        frontChannelLogoutUri:
+          type: string
+          nullable: true
+        frontChannelLogoutSessionRequired:
+          type: boolean
+          nullable: true
+        consentLifetime:
+          type: integer
+          format: int32
+          nullable: true
+        userSsoLifetime:
+          type: integer
+          format: int32
+          nullable: true
+        allowRememberConsent:
+          type: boolean
+          nullable: true
+        allowPlainTextPkce:
+          type: boolean
+          nullable: true
+        requireRequestObject:
+          type: boolean
+          nullable: true
+        allowedIdentityTokenSigningAlgorithms:
+          $ref: '#/components/schemas/IdentityApi.Client.V1.StringList'
+        includeJwtId:
+          type: boolean
+          nullable: true
+        alwaysSendClientClaims:
+          type: boolean
+          nullable: true
+        clientClaimsPrefix:
+          type: string
+          nullable: true
+        pairWiseSubjectSalt:
+          type: string
+          nullable: true
+        userCodeType:
+          type: string
+          nullable: true
+        deviceCodeLifetime:
+          type: integer
+          format: int32
+          nullable: true
+        cibaLifetime:
+          type: integer
+          format: int32
+          nullable: true
+        pollingInterval:
+          type: integer
+          format: int32
+          nullable: true
+        coordinateLifetimeWithUserSession:
+          type: boolean
+          nullable: true
+        initiateLoginUri:
+          type: string
+          nullable: true
+        requireDPoP:
+          type: boolean
+          nullable: true
+        dPoPValidationMode:
+          type: string
+          nullable: true
+        dPoPClockSkew:
+          type: string
+          nullable: true
+        requirePushedAuthorization:
+          type: boolean
+          nullable: true
+        pushedAuthorizationLifetime:
+          type: integer
+          format: int32
+          nullable: true
+      additionalProperties: false
     IdentityApi.Client.V1.ClientBrandingBackground:
       type: object
       properties:
@@ -28927,6 +29074,11 @@ components:
           $ref: '#/components/schemas/IdentityApi.Client.V1.ClientBrandingResponse'
         allowTenantToOverride:
           type: boolean
+        properties:
+          type: string
+          nullable: true
+        advanced:
+          $ref: '#/components/schemas/IdentityApi.Client.V1.ClientAdvancedSettings'
       additionalProperties: false
     IdentityApi.Client.V1.ClientSecretAddedResponse:
       type: object
@@ -29080,6 +29232,8 @@ components:
         properties:
           type: string
           nullable: true
+        advanced:
+          $ref: '#/components/schemas/IdentityApi.Client.V1.ClientAdvancedSettings'
       additionalProperties: false
     IdentityApi.Client.V1.RegenerateClientSecretRequest:
       type: object
@@ -29115,6 +29269,17 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    IdentityApi.Client.V1.StringList:
+      type: object
+      properties:
+        values:
+          type: array
+          items:
+            type: string
+          nullable: true
+          readOnly: true
+      additionalProperties: false
+      description: "Duende Client settings that the API could not read or set (backlog B11/B15). Every member is optional: on create and update an\r\nabsent member means \"leave unchanged\"; a present one is applied. Responses fill every member that has a value."
     IdentityApi.Client.V1.TokenExpiration:
       enum:
         - Sliding
@@ -29236,6 +29401,8 @@ components:
         properties:
           type: string
           nullable: true
+        advanced:
+          $ref: '#/components/schemas/IdentityApi.Client.V1.ClientAdvancedSettings'
       additionalProperties: false
     IdentityApi.ClientSettingsType.V1.ClientSettingsTypeCreatedResponse:
       type: object
@@ -34076,6 +34243,10 @@ components:
           type: boolean
         gracePeriodMfaExpiryDate:
           type: string
+          nullable: true
+        acceptEdGraphPasskeys:
+          type: boolean
+          description: Accept passkeys registered with EdGraph even when the Local (password) provider is inactive. Unset on an update keeps the stored value.
           nullable: true
       additionalProperties: false
     TenantApi.Tenant.V1.TenantBrandingBackground:
