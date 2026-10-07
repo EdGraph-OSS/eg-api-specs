@@ -59246,10 +59246,6 @@ components:
           description: 'The priority tier - sibling, staff, feeder, PreK. Unset until the priority engine stamps it.'
           format: int32
           nullable: true
-        applicationRoundId:
-          type: string
-          description: Foreign key into the application round this entry was submitted to.
-          nullable: true
       additionalProperties: false
       description: "One Program-seat choice on a Registration - zero-to-many, independently approvable. See\r\nApproveRegistrationApplication / GetRegistrationApplications."
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationApplicationsListResponse:
@@ -59366,6 +59362,10 @@ components:
             $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationApplicationMessage'
           nullable: true
           readOnly: true
+        applicationRoundId:
+          type: string
+          description: "The round this registration's applications are in. Absent until the first application;\r\nonce set it never changes."
+          nullable: true
       additionalProperties: false
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationScreenMessage:
       type: object
