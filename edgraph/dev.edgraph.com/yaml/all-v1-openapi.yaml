@@ -49298,6 +49298,10 @@ components:
           type: string
           format: date-time
           nullable: true
+        acceptEdGraphPasskeys:
+          type: boolean
+          description: '"Accept EdGraph passkeys". Null (not sent) keeps the tenant''s stored value.'
+          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Tenants.TenantIdentityProviderId:
       enum:
@@ -66061,6 +66065,10 @@ components:
           type: boolean
         gracePeriodMfaExpiryDate:
           type: string
+          nullable: true
+        acceptEdGraphPasskeys:
+          type: boolean
+          description: Accept passkeys registered with EdGraph even when the Local (password) provider is inactive. Unset on an update keeps the stored value.
           nullable: true
       additionalProperties: false
     TenantApi.Tenant.V1.TenantAppSettings:
