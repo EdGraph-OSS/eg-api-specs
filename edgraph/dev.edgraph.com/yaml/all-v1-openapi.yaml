@@ -7786,6 +7786,82 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/impersonation':
+    post:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: "Starts acting as an Enrollment Contact: returns a one-time hand-off URL that opens the tenant's Enrollment site\r\nas that contact."
+      description: "The contact is notified on the chosen channel when the hand-off is redeemed. The URL's ticket is single-use and\r\nexpires in about a minute; open it immediately and do not log or store it."
+      operationId: StartEnrollmentContactImpersonation
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.StartContactImpersonationRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.StartContactImpersonationRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.StartContactImpersonationRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.StartContactImpersonationRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Refused. Deliberately the same bodiless response for every reason.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The session was started; open `handoffUrl` in a new tab.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactImpersonationStartedDto'
+        '400':
+          description: 'The channel is invalid, the reason is missing, or the contact has no address for the channel.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Infrastructure.ExceptionResponse'
+        '404':
+          description: The contact could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '409':
+          description: The tenant has no usable Enrollment site (`enrollmentTenantDNS`) configured.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Infrastructure.ExceptionResponse'
   '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/overrides/emails':
     delete:
       tags:
@@ -8835,6 +8911,91 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/impersonation/current':
+    get:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: "The caller's own open impersonation session, if any. EnrollmentAdmin polls it to show\r\n\"Acting as ... in another tab\"; it is the only source of that state (the Enrollment site may be on another\r\ndomain, so no cookie is shared)."
+      operationId: GetCurrentEnrollmentContactImpersonation
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: 'Refused, or Identity could not be reached. Deliberately bodiless.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: 'The open session, or every field null when there is none.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CurrentImpersonationDto'
+  '/tenants/{tenantId}/enrollmentadmin/impersonation/end':
+    post:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: Ends the caller's own impersonation session (any kind).
+      description: "No role policy on purpose: ending is the safe direction, and an admin who just lost the role must still be\r\nable to end. Identity ends a session only for its owner."
+      operationId: EndEnrollmentContactImpersonation
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EndContactImpersonationRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EndContactImpersonationRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EndContactImpersonationRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EndContactImpersonationRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Refused. Deliberately bodiless.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '204':
+          description: 'The session was ended, or had already ended.'
   '/tenants/{tenantId}/enrollmentadmin/feederpatterns/{id}':
     delete:
       tags:
@@ -9362,7 +9523,7 @@ paths:
     get:
       tags:
         - Enrollment Admin / Programs
-      summary: "Searches Programs. Every row is one school's offering of a program: the school, the program\r\ntype and the requirements are embedded on it, each with its own `_id` beside the id of\r\nthe row it was copied from."
+      summary: "Searches Programs. Every row is one school's offering of a program: the school, the program\r\ntype and the requirements are embedded on it, each identified by the id of the row it was\r\ncopied from."
       operationId: GetPrograms
       parameters:
         - name: tenantId
@@ -9595,13 +9756,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramTypeResponseDto'
-  '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/applications/{applicationId}/approve':
-    put:
+  '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/applications/{applicationId}/accept':
+    post:
       tags:
         - Enrollment Admin / Registrations
-      summary: 'Sets a single Application''s status on a Registration, independently of its siblings.'
-      description: "`applicationStatus` defaults to Approved when the body or the field is absent. The\r\n            Registration's own status is not changed. Returns the identity only."
-      operationId: ApproveEnrollmentRegistrationApplication
+      summary: "Accepts one Application on a Registration - sets its status to Accepted, independently of its\r\nsiblings. Takes no body."
+      description: "The Registration's own status is not changed. An\r\n`EnrollmentRegistrationApplicationAcceptedEvent` is published. Repeating the call on an application\r\nthat is already Accepted succeeds and changes nothing. Refused while the Registration is Rejected or\r\nExited. Returns the identity only."
+      operationId: AcceptEnrollmentRegistrationApplication
       parameters:
         - name: tenantId
           in: path
@@ -9621,21 +9782,6 @@ paths:
           required: true
           schema:
             type: string
-      requestBody:
-        description: ''
-        content:
-          application/json-patch+json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationApproveRequestDto'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationApproveRequestDto'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationApproveRequestDto'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationApproveRequestDto'
       responses:
         '401':
           description: Unauthorized
@@ -9656,7 +9802,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
         '200':
-          description: The application was approved.
+          description: The application was accepted.
           content:
             application/json:
               schema:
@@ -9669,6 +9815,81 @@ paths:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
         '404':
           description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '412':
+          description: The registration is Rejected or Exited.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/applications/{applicationId}/decline':
+    post:
+      tags:
+        - Enrollment Admin / Registrations
+      summary: "Declines one Application on a Registration - sets its status to Declined, independently of its\r\nsiblings. Takes no body."
+      description: "The Registration's own status is not changed. An\r\n`EnrollmentRegistrationApplicationDeclinedEvent` is published. Repeating the call on an application\r\nthat is already Declined succeeds and changes nothing. Refused while the Registration is Rejected or\r\nExited. Returns the identity only."
+      operationId: DeclineEnrollmentRegistrationApplication
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: applicationId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The application was declined.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationMutationResultDto'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '412':
+          description: The registration is Rejected or Exited.
           content:
             application/json:
               schema:
@@ -9861,7 +10082,7 @@ paths:
       tags:
         - Enrollment Admin / Registrations
       summary: "Consolidates an Approved Registration - provisions its Student, links its Contacts and sets its\r\nApplications' statuses."
-      description: "The registration must already be Approved (412 otherwise); its status is not changed. An\r\n`EnrollmentRegistrationConsolidatedEvent` is published.\r\nThe body's `tenantId` and `id` must match the route.\r\n`student` is required. The student record is matched by `studentId`, else\r\n`externalDataSourceStudentId`, else `studentLocalCode`, and updated; when none matches it\r\nis created from these fields plus the registration's screens (birth date, grade, address), which\r\nneeds `studentLocalCode`. Consolidating again with the returned `studentId` updates\r\nthe same student.\r\nThe `contacts` array merges into the Registration's existing Contacts collection, matched by\r\n`contactId`, else `externalDataSourceContactId` (upsert semantics); each contact that\r\nresolves to a contact record is linked to the student.\r\nThe `applications` array sets the status of the Registration's Applications.\r\nThe registration's `nextSchoolStateShortCode` and `nextSchoolName` are taken from the school\r\nof the top-ranked Approved application, and `languageCode`, while still `Unknown`, from the\r\nprimary-language screen answer.\r\nReturns the registration's identity and the `studentId` it provisioned or linked; re-read\r\nthe registration for its state."
+      description: "The registration must already be Approved (412 otherwise); its status is not changed. An\r\n`EnrollmentRegistrationConsolidatedEvent` is published.\r\nThe body's `tenantId` and `id` must match the route.\r\n`student` is required. The student record is matched by `studentId`, else\r\n`externalDataSourceStudentId`, else `studentLocalCode`, and updated; when none matches it\r\nis created from these fields plus the registration's screens (birth date, grade, address), which\r\nneeds `studentLocalCode`. Consolidating again with the returned `studentId` updates\r\nthe same student.\r\nThe `contacts` array merges into the Registration's existing Contacts collection, matched by\r\n`contactId`, else `externalDataSourceContactId` (upsert semantics); each contact that\r\nresolves to a contact record is linked to the student.\r\nThe `applications` array sets the status of the Registration's Applications.\r\nThe registration's `nextSchoolStateShortCode` and `nextSchoolName` are taken from the school\r\nof the top-ranked Accepted application, and `languageCode`, while still `Unknown`, from the\r\nprimary-language screen answer.\r\nReturns the registration's identity and the `studentId` it provisioned or linked; re-read\r\nthe registration for its state."
       operationId: ConsolidateEnrollmentRegistration
       parameters:
         - name: tenantId
@@ -9938,7 +10159,7 @@ paths:
     put:
       tags:
         - Enrollment Admin / Registrations
-      summary: "Explicitly rejects a Registration - sets its status and every Application's status to Rejected.\r\nTakes no body. Terminal, like approve: a later Update/UpdateScreen/StartOver progress recompute\r\ndoes not revert it. Returns the identity only."
+      summary: "Explicitly rejects a Registration - sets its status to Rejected and every Application's status\r\nto Declined. Takes no body. Terminal, like approve: a later Update/UpdateScreen/StartOver\r\nprogress recompute does not revert it. Returns the identity only."
       operationId: RejectEnrollmentRegistration
       parameters:
         - name: tenantId
@@ -42929,6 +43150,159 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/users/{userId}/sign-in-names/{id}':
+    delete:
+      tags:
+        - Users
+      operationId: RemoveDirectorySignInName
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityApi.User.V1.RemoveExternalSignInNameResponse'
+  '/tenants/{tenantId}/users/{userId}/sign-in-names':
+    get:
+      tags:
+        - Users
+      operationId: ListDirectorySignInNames
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityApi.User.V1.ListExternalSignInNamesResponse'
+    post:
+      tags:
+        - Users
+      operationId: AddDirectorySignInName
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Users.DirectorySignInNameBody'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Users.DirectorySignInNameBody'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Users.DirectorySignInNameBody'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Users.DirectorySignInNameBody'
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityApi.User.V1.ExternalSignInNameResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
   '/tenants/{tenantId}/users/{userId}':
     delete:
       tags:
@@ -47773,6 +48147,17 @@ components:
           type: string
       additionalProperties: false
       description: The school year the copy goes into.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EndContactImpersonationRequestDto:
+      required:
+        - impersonationSessionId
+      type: object
+      properties:
+        impersonationSessionId:
+          maxLength: 128
+          minLength: 1
+          type: string
+          description: The session to end; Identity ends it only for its owner.
+      additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto:
       required:
         - closesAt
@@ -47907,18 +48292,11 @@ components:
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.LinearRingRequestDto'
       additionalProperties: false
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationApproveRequestDto:
-      type: object
-      properties:
-        applicationStatus:
-          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationStatus'
-      additionalProperties: false
-      description: "The body of an application-level approve call. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationApproveRequestDto.ApplicationStatus defaults to Approved\r\nwhen absent."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationStatus:
       enum:
         - Pending
-        - Approved
-        - Rejected
+        - Accepted
+        - Declined
         - Waitlisted
         - NotProcessed
       type: string
@@ -48041,6 +48419,22 @@ components:
           format: uuid
       additionalProperties: false
       description: The body of a Registration submit call. Submit only ever sets Status; the ids must match the route.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.StartContactImpersonationRequestDto:
+      required:
+        - channel
+      type: object
+      properties:
+        channel:
+          minLength: 1
+          type: string
+          description: '`email` or `phone`: which of the contact''s effective addresses to act as.'
+        reason:
+          maxLength: 500
+          type: string
+          description: Required; recorded in Identity's audit.
+          nullable: true
+      additionalProperties: false
+      description: 'The body of an "act as contact" start (spec 2026-10-06 contact impersonation, T2).'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateApplicationRoundRequestDto:
       required:
         - grades
@@ -49524,6 +49918,23 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Users.DirectorySignInNameBody:
+      type: object
+      properties:
+        provider:
+          type: string
+          description: '`AAD` or `Google`.'
+          nullable: true
+        value:
+          type: string
+          description: 'The sign-in name, e.g. `jsmith@district.onmicrosoft.com`.'
+          nullable: true
+        directoryId:
+          type: string
+          description: Optional when the tenant has exactly one directory for the provider.
+          nullable: true
+      additionalProperties: false
+      description: 'Backlog A5: the body that adds a directory sign-in name. The tenant is the route''s; there is no way to name another.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Validations.CreateValidationJobRequest:
       required:
         - environmentId
@@ -49600,15 +50011,6 @@ components:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.DomainListResponseDto'
           nullable: true
       additionalProperties: false
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.AllowedPathwayIdDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          nullable: true
-      additionalProperties: false
-      description: 'One allowed pathway on a student: the pathway record id.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundMutationResultDto:
       type: object
       properties:
@@ -49807,6 +50209,22 @@ components:
           nullable: true
       additionalProperties: false
       description: The body of an override write.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactImpersonationStartedDto:
+      type: object
+      properties:
+        impersonationSessionId:
+          type: string
+        handoffUrl:
+          type: string
+        sessionExpiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        identifierMasked:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: "A started contact impersonation. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactImpersonationStartedDto.HandoffUrl carries a single-use, 60-second ticket in its fragment:\r\nopen it once, at once, in a new tab, and never log or store it."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactMutationResultDto:
       type: object
       properties:
@@ -50126,10 +50544,6 @@ components:
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactStudentResponseDto:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
-          nullable: true
         studentId:
           type: string
           format: uuid
@@ -50150,7 +50564,7 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-      description: "One student linked to a contact. `_id` is the link entry's own id, NOT the student: read\r\n`studentId` for the student record id and `studentLocalCode` for the SIS code."
+      description: "One student linked to a contact, identified by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactStudentResponseDto.StudentId: the student record id.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactStudentResponseDto.StudentLocalCode is the SIS code."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactVerifiedResultDto:
       type: object
       properties:
@@ -50166,6 +50580,28 @@ components:
           type: string
       additionalProperties: false
       description: What a contact verification reports back.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CurrentImpersonationDto:
+      type: object
+      properties:
+        impersonationSessionId:
+          type: string
+          nullable: true
+        targetKind:
+          type: string
+          description: '`otp_subject` for an enrollment contact, `user` for a platform user.'
+          nullable: true
+        identifierMasked:
+          type: string
+          nullable: true
+        tenantId:
+          type: string
+          nullable: true
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: false
+      description: 'The caller''s own open impersonation session, or every field null when there is none.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.EnrollmentWindowDto:
       type: object
       properties:
@@ -50510,10 +50946,6 @@ components:
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramTypeRefDto:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
-          nullable: true
         programTypeId:
           type: string
           format: uuid
@@ -50627,10 +51059,6 @@ components:
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
-          nullable: true
         requirementId:
           type: string
           format: uuid
@@ -50655,7 +51083,7 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-      description: "One requirement, as embedded on the program. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto.RequirementId is the requirements row.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto.IsRequired is copied from that row when the program is saved; false means optional.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto.Url is copied the same way, and set only on a `url` requirement."
+      description: "One requirement, as embedded on the program, identified by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto.RequirementId: the requirements row.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto.IsRequired is copied from that row when the program is saved; false means optional.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto.Url is copied the same way, and set only on a `url` requirement."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementResponseDto:
       type: object
       properties:
@@ -50851,10 +51279,6 @@ components:
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolRefDto:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
-          nullable: true
         schoolId:
           type: string
           format: uuid
@@ -50866,7 +51290,7 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-      description: "The school a program runs at, as embedded on the program. `id` is this entry's own\r\nidentity; EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolRefDto.SchoolId is the school row it was copied from."
+      description: "The school a program runs at, as embedded on the program, identified by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolRefDto.SchoolId: the\r\nschool row it was copied from."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolResponseDto:
       type: object
       properties:
@@ -51021,10 +51445,6 @@ components:
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentContactResponseDto:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
-          nullable: true
         contactId:
           type: string
           format: uuid
@@ -51052,7 +51472,7 @@ components:
           type: boolean
           nullable: true
       additionalProperties: false
-      description: "One contact link on a student. `id` is this entry's own identity; EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentContactResponseDto.ContactId is the\r\ncontact record it links to."
+      description: 'One contact link on a student, identified by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentContactResponseDto.ContactId: the contact record it links to.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentListItemResponseDto:
       type: object
       properties:
@@ -51080,7 +51500,8 @@ components:
         allowedPathwayIds:
           type: array
           items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.AllowedPathwayIdDto'
+            type: string
+            format: uuid
         firstName:
           type: string
           nullable: true
@@ -51203,7 +51624,8 @@ components:
         allowedPathwayIds:
           type: array
           items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.AllowedPathwayIdDto'
+            type: string
+            format: uuid
         firstName:
           type: string
           nullable: true
@@ -52143,6 +52565,16 @@ components:
           format: uuid
           nullable: true
         value:
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Infrastructure.ExceptionResponse:
+      type: object
+      properties:
+        Code:
+          type: string
+          nullable: true
+        Details:
+          type: string
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Services.Connectors.Extensions.ADLSGen2ConnectorProfileDTO:
@@ -59434,7 +59866,7 @@ components:
           format: int32
           nullable: true
       additionalProperties: false
-      description: "One Program-seat choice on a Registration - zero-to-many, independently approvable. See\r\nApproveRegistrationApplication / GetRegistrationApplications."
+      description: "One Program-seat choice on a Registration - zero-to-many, independently accepted or declined. See\r\nAcceptRegistrationApplication / DeclineRegistrationApplication / GetRegistrationApplications."
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationApplicationsListResponse:
       type: object
       properties:
@@ -63178,6 +63610,43 @@ components:
           type: integer
           format: int32
       additionalProperties: false
+    IdentityApi.User.V1.ExternalSignInNameMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        provider:
+          type: string
+          description: AAD | Google
+          nullable: true
+        directoryId:
+          type: string
+          description: Entra tenant id (GUID) or Google Workspace domain
+          nullable: true
+        value:
+          type: string
+          description: normalised sign-in name (UPN)
+          nullable: true
+        source:
+          type: string
+          description: admin | directory | import
+          nullable: true
+        tenantId:
+          type: string
+          description: the tenant that scoped an admin entry; empty otherwise
+          nullable: true
+        createdAt:
+          type: string
+          description: 'ISO 8601, UTC'
+          nullable: true
+      additionalProperties: false
+    IdentityApi.User.V1.ExternalSignInNameResponse:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/IdentityApi.User.V1.ExternalSignInNameMessage'
+      additionalProperties: false
     IdentityApi.User.V1.GetSEOAAsResponse:
       type: object
       properties:
@@ -63293,6 +63762,25 @@ components:
         - Active
         - Expired
       type: string
+    IdentityApi.User.V1.ListExternalSignInNamesResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          nullable: true
+        names:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityApi.User.V1.ExternalSignInNameMessage'
+          nullable: true
+          readOnly: true
+        directories:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityApi.User.V1.TenantDirectoryMessage'
+          nullable: true
+          readOnly: true
+      additionalProperties: false
     IdentityApi.User.V1.LocalUserCreatedResponse:
       type: object
       properties:
@@ -63344,6 +63832,16 @@ components:
           type: string
           nullable: true
         tenantId:
+          type: string
+          nullable: true
+      additionalProperties: false
+    IdentityApi.User.V1.RemoveExternalSignInNameResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          nullable: true
+        id:
           type: string
           nullable: true
       additionalProperties: false
@@ -63654,6 +64152,25 @@ components:
           nullable: true
           readOnly: true
         organizationName:
+          type: string
+          nullable: true
+      additionalProperties: false
+    IdentityApi.User.V1.TenantDirectoryMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        tenantId:
+          type: string
+          nullable: true
+        provider:
+          type: string
+          nullable: true
+        directoryId:
+          type: string
+          nullable: true
+        createdAt:
           type: string
           nullable: true
       additionalProperties: false
