@@ -16840,6 +16840,132 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/directories/{id}':
+    delete:
+      tags:
+        - Tenants
+      operationId: UnbindTenantDirectory
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityApi.User.V1.UnbindTenantDirectoryResponse'
+  '/tenants/{tenantId}/directories':
+    get:
+      tags:
+        - Tenants
+      operationId: ListTenantDirectories
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityApi.User.V1.ListTenantDirectoriesResponse'
+    post:
+      tags:
+        - Tenants
+      operationId: BindTenantDirectory
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.TenantDirectoryBody'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.TenantDirectoryBody'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.TenantDirectoryBody'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.TenantDirectoryBody'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityApi.User.V1.TenantDirectoryResponse'
   '/tenants/{tenantId}/applications/{applicationId}/launchersettings':
     get:
       tags:
@@ -21069,6 +21195,149 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/users/{userId}/sign-in-names/{id}':
+    delete:
+      tags:
+        - Users
+      summary: Removes a directory sign-in name.
+      operationId: RemoveDirectorySignInName
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityApi.User.V1.RemoveExternalSignInNameResponse'
+  '/users/{userId}/sign-in-names':
+    get:
+      tags:
+        - Users
+      summary: 'The user''s directory sign-in names; with tenantId, only that tenant''s, plus the directories it trusts.'
+      operationId: ListDirectorySignInNames
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityApi.User.V1.ListExternalSignInNamesResponse'
+    post:
+      tags:
+        - Users
+      summary: Adds a directory sign-in name. 409 when it belongs to another account; 412 when the tenant has no directory for the provider.
+      operationId: AddDirectorySignInName
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.DirectorySignInNameBody'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.DirectorySignInNameBody'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.DirectorySignInNameBody'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.DirectorySignInNameBody'
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityApi.User.V1.ExternalSignInNameResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
   '/users/{userId}':
     delete:
       tags:
@@ -25617,6 +25886,40 @@ components:
             type: string
           nullable: true
       additionalProperties: false
+    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.DirectorySignInNameBody:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          description: The user's tenant whose bound directory vouches for the name.
+          nullable: true
+        provider:
+          type: string
+          description: '`AAD` or `Google`.'
+          nullable: true
+        value:
+          type: string
+          description: 'The sign-in name, e.g. `jsmith@district.onmicrosoft.com`.'
+          nullable: true
+        directoryId:
+          type: string
+          description: Optional when the tenant has exactly one directory for the provider.
+          nullable: true
+      additionalProperties: false
+      description: 'Backlog A5: the body that adds a directory sign-in name.'
+    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.TenantDirectoryBody:
+      type: object
+      properties:
+        provider:
+          type: string
+          description: '`AAD` or `Google`.'
+          nullable: true
+        directoryId:
+          type: string
+          description: The Entra tenant id (GUID) or the Google Workspace domain.
+          nullable: true
+      additionalProperties: false
+      description: 'Backlog A5: the body that binds a directory to a tenant.'
     EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.ApiResourceResponse:
       type: object
       properties:
@@ -30549,6 +30852,43 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    IdentityApi.User.V1.ExternalSignInNameMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        provider:
+          type: string
+          description: AAD | Google
+          nullable: true
+        directoryId:
+          type: string
+          description: Entra tenant id (GUID) or Google Workspace domain
+          nullable: true
+        value:
+          type: string
+          description: normalised sign-in name (UPN)
+          nullable: true
+        source:
+          type: string
+          description: admin | directory | import
+          nullable: true
+        tenantId:
+          type: string
+          description: the tenant that scoped an admin entry; empty otherwise
+          nullable: true
+        createdAt:
+          type: string
+          description: 'ISO 8601, UTC'
+          nullable: true
+      additionalProperties: false
+    IdentityApi.User.V1.ExternalSignInNameResponse:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/IdentityApi.User.V1.ExternalSignInNameMessage'
+      additionalProperties: false
     IdentityApi.User.V1.GetSEOAAsResponse:
       type: object
       properties:
@@ -30666,6 +31006,38 @@ components:
         - Active
         - Expired
       type: string
+    IdentityApi.User.V1.ListExternalSignInNamesResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          nullable: true
+        names:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityApi.User.V1.ExternalSignInNameMessage'
+          nullable: true
+          readOnly: true
+        directories:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityApi.User.V1.TenantDirectoryMessage'
+          nullable: true
+          readOnly: true
+      additionalProperties: false
+    IdentityApi.User.V1.ListTenantDirectoriesResponse:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          nullable: true
+        directories:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityApi.User.V1.TenantDirectoryMessage'
+          nullable: true
+          readOnly: true
+      additionalProperties: false
     IdentityApi.User.V1.LocalUserCreatedResponse:
       type: object
       properties:
@@ -30712,6 +31084,16 @@ components:
           type: string
           nullable: true
         tenantId:
+          type: string
+          nullable: true
+      additionalProperties: false
+    IdentityApi.User.V1.RemoveExternalSignInNameResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          nullable: true
+        id:
           type: string
           nullable: true
       additionalProperties: false
@@ -30863,6 +31245,31 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    IdentityApi.User.V1.TenantDirectoryMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        tenantId:
+          type: string
+          nullable: true
+        provider:
+          type: string
+          nullable: true
+        directoryId:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          nullable: true
+      additionalProperties: false
+    IdentityApi.User.V1.TenantDirectoryResponse:
+      type: object
+      properties:
+        directory:
+          $ref: '#/components/schemas/IdentityApi.User.V1.TenantDirectoryMessage'
+      additionalProperties: false
     IdentityApi.User.V1.TenantEducationOrganizationMetrics:
       type: object
       properties:
@@ -30950,6 +31357,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/IdentityApi.User.V1.TenantUserMetrics'
+          nullable: true
+      additionalProperties: false
+    IdentityApi.User.V1.UnbindTenantDirectoryResponse:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          nullable: true
+        id:
+          type: string
           nullable: true
       additionalProperties: false
     IdentityApi.User.V1.UpdateUserRequest:
