@@ -5113,7 +5113,7 @@ components:
         lastName:
           minLength: 1
           type: string
-        birthdate:
+        birthDate:
           type: string
           nullable: true
         last4SSN:
@@ -5478,7 +5478,7 @@ components:
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto:
       required:
-        - closesAt
+        - closeDateTime
         - kind
         - timeZone
       type: object
@@ -5486,10 +5486,10 @@ components:
         kind:
           minLength: 1
           type: string
-        opensAt:
+        openDateTime:
           type: string
           nullable: true
-        closesAt:
+        closeDateTime:
           minLength: 1
           type: string
         timeZone:
@@ -5498,7 +5498,7 @@ components:
         dependsOn:
           $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.WindowDependencyRequestDto'
       additionalProperties: false
-      description: "A window as written. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto.OpensAt and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto.ClosesAt are ISO-8601 instants with\r\ntheir offset (\"2026-06-01T08:00:00-05:00\" or \"...Z\"); they are passed to the Enrollment Service\r\nverbatim, which refuses one without an offset. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto.OpensAt may be omitted only when\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto.DependsOn is set."
+      description: "A window as written. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto.OpenDateTime and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto.CloseDateTime are ISO-8601 instants with\r\ntheir offset (\"2026-06-01T08:00:00-05:00\" or \"...Z\"); they are passed to the Enrollment Service\r\nverbatim, which refuses one without an offset. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto.OpenDateTime may be omitted only when\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto.DependsOn is set."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.FeederPatternPropertiesRequestDto:
       required:
         - feederPattern
@@ -6263,7 +6263,7 @@ components:
         lastName:
           minLength: 1
           type: string
-        birthdate:
+        birthDate:
           type: string
           nullable: true
         last4SSN:
@@ -6522,7 +6522,7 @@ components:
         lastName:
           minLength: 1
           type: string
-        birthdate:
+        birthDate:
           type: string
           nullable: true
         last4SSN:
@@ -6559,9 +6559,11 @@ components:
       properties:
         roundId:
           type: string
+          description: The round holding the window this one depends on.
           format: uuid
         windowId:
           type: string
+          description: The window this one depends on.
           format: uuid
         whenState:
           type: string
@@ -6569,6 +6571,7 @@ components:
           nullable: true
         unavailableReason:
           type: string
+          description: Shown while the dependency keeps this window from opening.
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundMutationResultDto:
@@ -6660,14 +6663,17 @@ components:
       properties:
         id:
           type: string
+          description: The run's id.
           format: uuid
           nullable: true
         tenantId:
           type: string
+          description: The tenant the run belongs to.
           format: uuid
           nullable: true
         applicationRoundId:
           type: string
+          description: The round this run executed.
           format: uuid
           nullable: true
         roundCode:
@@ -6687,12 +6693,14 @@ components:
           type: string
           description: 'Running, Completed or Failed.'
           nullable: true
-        startedAt:
+        startedDateTime:
           type: string
+          description: When the run started.
           format: date-time
           nullable: true
-        completedAt:
+        completedDateTime:
           type: string
+          description: When the run finished; absent while it is running.
           format: date-time
           nullable: true
         inputsHash:
@@ -6701,14 +6709,17 @@ components:
           nullable: true
         registrations:
           type: integer
+          description: How many registrations the run considered.
           format: int32
           nullable: true
         offers:
           type: integer
+          description: How many offers the run made.
           format: int32
           nullable: true
         waitlisted:
           type: integer
+          description: How many registrations the run waitlisted.
           format: int32
           nullable: true
         error:
@@ -6717,16 +6728,20 @@ components:
           nullable: true
         createdBy:
           type: string
+          description: Who started the run.
           nullable: true
         createdDateTime:
           type: string
+          description: When the run record was created.
           format: date-time
           nullable: true
         lastModifiedBy:
           type: string
+          description: Who last changed the run record.
           nullable: true
         lastModifiedDateTime:
           type: string
+          description: When the run record last changed.
           format: date-time
           nullable: true
       additionalProperties: false
@@ -6761,6 +6776,7 @@ components:
         studentLocalCode:
           maxLength: 100
           type: string
+          description: "The student whose screen the edit was made from. Recorded on the history entry so it can be\r\nfiltered per student. It does NOT scope the override — every student linked to the contact shares\r\none corrected value."
           nullable: true
         expectedVersion:
           maxLength: 50
@@ -6776,7 +6792,7 @@ components:
           type: string
         handoffUrl:
           type: string
-        sessionExpiresAt:
+        sessionExpirationDateTime:
           type: string
           format: date-time
           nullable: true
@@ -6803,6 +6819,7 @@ components:
       properties:
         eventId:
           type: string
+          description: The change log entry's id.
           nullable: true
         detail:
           type: string
@@ -6818,15 +6835,19 @@ components:
           nullable: true
         newValue:
           type: string
+          description: The value this entry set; absent on a removal.
           nullable: true
         sisValue:
           type: string
+          description: The SIS value at the time of the change.
           nullable: true
         overriddenBy:
           type: string
+          description: Who made the change.
           nullable: true
-        overriddenAt:
+        overriddenDateTime:
           type: string
+          description: When the change was made.
           format: date-time
           nullable: true
         actingStudentId:
@@ -6837,6 +6858,7 @@ components:
           type: array
           items:
             type: string
+          description: The district codes (`studentLocalCode`) of the students linked to the contact when the change was made.
         eventType:
           type: string
           description: "The change log's event type, e.g. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactOverrideHistoryExtensions.OverrideEventType\r\nor one of the created/updated/deleted event types. Lets a client distinguish entries in a combined\r\nchangelog feed - only override entries carry EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactOverrideHistoryEntryDto.Detail/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactOverrideHistoryEntryDto.Action and the\r\nvalue fields; the others read null there."
@@ -6866,10 +6888,12 @@ components:
       properties:
         id:
           type: string
+          description: The contact's id.
           format: uuid
           nullable: true
         tenantId:
           type: string
+          description: The contact's tenant.
           format: uuid
           nullable: true
         lastUpdatedDateTime:
@@ -7145,6 +7169,7 @@ components:
       properties:
         impersonationSessionId:
           type: string
+          description: The open session's id.
           nullable: true
         targetKind:
           type: string
@@ -7152,12 +7177,15 @@ components:
           nullable: true
         identifierMasked:
           type: string
+          description: 'The impersonated identifier, masked.'
           nullable: true
         tenantId:
           type: string
+          description: The tenant the session was started in.
           nullable: true
-        expiresAt:
+        expirationDateTime:
           type: string
+          description: When the session expires.
           format: date-time
           nullable: true
       additionalProperties: false
@@ -7172,11 +7200,11 @@ components:
         kind:
           type: string
           nullable: true
-        opensAt:
+        openDateTime:
           type: string
           format: date-time
           nullable: true
-        closesAt:
+        closeDateTime:
           type: string
           format: date-time
           nullable: true
@@ -7192,7 +7220,7 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-      description: "A window the round owns. Instants are UTC; EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.EnrollmentWindowDto.TimeZone is the IANA zone they are\r\nshown in. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.EnrollmentWindowDto.OpensAt is absent when EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.EnrollmentWindowDto.DependsOn sets the open moment.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.EnrollmentWindowDto.UnavailableReason is present only while the dependency keeps the window closed."
+      description: "A window the round owns. Instants are UTC; EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.EnrollmentWindowDto.TimeZone is the IANA zone they are\r\nshown in. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.EnrollmentWindowDto.OpenDateTime is absent when EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.EnrollmentWindowDto.DependsOn sets the open moment.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.EnrollmentWindowDto.UnavailableReason is present only while the dependency keeps the window closed."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.FeederPatternDto:
       type: object
       properties:
@@ -8071,7 +8099,7 @@ components:
         lastName:
           type: string
           nullable: true
-        birthdate:
+        birthDate:
           type: string
           nullable: true
         last4SSN:
@@ -8195,7 +8223,7 @@ components:
         lastName:
           type: string
           nullable: true
-        birthdate:
+        birthDate:
           type: string
           nullable: true
         last4SSN:
