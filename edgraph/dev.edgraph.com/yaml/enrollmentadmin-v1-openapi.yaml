@@ -8518,8 +8518,11 @@ components:
         externalDataSourceStudentId:
           type: string
           nullable: true
+        studentBirthdate:
+          type: string
+          nullable: true
       additionalProperties: false
-      description: "The student a registration is for. studentId is the EnrollmentStudent record id, all zeros until\r\nthe registration is linked; the local/state/external ids and names are denormalized from the\r\nstudent or supplied by the registration flow. No id of its own."
+      description: "The student a registration is for. studentId is the EnrollmentStudent record id, all zeros until\r\nthe registration is linked; the local/state/external ids, names and birthdate are denormalized\r\nfrom the student or supplied by the registration flow. No id of its own."
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationUpdatedResponse:
       type: object
       properties:
