@@ -58736,7 +58736,7 @@ components:
         externalDataSourceStudentId:
           type: string
           nullable: true
-        studentBirthdate:
+        studentBirthDate:
           type: string
           nullable: true
       additionalProperties: false
