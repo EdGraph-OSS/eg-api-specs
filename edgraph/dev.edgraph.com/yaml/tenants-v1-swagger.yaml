@@ -8201,6 +8201,8 @@ components:
         - CompletedWithErrors
         - Cancelled
         - Error
+        - QueuedForCancel
+        - TimedOut
       type: string
     DataSyncApi.JobExecution.V1.Metric:
       type: object

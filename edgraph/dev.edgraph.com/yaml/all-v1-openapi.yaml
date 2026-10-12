@@ -45734,6 +45734,7 @@ components:
         - Cancelled
         - Error
         - QueuedForCancel
+        - TimedOut
       type: string
     DataSyncApi.Job.V1.JobListResponse:
       type: object
@@ -46073,6 +46074,8 @@ components:
         - CompletedWithErrors
         - Cancelled
         - Error
+        - QueuedForCancel
+        - TimedOut
       type: string
     DataSyncApi.JobExecution.V1.Metric:
       type: object
@@ -67040,6 +67043,7 @@ components:
         - Cancelled
         - Error
         - QueuedForCancel
+        - TimedOut
       type: string
     ValidationsApi.Jobs.V1.JobListResponse:
       type: object

@@ -4087,6 +4087,7 @@ components:
         - Cancelled
         - Error
         - QueuedForCancel
+        - TimedOut
       type: string
     ValidationsApi.Jobs.V1.JobListResponse:
       type: object
