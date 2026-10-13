@@ -20709,6 +20709,12 @@ paths:
           schema:
             type: string
             default: ''
+        - name: includeDeleted
+          in: query
+          description: Also return users whose membership in this tenant was removed.
+          schema:
+            type: boolean
+            default: false
       responses:
         '401':
           description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
@@ -34472,6 +34478,8 @@ components:
         deletedAt:
           type: string
           nullable: true
+        onboarding:
+          $ref: '#/components/schemas/TenantApi.Tenant.V1.SubscriptionOnboarding'
       additionalProperties: false
     TenantApi.Tenant.V1.SubscriptionListResponsePaginatedItemsViewModel:
       type: object
@@ -34611,6 +34619,8 @@ components:
         deletedAt:
           type: string
           nullable: true
+        onboarding:
+          $ref: '#/components/schemas/TenantApi.Tenant.V1.SubscriptionOnboarding'
       additionalProperties: false
     TenantApi.Tenant.V1.SubscriptionRejectedResponse:
       type: object
