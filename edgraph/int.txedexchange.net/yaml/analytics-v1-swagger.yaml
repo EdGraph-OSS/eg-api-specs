@@ -3061,13 +3061,11 @@ components:
       properties:
         type:
           type: string
-          nullable: true
         status:
           type: integer
           format: int32
         title:
           type: string
-          nullable: true
         details:
           type: string
           nullable: true
@@ -3078,7 +3076,6 @@ components:
           type: object
           additionalProperties:
             nullable: true
-          nullable: true
           readOnly: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Services.Connectors.Extensions.ADLSGen2ConnectorProfileDTO:

@@ -1907,6 +1907,7 @@ components:
         - Cancelled
         - Error
         - QueuedForCancel
+        - TimedOut
       type: string
     DataSyncApi.Job.V1.JobListResponse:
       type: object
@@ -2246,6 +2247,8 @@ components:
         - CompletedWithErrors
         - Cancelled
         - Error
+        - QueuedForCancel
+        - TimedOut
       type: string
     DataSyncApi.JobExecution.V1.Metric:
       type: object
@@ -2628,13 +2631,11 @@ components:
       properties:
         type:
           type: string
-          nullable: true
         status:
           type: integer
           format: int32
         title:
           type: string
-          nullable: true
         details:
           type: string
           nullable: true
@@ -2645,7 +2646,6 @@ components:
           type: object
           additionalProperties:
             nullable: true
-          nullable: true
           readOnly: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.Connections.ConnectionMetadata:
@@ -2895,7 +2895,6 @@ components:
             type: array
             items:
               type: string
-          nullable: true
         type:
           type: string
           nullable: true
