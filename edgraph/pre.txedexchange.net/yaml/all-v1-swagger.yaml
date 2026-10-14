@@ -8282,6 +8282,7 @@ paths:
       tags:
         - Enrollment Admin / Contacts
       summary: Removes a student's link to a contact.
+      description: '`id` and `studentId` are the EdGraph record ids of the contact and the student.'
       operationId: RemoveEnrollmentContactStudent
       parameters:
         - name: tenantId
@@ -8302,8 +8303,8 @@ paths:
           description: ''
           required: true
           schema:
-            maxLength: 100
             type: string
+            format: uuid
       responses:
         '401':
           description: Unauthorized
@@ -8335,11 +8336,90 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+    post:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: Links an existing student to a contact.
+      description: "`id` and `studentId` are the EdGraph record ids of the contact and the student - not\r\n            their SIS ids; look a record up by its SIS id with `GET .../students?filter=...`. Neither\r\n            record is changed. The body is optional and carries the link's relationship attributes\r\n            (`priority`, `relationship`, `livesWithStudent`, `hasLegalCustody`,\r\n            `canPickUp`, `isEmergency`): a new link defaults the ones left out (priority to the next\r\n            position, the rest to empty/false), and on an already-linked student only the ones sent change.\r\n            The same link as `POST .../students/{studentId}/contacts/{id}`, made from the contact's side."
+      operationId: LinkEnrollmentContactStudent
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: studentId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.StudentContactLinkAttributesDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.StudentContactLinkAttributesDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.StudentContactLinkAttributesDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.StudentContactLinkAttributesDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '201':
+          description: The student was linked to the contact.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactStudentAssociatedResultDto'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
     put:
       tags:
         - Enrollment Admin / Contacts
       summary: Updates a contact-student association's attributes.
-      description: Relationship attributes only; neither the contact nor the student record is changed.
+      description: "Relationship attributes only; neither the contact nor the student record is changed. `id` and\r\n`studentId` are the EdGraph record ids of the contact and the student."
       operationId: UpdateEnrollmentContactStudent
       parameters:
         - name: tenantId
@@ -8360,8 +8440,8 @@ paths:
           description: ''
           required: true
           schema:
-            maxLength: 100
             type: string
+            format: uuid
       requestBody:
         description: ''
         content:
@@ -8471,7 +8551,7 @@ paths:
       tags:
         - Enrollment Admin / Contacts
       summary: Upserts a student and links it to the contact.
-      description: "The body is the `POST .../students` body plus the link's relationship attributes. The student\r\nis upserted exactly as that route does - matched by `studentLocalCode`, overwritten when it\r\nexists, created otherwise - and then linked on both sides. The relationship attributes\r\n(`priority`, `relationship`, `livesWithStudent`, `hasLegalCustody`,\r\n`canPickUp`, `isEmergency`) are optional: a new link defaults them (priority to the next\r\nposition, the rest to empty/false), and on an already-linked student only the ones sent change."
+      description: "The body is the `POST .../students` body plus the link's relationship attributes. The student\r\nis upserted exactly as that route does - matched by `externalDataSourceStudentId` when sent,\r\nelse by `studentLocalCode`; overwritten when it exists, created otherwise - and then linked on\r\nboth sides. Use `.../students/{studentId}` to link an existing student by its EdGraph record id\r\nwithout touching it. The relationship attributes\r\n(`priority`, `relationship`, `livesWithStudent`, `hasLegalCustody`,\r\n`canPickUp`, `isEmergency`) are optional: a new link defaults them (priority to the next\r\nposition, the rest to empty/false), and on an already-linked student only the ones sent change."
       operationId: AddEnrollmentContactStudent
       parameters:
         - name: tenantId
@@ -8800,7 +8880,7 @@ paths:
             default: ''
         - name: filter
           in: query
-          description: ''
+          description: "A predicate over the contact's fields, e.g. `externalDataSourceContactId == \"21138538\"` - the\r\nway to find a contact's EdGraph record id from its SIS id."
           schema:
             type: string
             default: ''
@@ -10082,7 +10162,7 @@ paths:
       tags:
         - Enrollment Admin / Registrations
       summary: "Consolidates an Approved Registration - provisions its Student, links its Contacts and sets its\r\nApplications' statuses."
-      description: "The registration must already be Approved (412 otherwise); its status is not changed. An\r\n`EnrollmentRegistrationConsolidatedEvent` is published.\r\nThe body's `tenantId` and `id` must match the route.\r\n`student` is required. The student record is matched by `studentId`, else\r\n`externalDataSourceStudentId`, else `studentLocalCode`, and updated; when none matches it\r\nis created from these fields plus the registration's screens (birth date, grade, address), which\r\nneeds `studentLocalCode`. Consolidating again with the returned `studentId` updates\r\nthe same student.\r\nThe `contacts` array merges into the Registration's existing Contacts collection, matched by\r\n`contactId`, else `externalDataSourceContactId` (upsert semantics); each contact that\r\nresolves to a contact record is linked to the student.\r\nThe `applications` array sets the status of the Registration's Applications.\r\nThe registration's `nextSchoolStateShortCode` and `nextSchoolName` are taken from the school\r\nof the top-ranked Accepted application, and `languageCode`, while still `Unknown`, from the\r\nprimary-language screen answer.\r\nReturns the registration's identity and the `studentId` it provisioned or linked; re-read\r\nthe registration for its state."
+      description: "The registration must already be Approved (412 otherwise); its status is not changed. An\r\n`EnrollmentRegistrationConsolidatedEvent` is published.\r\nThe body's `tenantId` and `id` must match the route.\r\n`student` is required. The student record is matched by `studentId`, else\r\n`externalDataSourceStudentId`, else `studentLocalCode`, and updated; when none matches it\r\nis created from these fields plus the registration's screens (birth date, grade, address), which\r\nneeds `studentLocalCode`. Consolidating again with the returned `studentId` updates\r\nthe same student.\r\nThe `contacts` array merges into the Registration's existing Contacts collection, matched by\r\n`contactId`, else `externalDataSourceContactId` (upsert semantics); each contact that\r\nresolves to a contact record is linked to the student.\r\nThe `applications` array sets the status of the Registration's Applications.\r\nThe registration's `school` (`schoolId`, `schoolLocalCode`, `schoolName`) becomes the\r\nschool of the top-ranked Accepted application, replacing the zoned school, and `languageCode`, while still `Unknown`, from the\r\nprimary-language screen answer.\r\nReturns the registration's identity and the `studentId` it provisioned or linked; re-read\r\nthe registration for its state."
       operationId: ConsolidateEnrollmentRegistration
       parameters:
         - name: tenantId
@@ -11311,6 +11391,7 @@ paths:
       tags:
         - Enrollment Admin / Students
       summary: Removes a contact's link to a student.
+      description: '`id` and `contactId` are the EdGraph record ids of the student and the contact.'
       operationId: RemoveEnrollmentStudentContact
       parameters:
         - name: tenantId
@@ -11331,8 +11412,8 @@ paths:
           description: ''
           required: true
           schema:
-            maxLength: 100
             type: string
+            format: uuid
       responses:
         '401':
           description: Unauthorized
@@ -11368,6 +11449,7 @@ paths:
       tags:
         - Enrollment Admin / Students
       summary: Links an existing contact to a student.
+      description: "`id` and `contactId` are the EdGraph record ids of the student and the contact - not\r\n            their SIS ids; look a record up by its SIS id with `GET .../contacts?filter=...`. Neither\r\n            record is changed. The body is optional and carries the link's relationship attributes\r\n            (`priority`, `relationship`, `livesWithStudent`, `hasLegalCustody`,\r\n            `canPickUp`, `isEmergency`): a new link defaults the ones left out (priority to the next\r\n            position, the rest to empty/false), and on an already-linked contact only the ones sent change."
       operationId: AddEnrollmentStudentContact
       parameters:
         - name: tenantId
@@ -11388,8 +11470,23 @@ paths:
           description: ''
           required: true
           schema:
-            maxLength: 100
             type: string
+            format: uuid
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.StudentContactLinkAttributesDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.StudentContactLinkAttributesDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.StudentContactLinkAttributesDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.StudentContactLinkAttributesDto'
       responses:
         '401':
           description: Unauthorized
@@ -11415,6 +11512,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentContactAssociatedResultDto'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
         '404':
           description: The resource could not be found.
           content:
@@ -11425,7 +11528,7 @@ paths:
       tags:
         - Enrollment Admin / Students
       summary: Updates a student-contact association's attributes.
-      description: Relationship attributes only; neither the student nor the contact record is changed.
+      description: "Relationship attributes only; neither the student nor the contact record is changed. `id` and\r\n`contactId` are the EdGraph record ids of the student and the contact."
       operationId: UpdateEnrollmentStudentContact
       parameters:
         - name: tenantId
@@ -11446,8 +11549,8 @@ paths:
           description: ''
           required: true
           schema:
-            maxLength: 100
             type: string
+            format: uuid
       requestBody:
         description: ''
         content:
@@ -11557,7 +11660,7 @@ paths:
       tags:
         - Enrollment Admin / Students
       summary: Upserts a contact and links it to the student.
-      description: "The body is the `POST .../contacts` body plus the link's relationship attributes. The contact\r\nis upserted exactly as that route does - matched by `externalDataSourceContactId`, overwritten\r\n(and its verification reset) when it exists, created otherwise - and then linked on both sides.\r\nThe relationship attributes (`priority`, `relationship`, `livesWithStudent`,\r\n`hasLegalCustody`, `canPickUp`, `isEmergency`) are optional: a new link defaults them\r\n(priority to the next position, the rest to empty/false), and on an already-linked contact only\r\nthe ones sent change. Use `.../contacts/{contactId}` to link an existing contact without\r\ntouching it."
+      description: "The body is the `POST .../contacts` body plus the link's relationship attributes. The contact\r\nis upserted exactly as that route does - matched by `externalDataSourceContactId`, overwritten\r\n(and its verification reset) when it exists, created otherwise - and then linked on both sides.\r\nThe relationship attributes (`priority`, `relationship`, `livesWithStudent`,\r\n`hasLegalCustody`, `canPickUp`, `isEmergency`) are optional: a new link defaults them\r\n(priority to the next position, the rest to empty/false), and on an already-linked contact only\r\nthe ones sent change. Use `.../contacts/{contactId}` to link an existing contact by its\r\nEdGraph record id without touching it."
       operationId: AddOrCreateEnrollmentStudentContact
       parameters:
         - name: tenantId
@@ -11800,7 +11903,7 @@ paths:
       tags:
         - Enrollment Admin / Students
       summary: Searches Enrollment Students.
-      description: "Lists student records together with the new students of registrations not yet consolidated. A row's\r\n`studentId` is null for a student who exists only on a registration; open its `registrationId`\r\ninstead. Such a row's contacts and allowed pathway come from that registration."
+      description: "Lists student records together with the new students of registrations not yet consolidated. A row's\r\n`studentId` is null for a student who exists only on a registration; open its `registrationId`\r\ninstead. Such a row's contacts and allowed pathway come from that registration.\r\n<br>`filter` is a predicate over the student's fields, e.g.\r\n`externalDataSourceStudentId == \"10059615\"` or `studentLocalCode == \"1000001\"` - the way to\r\nfind a student's EdGraph record id from its SIS id.\r\n"
       operationId: GetEnrollmentStudents
       parameters:
         - name: tenantId
@@ -11869,8 +11972,8 @@ paths:
     post:
       tags:
         - Enrollment Admin / Students
-      summary: Creates or updates an Enrollment Student by its source-system `studentId`.
-      description: "Upsert semantics: unique per `studentId`. A first call creates the student; a later call\r\nfor the same `studentId` overwrites the SIS-sourced fields. Contact association is managed\r\nexclusively through the `students/{id}/contacts` routes, not through this call."
+      summary: Creates or updates an Enrollment Student by its source-system ids.
+      description: "Upsert semantics: the student is matched by `externalDataSourceStudentId` when sent, else by\r\n`studentLocalCode`; both are unique per tenant. A first call creates the student; a later call\r\nfor the same student overwrites the SIS-sourced fields. `studentLocalCode` is never rewritten,\r\nso an `externalDataSourceStudentId` already held by a student with a different\r\n`studentLocalCode` is refused with 409. Contact association is managed exclusively through the\r\n`students/{id}/contacts` routes, not through this call."
       operationId: UpsertEnrollmentStudent
       parameters:
         - name: tenantId
@@ -11925,6 +12028,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '409':
+          description: The externalDataSourceStudentId belongs to a student with a different studentLocalCode.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/statereporting/environments/{environmentId}/connectionsByType/{connectionType}':
     delete:
       tags:
@@ -47856,6 +47965,15 @@ components:
         isEmergency:
           type: boolean
           nullable: true
+        nextProgramCode:
+          type: string
+          nullable: true
+        nextProgramName:
+          type: string
+          nullable: true
+        lastSchoolYearAttended:
+          type: string
+          nullable: true
       additionalProperties: false
       description: "The body of `POST .../contacts/{id}/students`: every field of EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertStudentRequestDto\r\n- the student is upserted by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddContactStudentRequestDto.StudentLocalCode exactly as `POST .../students` does -\r\nplus the link's relationship attributes. The attributes are optional: a new link defaults them\r\n(priority to the next position, the rest to empty/false) and an existing link keeps the ones left out."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddOrCreateStudentContactRequestDto:
@@ -47910,6 +48028,8 @@ components:
         isEmergency:
           type: boolean
           nullable: true
+        verificationStatus:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ContactVerificationStatusValue'
       additionalProperties: false
       description: "The body of `POST .../students/{id}/contacts`: every field of EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateContactRequestDto\r\n- the contact is upserted by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddOrCreateStudentContactRequestDto.ExternalDataSourceContactId exactly as\r\n`POST .../contacts` does - plus the link's relationship attributes. The attributes are optional:\r\na new link defaults them (priority to the next position, the rest to empty/false) and an existing\r\nlink keeps the ones left out."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddRegistrationApplicationRequestDto:
@@ -47931,6 +48051,12 @@ components:
           description: "The target Program's record id (as returned in `ProgramMutationResultDto.Id` /\r\n`ProgramDetailDto.Id`), not its business ProgramId/code - unlike every other\r\n`ProgramId` field on the Programs DTOs."
       additionalProperties: false
       description: "The body of adding one Program-seat choice to an existing Registration. See\r\nEnrollmentAdminController.Registrations.AddEnrollmentRegistrationApplication."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ContactVerificationStatusValue:
+      enum:
+        - Unverified
+        - Verified
+      type: string
+      description: "A contact's verification status as a caller sets it. Optional wherever it appears: left out, a new\r\ncontact is Unverified and an existing one is reset to Unverified only when its name, email or phone\r\nchanges."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateApplicationRoundRequestDto:
       required:
         - code
@@ -48001,6 +48127,8 @@ components:
           type: string
           description: 'The SIS-sourced phone, on the same terms as Email.'
           nullable: true
+        verificationStatus:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ContactVerificationStatusValue'
       additionalProperties: false
       description: The body of a contact creation.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateFeederPatternRequestDto:
@@ -48444,6 +48572,33 @@ components:
           nullable: true
       additionalProperties: false
       description: 'The body of an "act as contact" start (spec 2026-10-06 contact impersonation, T2).'
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.StudentContactLinkAttributesDto:
+      type: object
+      properties:
+        priority:
+          maximum: 999
+          minimum: 0
+          type: integer
+          format: int32
+          nullable: true
+        relationship:
+          maxLength: 100
+          type: string
+          nullable: true
+        livesWithStudent:
+          type: boolean
+          nullable: true
+        hasLegalCustody:
+          type: boolean
+          nullable: true
+        canPickUp:
+          type: boolean
+          nullable: true
+        isEmergency:
+          type: boolean
+          nullable: true
+      additionalProperties: false
+      description: "The optional body of the two link-existing POSTs - `POST .../students/{id}/contacts/{contactId}`\r\nand `POST .../contacts/{id}/students/{studentId}`: the link's relationship attributes only, with\r\nboth records named by their EdGraph record ids in the route. A new link defaults the attributes left\r\nout (priority to the next position, the rest to empty/false); an existing link keeps them."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateApplicationRoundRequestDto:
       required:
         - grades
@@ -48503,6 +48658,12 @@ components:
         phone:
           type: string
           nullable: true
+        externalDataSourceContactId:
+          maxLength: 100
+          type: string
+          nullable: true
+        verificationStatus:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ContactVerificationStatusValue'
       additionalProperties: false
       description: The body of a contact update.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateContactStudentRequestDto:
@@ -48727,7 +48888,7 @@ components:
           type: string
           description: ''
           nullable: true
-        schoolStateLongCode:
+        schoolStateCode:
           type: string
           description: ''
           nullable: true
@@ -48984,6 +49145,15 @@ components:
         eligibilityDescription:
           type: string
           nullable: true
+        nextProgramCode:
+          type: string
+          nullable: true
+        nextProgramName:
+          type: string
+          nullable: true
+        lastSchoolYearAttended:
+          type: string
+          nullable: true
       additionalProperties: false
       description: "The body of a student update. As EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertStudentRequestDto, contact association is\r\nmanaged exclusively through the `/students/{id}/contacts` sub-resource, not through this call."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertSchoolRequestDto:
@@ -49014,7 +49184,7 @@ components:
           type: string
           description: ''
           nullable: true
-        schoolStateLongCode:
+        schoolStateCode:
           type: string
           description: ''
           nullable: true
@@ -49243,8 +49413,17 @@ components:
         eligibilityDescription:
           type: string
           nullable: true
+        nextProgramCode:
+          type: string
+          nullable: true
+        nextProgramName:
+          type: string
+          nullable: true
+        lastSchoolYearAttended:
+          type: string
+          nullable: true
       additionalProperties: false
-      description: "The body of a student upsert, keyed by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertStudentRequestDto.StudentLocalCode (the district's SIS code). Contact association is managed\r\nexclusively through the `/students/{id}/contacts` sub-resource, not through this call."
+      description: "The body of a student upsert, keyed by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertStudentRequestDto.ExternalDataSourceStudentId when sent, else by\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertStudentRequestDto.StudentLocalCode (the district's SIS code). Contact association is managed\r\nexclusively through the `/students/{id}/contacts` sub-resource, not through this call."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.WindowDependencyRequestDto:
       type: object
       properties:
@@ -51204,7 +51383,7 @@ components:
         districtStateShortCode:
           type: string
           nullable: true
-        schoolStateLongCode:
+        schoolStateCode:
           type: string
           nullable: true
         schoolLocalCode:
@@ -51326,8 +51505,17 @@ components:
         schoolName:
           type: string
           nullable: true
+        schoolStateShortCode:
+          type: string
+          nullable: true
+        schoolStateCode:
+          type: string
+          nullable: true
+        externalDataSourceSchoolId:
+          type: string
+          nullable: true
       additionalProperties: false
-      description: "The school a program runs at, as embedded on the program, identified by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolRefDto.SchoolId: the\r\nschool row it was copied from."
+      description: "The school a program runs at, as embedded on the program, identified by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolRefDto.SchoolId: the\r\nschool row it was copied from. Every other field is a copy of that school's own."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolResponseDto:
       type: object
       properties:
@@ -51353,7 +51541,7 @@ components:
         districtStateShortCode:
           type: string
           nullable: true
-        schoolStateLongCode:
+        schoolStateCode:
           type: string
           nullable: true
         schoolLocalCode:
@@ -51578,6 +51766,15 @@ components:
         eligibilityDescription:
           type: string
           nullable: true
+        nextProgramCode:
+          type: string
+          nullable: true
+        nextProgramName:
+          type: string
+          nullable: true
+        lastSchoolYearAttended:
+          type: string
+          nullable: true
         contacts:
           type: array
           items:
@@ -51700,6 +51897,15 @@ components:
           type: string
           nullable: true
         eligibilityDescription:
+          type: string
+          nullable: true
+        nextProgramCode:
+          type: string
+          nullable: true
+        nextProgramName:
+          type: string
+          nullable: true
+        lastSchoolYearAttended:
           type: string
           nullable: true
         contacts:
@@ -59935,8 +60141,17 @@ components:
         lastName:
           type: string
           nullable: true
+        verificationStatus:
+          $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationContactVerificationStatus'
       additionalProperties: false
       description: "One contact on a registration. contactId is the EnrollmentContact record id the entry resolved to\r\n(the key every join goes through; unset until resolved); externalDataSourceContactId is the\r\nSIS-side code, when known."
+    EnrollmentApi.EnrollmentRegistrations.V1.RegistrationContactVerificationStatus:
+      enum:
+        - Unspecified
+        - Unverified
+        - Verified
+      type: string
+      description: 'EnrollmentContacts.ContactVerificationStatus, restated so this contract stays self-contained.'
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationCreatedResponse:
       type: object
       properties:
@@ -60004,12 +60219,8 @@ components:
         status:
           type: string
           nullable: true
-        nextSchoolStateShortCode:
-          type: string
-          nullable: true
-        nextSchoolName:
-          type: string
-          nullable: true
+        school:
+          $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationSchoolMessage'
         student:
           $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationStudentMessage'
         applications:
@@ -60023,6 +60234,29 @@ components:
           description: "The round this registration's applications are in. Absent until the first application;\r\nonce set it never changes."
           nullable: true
       additionalProperties: false
+    EnrollmentApi.EnrollmentRegistrations.V1.RegistrationSchoolMessage:
+      type: object
+      properties:
+        schoolId:
+          type: string
+          nullable: true
+        schoolLocalCode:
+          type: string
+          nullable: true
+        schoolName:
+          type: string
+          nullable: true
+        schoolStateShortCode:
+          type: string
+          nullable: true
+        schoolStateCode:
+          type: string
+          nullable: true
+        externalDataSourceSchoolId:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: "A registration's next school: a copy of the school's own fields (enrollment-svc-schools), as programs\r\nembed theirs. schoolId is the school record id (unset when no school record matched)."
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationScreenMessage:
       type: object
       properties:
