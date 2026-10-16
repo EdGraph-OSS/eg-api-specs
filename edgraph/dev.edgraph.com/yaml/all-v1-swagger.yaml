@@ -12200,7 +12200,7 @@ paths:
     post:
       tags:
         - Enrollment Admin / Settings
-      summary: "Publishes the tenant's current enrollment settings (custom branding, global configuration,\r\npolicy acknowledgement URLs) to the public enrollment site."
+      summary: "Publishes the tenant's current enrollment settings (custom branding, global configuration,\r\npolicy acknowledgement URLs, screen configuration) to the public enrollment site."
       operationId: PublishEnrollmentSettings
       parameters:
         - name: tenantId
