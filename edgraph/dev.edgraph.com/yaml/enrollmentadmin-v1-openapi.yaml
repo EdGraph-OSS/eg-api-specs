@@ -8815,8 +8815,26 @@ components:
         applicationStatus:
           type: string
           nullable: true
+        programName:
+          type: string
+          nullable: true
+        programCode:
+          type: string
+          nullable: true
+        programTypeName:
+          type: string
+          nullable: true
+        schoolName:
+          type: string
+          nullable: true
+        schoolLocalCode:
+          type: string
+          nullable: true
+        seatStatus:
+          type: string
+          nullable: true
       additionalProperties: false
-      description: An application on a list row; the application's own status is one of the application statuses.
+      description: "An application on a list row; the application's own status is one of the application statuses. The program\r\nfields are absent when the program is deleted or unreadable. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.SeatStatus is `Accepting`,\r\n`WaitlistOnly`, `NotAccepting` or `Unavailable`."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto:
       type: object
       properties:
@@ -9756,6 +9774,28 @@ components:
           type: string
           nullable: true
         decidedDateTime:
+          type: string
+          nullable: true
+        programName:
+          type: string
+          description: "The program's details, so a caller needs no lookup per application. All unset when the program\r\nis deleted or unreadable. seatStatus is Accepting, WaitlistOnly, NotAccepting or Unavailable."
+          nullable: true
+        programCode:
+          type: string
+          nullable: true
+        programTypeName:
+          type: string
+          nullable: true
+        schoolName:
+          type: string
+          nullable: true
+        schoolLocalCode:
+          type: string
+          nullable: true
+        seatStatus:
+          type: string
+          nullable: true
+        eligibilityCriteria:
           type: string
           nullable: true
       additionalProperties: false
