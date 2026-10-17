@@ -6,6 +6,583 @@ info:
 servers:
   - url: https://api.dev.edgraph.com/management
 paths:
+  '/jobs/{jobId}/execute':
+    post:
+      tags:
+        - All Jobs
+      summary: Starts a run of a job (Platform.Admin only). DataSync jobs run a full refresh through DataSync; other jobs run through UJF.
+      operationId: ExecuteJobAsync
+      parameters:
+        - name: jobId
+          in: path
+          description: The job id.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '202':
+          description: The run was requested. `executionId` is absent for DataSync jobs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Models.AllJobs.ExecuteJobResult'
+        '400':
+          description: Bad Request. The job id is not a GUID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The job does not exist or was deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '409':
+          description: A run of the job is already active.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '422':
+          description: The job cannot be executed; the problem detail carries the reason.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '502':
+          description: The jobs framework answered with an unexpected error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+  '/jobs/{jobId}/executions/{executionId}/cancel':
+    post:
+      tags:
+        - All Jobs
+      summary: Requests the cancellation of an execution (Platform.Admin only)
+      operationId: CancelJobExecutionAsync
+      parameters:
+        - name: jobId
+          in: path
+          description: The job id.
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: executionId
+          in: path
+          description: The execution id.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '202':
+          description: The cancellation was requested.
+        '400':
+          description: Bad Request. An id is not a GUID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The job or execution does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '409':
+          description: The execution can no longer be cancelled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '502':
+          description: The jobs framework answered with an unexpected error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+  '/jobs/{jobId}/executions/{executionId}/logs':
+    get:
+      tags:
+        - All Jobs
+      summary: Lists the log entries of one execution (Platform.Admin only)
+      operationId: GetJobExecutionLogsAsync
+      parameters:
+        - name: jobId
+          in: path
+          description: The job id.
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: executionId
+          in: path
+          description: The execution id.
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: pageIndex
+          in: query
+          description: Zero-based page index.
+          schema:
+            maximum: 2147483647
+            minimum: 0
+            type: integer
+            format: int32
+            default: 0
+        - name: pageSize
+          in: query
+          description: Page size (at least 1; larger than 200 is treated as 200).
+          schema:
+            maximum: 2147483647
+            minimum: 1
+            type: integer
+            format: int32
+            default: 50
+        - name: level
+          in: query
+          description: Restrict to one log level.
+          schema:
+            type: string
+        - name: message
+          in: query
+          description: Substring of the log message.
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Models.AllJobs.LogRowPaginatedItemsViewModel'
+        '400':
+          description: Bad Request. A parameter is not valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The job or execution does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '502':
+          description: The jobs framework answered with an unexpected error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+  '/jobs/{jobId}/executions':
+    get:
+      tags:
+        - All Jobs
+      summary: 'Lists the executions of one job, newest first (Platform.Admin only)'
+      operationId: GetJobExecutionsAsync
+      parameters:
+        - name: jobId
+          in: path
+          description: The job id.
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: pageIndex
+          in: query
+          description: Zero-based page index.
+          schema:
+            maximum: 2147483647
+            minimum: 0
+            type: integer
+            format: int32
+            default: 0
+        - name: pageSize
+          in: query
+          description: Page size (at least 1; larger than 100 is treated as 100).
+          schema:
+            maximum: 2147483647
+            minimum: 1
+            type: integer
+            format: int32
+            default: 10
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Models.AllJobs.ExecutionFeedRowPaginatedItemsViewModel'
+        '400':
+          description: Bad Request. A parameter is not valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The job does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '502':
+          description: The jobs framework answered with an unexpected error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+  '/jobs/{jobId}':
+    get:
+      tags:
+        - All Jobs
+      summary: Retrieves one job of any tenant (Platform.Admin only)
+      operationId: GetJobAsync
+      parameters:
+        - name: jobId
+          in: path
+          description: The job id.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Models.AllJobs.AllJobsRow'
+        '400':
+          description: Bad Request. The job id is not a GUID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The job does not exist or was deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '502':
+          description: The jobs framework answered with an unexpected error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+  /jobs/executions:
+    get:
+      tags:
+        - All Jobs
+      summary: 'Lists the executions of every job and tenant, newest first (Platform.Admin only)'
+      operationId: GetExecutionFeedAsync
+      parameters:
+        - name: pageIndex
+          in: query
+          description: Zero-based page index.
+          schema:
+            maximum: 2147483647
+            minimum: 0
+            type: integer
+            format: int32
+            default: 0
+        - name: pageSize
+          in: query
+          description: Page size (at least 1; larger than 100 is treated as 100).
+          schema:
+            maximum: 2147483647
+            minimum: 1
+            type: integer
+            format: int32
+            default: 10
+        - name: tenantId
+          in: query
+          description: Restrict to one tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: statuses
+          in: query
+          description: Restrict to these UJF execution statuses.
+          schema:
+            type: array
+            items:
+              type: string
+        - name: since
+          in: query
+          description: Only executions queued at or after this instant; defaults to 24 hours ago.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Models.AllJobs.ExecutionFeedRowPaginatedItemsViewModel'
+        '400':
+          description: Bad Request. A parameter is not valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '502':
+          description: The jobs framework answered with an unexpected error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+  /jobs/types:
+    get:
+      tags:
+        - All Jobs
+      summary: 'Lists the job types that are not deleted, by name, for the All Jobs page''s Job type filter (Platform.Admin only)'
+      operationId: GetAllJobTypesAsync
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Models.AllJobs.JobTypeOption'
+        '502':
+          description: The jobs framework answered with an unexpected error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+  /jobs:
+    get:
+      tags:
+        - All Jobs
+      summary: Lists the jobs of every tenant (Platform.Admin only)
+      operationId: GetAllJobsAsync
+      parameters:
+        - name: pageIndex
+          in: query
+          description: Zero-based page index.
+          schema:
+            maximum: 2147483647
+            minimum: 0
+            type: integer
+            format: int32
+            default: 0
+        - name: pageSize
+          in: query
+          description: Page size (at least 1; larger than 200 is treated as 200).
+          schema:
+            maximum: 2147483647
+            minimum: 1
+            type: integer
+            format: int32
+            default: 25
+        - name: orderBy
+          in: query
+          description: 'UJF order-by expression, e.g. `name asc`.'
+          schema:
+            type: string
+        - name: tenantId
+          in: query
+          description: Restrict to one tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: jobTypeIds
+          in: query
+          description: Restrict to these job types.
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+        - name: lastRunStatuses
+          in: query
+          description: Restrict to jobs whose last run has one of these UJF statuses.
+          schema:
+            type: array
+            items:
+              type: string
+        - name: active
+          in: query
+          description: Restrict to active (true) or inactive (false) jobs.
+          schema:
+            type: boolean
+        - name: name
+          in: query
+          description: Case-insensitive substring of the job name.
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Models.AllJobs.AllJobsRowPaginatedItemsViewModel'
+        '400':
+          description: Bad Request. A parameter is not valid (for example a non-GUID tenantId or an unknown status).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '502':
+          description: The jobs framework answered with an unexpected error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
   /analytics/datalake/query:
     get:
       tags:
@@ -14045,6 +14622,71 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/jobs/{jobId}/cancel':
+    post:
+      tags:
+        - Tenant / Jobs
+      summary: Requests cancellation of a job execution (or one of its child jobs) for a tenant
+      operationId: CancelTenantJob
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: jobId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.Requests.CancelTenantJobBodyRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.Requests.CancelTenantJobBodyRequest'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.Requests.CancelTenantJobBodyRequest'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.Requests.CancelTenantJobBodyRequest'
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The cancellation was successfully requested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSyncApi.Job.V1.JobCancellationRequestedResponse'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed. See the response body for specific validation errors. This will typically be an issue with the query parameters or the request body values.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
   '/tenants/{tenantId}/jobs/{jobId}/deactivate':
     post:
       tags:
@@ -23529,6 +24171,16 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    DataSyncApi.Job.V1.JobCancellationRequestedResponse:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          nullable: true
+        jobId:
+          type: string
+          nullable: true
+      additionalProperties: false
     DataSyncApi.Job.V1.JobCreatedResponse:
       type: object
       properties:
@@ -24878,6 +25530,17 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    EdGraph.HttpAggregators.Management.Api.Controllers.v1.Requests.CancelTenantJobBodyRequest:
+      type: object
+      properties:
+        jobExecutionId:
+          type: string
+          nullable: true
+        childJobId:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: Body of a tenant job cancel request. TenantId and JobId come from the route only.
     EdGraph.HttpAggregators.Management.Api.Controllers.v1.Requests.CreateCredentialBodyRequest:
       type: object
       properties:
@@ -26874,6 +27537,216 @@ components:
           type: string
           nullable: true
         properties:
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Management.Api.Models.AllJobs.AllJobsRow:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        tenantName:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        jobTypeId:
+          type: string
+          format: uuid
+        jobTypeName:
+          type: string
+          nullable: true
+        isDataSync:
+          type: boolean
+        active:
+          type: boolean
+        schedule:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Models.AllJobs.AllJobsSchedule'
+        lastExecutionId:
+          type: string
+          format: uuid
+          nullable: true
+        lastRunStatus:
+          type: string
+          nullable: true
+        lastRunStarted:
+          type: string
+          format: date-time
+          nullable: true
+        lastRunDurationSeconds:
+          type: number
+          format: double
+          nullable: true
+        canExecute:
+          type: boolean
+        executeDisabledReason:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: 'One job of any tenant, as listed by the cross-tenant All Jobs page.'
+    EdGraph.HttpAggregators.Management.Api.Models.AllJobs.AllJobsRowPaginatedItemsViewModel:
+      type: object
+      properties:
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Models.AllJobs.AllJobsRow'
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Management.Api.Models.AllJobs.AllJobsSchedule:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        cron:
+          type: string
+          nullable: true
+        timeZone:
+          type: string
+          nullable: true
+        beginDate:
+          type: string
+          format: date
+          nullable: true
+        endDate:
+          type: string
+          format: date
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Management.Api.Models.AllJobs.ExecuteJobResult:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        executionId:
+          type: string
+          format: uuid
+          nullable: true
+      additionalProperties: false
+      description: Answer of the execute endpoint; EdGraph.HttpAggregators.Management.Api.Models.AllJobs.ExecuteJobResult.ExecutionId is null for DataSync jobs (the id is assigned asynchronously).
+    EdGraph.HttpAggregators.Management.Api.Models.AllJobs.ExecutionFeedRow:
+      type: object
+      properties:
+        executionId:
+          type: string
+          format: uuid
+        jobId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        tenantName:
+          type: string
+          nullable: true
+        jobName:
+          type: string
+          nullable: true
+        jobTypeName:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        queuedDateTime:
+          type: string
+          format: date-time
+        startDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        endDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        durationSeconds:
+          type: number
+          format: double
+          nullable: true
+        requestedBy:
+          type: string
+          nullable: true
+        canStop:
+          type: boolean
+        canRerun:
+          type: boolean
+        rerunDisabledReason:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: 'One execution of any job, as listed by the executions feed.'
+    EdGraph.HttpAggregators.Management.Api.Models.AllJobs.ExecutionFeedRowPaginatedItemsViewModel:
+      type: object
+      properties:
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Models.AllJobs.ExecutionFeedRow'
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Management.Api.Models.AllJobs.JobTypeOption:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: A job type for the All Jobs page's Job type filter.
+    EdGraph.HttpAggregators.Management.Api.Models.AllJobs.LogRow:
+      type: object
+      properties:
+        loggedDateTime:
+          type: string
+          format: date-time
+        level:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Management.Api.Models.AllJobs.LogRowPaginatedItemsViewModel:
+      type: object
+      properties:
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Models.AllJobs.LogRow'
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Management.Api.Services.DataIntegrations.CreateDataIntegrationRequest:
