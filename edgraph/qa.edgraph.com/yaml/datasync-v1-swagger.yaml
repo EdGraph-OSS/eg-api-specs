@@ -1789,6 +1789,9 @@ components:
             $ref: '#/components/schemas/DataSyncApi.Connection.V1.ConnectionMetadata'
           nullable: true
           readOnly: true
+        tenantId:
+          type: string
+          nullable: true
       additionalProperties: false
     DataSyncApi.Job.V1.ActivateJobRequest:
       type: object
