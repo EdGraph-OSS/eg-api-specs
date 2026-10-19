@@ -5182,6 +5182,186 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  /impersonation/active:
+    post:
+      tags:
+        - Impersonation
+      summary: "Every refusal path - regardless of cause - returns this exact response: a bare 403 with no\r\nbody. Centralizing it here makes \"every refusal is identical\" structurally true rather than\r\nsomething that could drift per call site."
+      description: "Deliberately Microsoft.AspNetCore.Mvc.EmptyResult with the status code set directly on\r\nMicrosoft.AspNetCore.Mvc.ControllerBase.Response, not `StatusCode(403)`/`Forbid()`: both of\r\nthose implement `IClientErrorActionResult`, which `[ApiController]`'s\r\n`ClientErrorResultFilter` intercepts and rewrites into an auto-generated\r\n`ProblemDetails` body carrying a per-request `traceId` - which would make a refused\r\n`start` and a refused `renew` differ on the wire every time, defeating the one\r\nproperty this endpoint most needs to hold."
+      operationId: Active
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.ActiveImpersonationsRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.ActiveImpersonationsRequest'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.ActiveImpersonationsRequest'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.ActiveImpersonationsRequest'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '403':
+          description: 'The request was refused, or Identity could not be reached.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: A map of target user id to the number of active impersonation sessions; targets with none are absent.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+  /impersonation/end:
+    post:
+      tags:
+        - Impersonation
+      summary: Ends the caller's own active impersonation session.
+      operationId: End
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.EndImpersonationRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.EndImpersonationRequest'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.EndImpersonationRequest'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.EndImpersonationRequest'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '403':
+          description: "The request was refused. This is deliberately the same generic response as a refused\r\n`start`/`renew` call - it carries no detail about which check failed."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '204':
+          description: The session was ended (or had already ended).
+  /impersonation/renew:
+    post:
+      tags:
+        - Impersonation
+      summary: Renews the caller's own active impersonation session.
+      operationId: Renew
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.RenewImpersonationRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.RenewImpersonationRequest'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.RenewImpersonationRequest'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.RenewImpersonationRequest'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '403':
+          description: "The request was refused. This is deliberately the same generic response as a refused\r\n`start` call - it carries no detail about which check failed."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The impersonation token was renewed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.Impersonation.ImpersonationTokenResponse'
+  /impersonation/start:
+    post:
+      tags:
+        - Impersonation
+      summary: Starts an impersonation session for the given target user/tenant.
+      operationId: Start
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.StartImpersonationRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.StartImpersonationRequest'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.StartImpersonationRequest'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.StartImpersonationRequest'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '403':
+          description: "The request was refused. This is deliberately the same generic response for every refusal\r\nreason - it carries no detail about which check failed."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The impersonation token was minted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.Impersonation.ImpersonationTokenResponse'
   /instances:
     get:
       tags:
@@ -16660,6 +16840,132 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/directories/{id}':
+    delete:
+      tags:
+        - Tenants
+      operationId: UnbindTenantDirectory
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityApi.User.V1.UnbindTenantDirectoryResponse'
+  '/tenants/{tenantId}/directories':
+    get:
+      tags:
+        - Tenants
+      operationId: ListTenantDirectories
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityApi.User.V1.ListTenantDirectoriesResponse'
+    post:
+      tags:
+        - Tenants
+      operationId: BindTenantDirectory
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.TenantDirectoryBody'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.TenantDirectoryBody'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.TenantDirectoryBody'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.TenantDirectoryBody'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityApi.User.V1.TenantDirectoryResponse'
   '/tenants/{tenantId}/applications/{applicationId}/launchersettings':
     get:
       tags:
@@ -20403,6 +20709,12 @@ paths:
           schema:
             type: string
             default: ''
+        - name: includeDeleted
+          in: query
+          description: Also return users whose membership in this tenant was removed.
+          schema:
+            type: boolean
+            default: false
       responses:
         '401':
           description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
@@ -20889,6 +21201,149 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/users/{userId}/sign-in-names/{id}':
+    delete:
+      tags:
+        - Users
+      summary: Removes a directory sign-in name.
+      operationId: RemoveDirectorySignInName
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityApi.User.V1.RemoveExternalSignInNameResponse'
+  '/users/{userId}/sign-in-names':
+    get:
+      tags:
+        - Users
+      summary: 'The user''s directory sign-in names; with tenantId, only that tenant''s, plus the directories it trusts.'
+      operationId: ListDirectorySignInNames
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityApi.User.V1.ListExternalSignInNamesResponse'
+    post:
+      tags:
+        - Users
+      summary: Adds a directory sign-in name. 409 when it belongs to another account; 412 when the tenant has no directory for the provider.
+      operationId: AddDirectorySignInName
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.DirectorySignInNameBody'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.DirectorySignInNameBody'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.DirectorySignInNameBody'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.DirectorySignInNameBody'
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityApi.User.V1.ExternalSignInNameResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
   '/users/{userId}':
     delete:
       tags:
@@ -23124,6 +23579,7 @@ components:
         - Cancelled
         - Error
         - QueuedForCancel
+        - TimedOut
       type: string
     DataSyncApi.Job.V1.JobListResponse:
       type: object
@@ -23526,6 +23982,8 @@ components:
         - CompletedWithErrors
         - Cancelled
         - Error
+        - QueuedForCancel
+        - TimedOut
       type: string
     DataSyncApi.JobExecution.V1.Metric:
       type: object
@@ -24956,6 +25414,46 @@ components:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.StaffClassificationLicenseRequest'
           nullable: true
       additionalProperties: false
+    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.ActiveImpersonationsRequest:
+      type: object
+      properties:
+        targetUserIds:
+          type: array
+          items:
+            type: string
+          nullable: true
+      additionalProperties: false
+      description: 'Body for `POST impersonation/active`: the users the Management user list is showing. Identity answers with the ones being impersonated right now, and by how many admins.'
+    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.EndImpersonationRequest:
+      type: object
+      properties:
+        impersonationSessionId:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: Body for `POST impersonation/end`.
+    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.RenewImpersonationRequest:
+      type: object
+      properties:
+        impersonationSessionId:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: Body for `POST impersonation/renew`.
+    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Impersonation.StartImpersonationRequest:
+      type: object
+      properties:
+        targetUserId:
+          type: string
+          nullable: true
+        targetTenantId:
+          type: string
+          nullable: true
+        reason:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: "Body for `POST impersonation/start`. The caller's own admin access token is never part of\r\nthis body - it is read from the request's `Authorization` header, exactly as every other\r\nManagement call already works."
     EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Role:
       type: object
       properties:
@@ -25033,6 +25531,10 @@ components:
         gracePeriodMfaExpiryDate:
           type: string
           format: date-time
+        acceptEdGraphPasskeys:
+          type: boolean
+          description: '"Accept EdGraph passkeys". Null (not sent) keeps the tenant''s stored value.'
+          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Tenants.TenantIdentityProviderId:
       enum:
@@ -25393,6 +25895,40 @@ components:
             type: string
           nullable: true
       additionalProperties: false
+    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.DirectorySignInNameBody:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          description: The user's tenant whose bound directory vouches for the name.
+          nullable: true
+        provider:
+          type: string
+          description: '`AAD` or `Google`.'
+          nullable: true
+        value:
+          type: string
+          description: 'The sign-in name, e.g. `jsmith@district.onmicrosoft.com`.'
+          nullable: true
+        directoryId:
+          type: string
+          description: Optional when the tenant has exactly one directory for the provider.
+          nullable: true
+      additionalProperties: false
+      description: 'Backlog A5: the body that adds a directory sign-in name.'
+    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Users.TenantDirectoryBody:
+      type: object
+      properties:
+        provider:
+          type: string
+          description: '`AAD` or `Google`.'
+          nullable: true
+        directoryId:
+          type: string
+          description: The Entra tenant id (GUID) or the Google Workspace domain.
+          nullable: true
+      additionalProperties: false
+      description: 'Backlog A5: the body that binds a directory to a tenant.'
     EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.ApiResourceResponse:
       type: object
       properties:
@@ -25671,6 +26207,24 @@ components:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.IdentityResourceResponse'
           nullable: true
       additionalProperties: false
+    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.Impersonation.ImpersonationTokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          nullable: true
+        expiresIn:
+          type: integer
+          format: int32
+        impersonationSessionId:
+          type: string
+          nullable: true
+        impersonationExpiresAt:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: false
+      description: "The success payload for `POST impersonation/start` and `POST impersonation/renew`.\r\nDeliberately carries only what EdGraph.HttpAggregators.Management.Api.Services.Impersonation.ImpersonationTokenResult\r\nitself carries on success - no error detail exists anywhere upstream of this type, so none can\r\nleak through it."
     EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.Role:
       type: object
       properties:
@@ -28504,6 +29058,90 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    IdentityApi.Client.V1.ClientAdvancedSettings:
+      type: object
+      properties:
+        backChannelLogoutUri:
+          type: string
+          nullable: true
+        backChannelLogoutSessionRequired:
+          type: boolean
+          nullable: true
+        frontChannelLogoutUri:
+          type: string
+          nullable: true
+        frontChannelLogoutSessionRequired:
+          type: boolean
+          nullable: true
+        consentLifetime:
+          type: integer
+          format: int32
+          nullable: true
+        userSsoLifetime:
+          type: integer
+          format: int32
+          nullable: true
+        allowRememberConsent:
+          type: boolean
+          nullable: true
+        allowPlainTextPkce:
+          type: boolean
+          nullable: true
+        requireRequestObject:
+          type: boolean
+          nullable: true
+        allowedIdentityTokenSigningAlgorithms:
+          $ref: '#/components/schemas/IdentityApi.Client.V1.StringList'
+        includeJwtId:
+          type: boolean
+          nullable: true
+        alwaysSendClientClaims:
+          type: boolean
+          nullable: true
+        clientClaimsPrefix:
+          type: string
+          nullable: true
+        pairWiseSubjectSalt:
+          type: string
+          nullable: true
+        userCodeType:
+          type: string
+          nullable: true
+        deviceCodeLifetime:
+          type: integer
+          format: int32
+          nullable: true
+        cibaLifetime:
+          type: integer
+          format: int32
+          nullable: true
+        pollingInterval:
+          type: integer
+          format: int32
+          nullable: true
+        coordinateLifetimeWithUserSession:
+          type: boolean
+          nullable: true
+        initiateLoginUri:
+          type: string
+          nullable: true
+        requireDPoP:
+          type: boolean
+          nullable: true
+        dPoPValidationMode:
+          type: string
+          nullable: true
+        dPoPClockSkew:
+          type: string
+          nullable: true
+        requirePushedAuthorization:
+          type: boolean
+          nullable: true
+        pushedAuthorizationLifetime:
+          type: integer
+          format: int32
+          nullable: true
+      additionalProperties: false
     IdentityApi.Client.V1.ClientBrandingBackground:
       type: object
       properties:
@@ -28748,6 +29386,11 @@ components:
           $ref: '#/components/schemas/IdentityApi.Client.V1.ClientBrandingResponse'
         allowTenantToOverride:
           type: boolean
+        properties:
+          type: string
+          nullable: true
+        advanced:
+          $ref: '#/components/schemas/IdentityApi.Client.V1.ClientAdvancedSettings'
       additionalProperties: false
     IdentityApi.Client.V1.ClientSecretAddedResponse:
       type: object
@@ -28901,6 +29544,8 @@ components:
         properties:
           type: string
           nullable: true
+        advanced:
+          $ref: '#/components/schemas/IdentityApi.Client.V1.ClientAdvancedSettings'
       additionalProperties: false
     IdentityApi.Client.V1.RegenerateClientSecretRequest:
       type: object
@@ -28936,6 +29581,17 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    IdentityApi.Client.V1.StringList:
+      type: object
+      properties:
+        values:
+          type: array
+          items:
+            type: string
+          nullable: true
+          readOnly: true
+      additionalProperties: false
+      description: "Duende Client settings that the API could not read or set (backlog B11/B15). Every member is optional: on create and update an\r\nabsent member means \"leave unchanged\"; a present one is applied. Responses fill every member that has a value."
     IdentityApi.Client.V1.TokenExpiration:
       enum:
         - Sliding
@@ -29057,6 +29713,8 @@ components:
         properties:
           type: string
           nullable: true
+        advanced:
+          $ref: '#/components/schemas/IdentityApi.Client.V1.ClientAdvancedSettings'
       additionalProperties: false
     IdentityApi.ClientSettingsType.V1.ClientSettingsTypeCreatedResponse:
       type: object
@@ -30203,6 +30861,43 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    IdentityApi.User.V1.ExternalSignInNameMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        provider:
+          type: string
+          description: AAD | Google
+          nullable: true
+        directoryId:
+          type: string
+          description: Entra tenant id (GUID) or Google Workspace domain
+          nullable: true
+        value:
+          type: string
+          description: normalised sign-in name (UPN)
+          nullable: true
+        source:
+          type: string
+          description: admin | directory | import
+          nullable: true
+        tenantId:
+          type: string
+          description: the tenant that scoped an admin entry; empty otherwise
+          nullable: true
+        createdAt:
+          type: string
+          description: 'ISO 8601, UTC'
+          nullable: true
+      additionalProperties: false
+    IdentityApi.User.V1.ExternalSignInNameResponse:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/IdentityApi.User.V1.ExternalSignInNameMessage'
+      additionalProperties: false
     IdentityApi.User.V1.GetSEOAAsResponse:
       type: object
       properties:
@@ -30320,6 +31015,38 @@ components:
         - Active
         - Expired
       type: string
+    IdentityApi.User.V1.ListExternalSignInNamesResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          nullable: true
+        names:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityApi.User.V1.ExternalSignInNameMessage'
+          nullable: true
+          readOnly: true
+        directories:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityApi.User.V1.TenantDirectoryMessage'
+          nullable: true
+          readOnly: true
+      additionalProperties: false
+    IdentityApi.User.V1.ListTenantDirectoriesResponse:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          nullable: true
+        directories:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityApi.User.V1.TenantDirectoryMessage'
+          nullable: true
+          readOnly: true
+      additionalProperties: false
     IdentityApi.User.V1.LocalUserCreatedResponse:
       type: object
       properties:
@@ -30366,6 +31093,16 @@ components:
           type: string
           nullable: true
         tenantId:
+          type: string
+          nullable: true
+      additionalProperties: false
+    IdentityApi.User.V1.RemoveExternalSignInNameResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          nullable: true
+        id:
           type: string
           nullable: true
       additionalProperties: false
@@ -30517,6 +31254,31 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    IdentityApi.User.V1.TenantDirectoryMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        tenantId:
+          type: string
+          nullable: true
+        provider:
+          type: string
+          nullable: true
+        directoryId:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          nullable: true
+      additionalProperties: false
+    IdentityApi.User.V1.TenantDirectoryResponse:
+      type: object
+      properties:
+        directory:
+          $ref: '#/components/schemas/IdentityApi.User.V1.TenantDirectoryMessage'
+      additionalProperties: false
     IdentityApi.User.V1.TenantEducationOrganizationMetrics:
       type: object
       properties:
@@ -30604,6 +31366,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/IdentityApi.User.V1.TenantUserMetrics'
+          nullable: true
+      additionalProperties: false
+    IdentityApi.User.V1.UnbindTenantDirectoryResponse:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          nullable: true
+        id:
+          type: string
           nullable: true
       additionalProperties: false
     IdentityApi.User.V1.UpdateUserRequest:
@@ -32628,6 +33400,20 @@ components:
           readOnly: true
         partnershipSync:
           $ref: '#/components/schemas/TenantApi.Partnership.V1.CreatePartnershipRequest+Types+CreatePartnershipSyncRequest'
+        roleMappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantApi.Partnership.V1.RoleMappingDTO'
+          nullable: true
+          readOnly: true
+        scope:
+          $ref: '#/components/schemas/TenantApi.Partnership.V1.PartnershipScope'
+        optedOutTenantIds:
+          type: array
+          items:
+            type: string
+          nullable: true
+          readOnly: true
       additionalProperties: false
     TenantApi.Partnership.V1.CreatePartnershipRequest+Types+CreatePartnershipSyncRequest:
       type: object
@@ -32741,6 +33527,20 @@ components:
         isDeleted:
           type: boolean
           nullable: true
+        roleMappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantApi.Partnership.V1.RoleMappingDTO'
+          nullable: true
+          readOnly: true
+        scope:
+          $ref: '#/components/schemas/TenantApi.Partnership.V1.PartnershipScope'
+        optedOutTenantIds:
+          type: array
+          items:
+            type: string
+          nullable: true
+          readOnly: true
       additionalProperties: false
     TenantApi.Partnership.V1.PartnershipCreatedResponse:
       type: object
@@ -32796,7 +33596,26 @@ components:
         isDeleted:
           type: boolean
           nullable: true
+        roleMappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantApi.Partnership.V1.RoleMappingDTO'
+          nullable: true
+          readOnly: true
+        scope:
+          $ref: '#/components/schemas/TenantApi.Partnership.V1.PartnershipScope'
+        optedOutTenantIds:
+          type: array
+          items:
+            type: string
+          nullable: true
+          readOnly: true
       additionalProperties: false
+    TenantApi.Partnership.V1.PartnershipScope:
+      enum:
+        - RelatedTenantsOnly
+        - AllActiveTenants
+      type: string
     TenantApi.Partnership.V1.PartnershipSyncDTO:
       type: object
       properties:
@@ -32827,6 +33646,16 @@ components:
       type: object
       properties:
         id:
+          type: string
+          nullable: true
+      additionalProperties: false
+    TenantApi.Partnership.V1.RoleMappingDTO:
+      type: object
+      properties:
+        partnerRole:
+          type: string
+          nullable: true
+        grantedRole:
           type: string
           nullable: true
       additionalProperties: false
@@ -32864,6 +33693,20 @@ components:
           readOnly: true
         partnershipSync:
           $ref: '#/components/schemas/TenantApi.Partnership.V1.UpdatePartnershipRequest+Types+UpdatePartnershipSyncRequest'
+        roleMappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantApi.Partnership.V1.RoleMappingDTO'
+          nullable: true
+          readOnly: true
+        scope:
+          $ref: '#/components/schemas/TenantApi.Partnership.V1.PartnershipScope'
+        optedOutTenantIds:
+          type: array
+          items:
+            type: string
+          nullable: true
+          readOnly: true
       additionalProperties: false
     TenantApi.Partnership.V1.UpdatePartnershipRequest+Types+UpdatePartnershipSyncRequest:
       type: object
@@ -33635,6 +34478,8 @@ components:
         deletedAt:
           type: string
           nullable: true
+        onboarding:
+          $ref: '#/components/schemas/TenantApi.Tenant.V1.SubscriptionOnboarding'
       additionalProperties: false
     TenantApi.Tenant.V1.SubscriptionListResponsePaginatedItemsViewModel:
       type: object
@@ -33774,6 +34619,8 @@ components:
         deletedAt:
           type: string
           nullable: true
+        onboarding:
+          $ref: '#/components/schemas/TenantApi.Tenant.V1.SubscriptionOnboarding'
       additionalProperties: false
     TenantApi.Tenant.V1.SubscriptionRejectedResponse:
       type: object
@@ -33826,6 +34673,10 @@ components:
           type: boolean
         gracePeriodMfaExpiryDate:
           type: string
+          nullable: true
+        acceptEdGraphPasskeys:
+          type: boolean
+          description: Accept passkeys registered with EdGraph even when the Local (password) provider is inactive. Unset on an update keeps the stored value.
           nullable: true
       additionalProperties: false
     TenantApi.Tenant.V1.TenantBrandingBackground:
