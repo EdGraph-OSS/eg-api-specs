@@ -44184,6 +44184,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/assignable-platform-role':
+    get:
+      tags:
+        - Users
+      summary: 'The platform role this tenant allows its users to hold (Platform.Support in the EdGraph tenant, Platform.Partner in a live partner tenant), or null when it allows none'
+      operationId: GetAssignablePlatformRoleAsync
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityApi.User.V1.GetAssignablePlatformRoleResponse'
   '/tenants/{tenantId}/users/{email}/status':
     get:
       tags:
@@ -44784,7 +44823,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
         '403':
-          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          description: 'A platform role was sent by a partnership-derived tenant administrator, or for a tenant whose administrators cannot assign one.'
           content:
             application/json:
               schema:
@@ -51381,6 +51420,10 @@ components:
           maxLength: 12
           minLength: 1
           type: string
+        platformRole:
+          type: string
+          description: "Optional. The platform role on this tenant's membership of the user: \"None\" removes it, \"Platform.Support\" or \"Platform.Partner\" grants the one the tenant allows\r\n(Identity refuses any other). Omit (null) to leave it unchanged - send it only when the admin changed it. \"Platform.Admin\" is never accepted here."
+          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.UpdateUserPreferenceRequest:
       type: object
@@ -56630,6 +56673,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.Platform.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.UserTenantLicense'
+          nullable: true
+        tenantAccess:
+          type: string
+          description: 'Spec 2026-10-17 Addendum A (A6): "derived" on a tenant a partnership derives; null for a direct membership.'
+          nullable: true
+        tenantAccessSource:
+          type: string
+          description: 'Spec 2026-10-17 Addendum A (A6): the granting partnership''s id on a derived tenant; null for a direct membership.'
           nullable: true
       additionalProperties: false
     EdGraph.Platform.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.UserLicense:
@@ -65876,6 +65927,13 @@ components:
         name:
           $ref: '#/components/schemas/IdentityApi.User.V1.ExternalSignInNameMessage'
       additionalProperties: false
+    IdentityApi.User.V1.GetAssignablePlatformRoleResponse:
+      type: object
+      properties:
+        platformRole:
+          type: string
+          nullable: true
+      additionalProperties: false
     IdentityApi.User.V1.GetSEOAAsResponse:
       type: object
       properties:
@@ -66692,6 +66750,13 @@ components:
         tenantType:
           type: string
           nullable: true
+        tenantAccess:
+          type: string
+          description: 'S5d spec 4.1: set only on entries that came back through includeDerived: "derived" and the granting partnership id.'
+          nullable: true
+        tenantAccessSource:
+          type: string
+          nullable: true
       additionalProperties: false
     IdentityApi.User.V1.UserTenantProfile+Types+UserTenantEducationOrganizationProfile:
       type: object
@@ -66849,6 +66914,13 @@ components:
           nullable: true
         branding:
           $ref: '#/components/schemas/TenantApi.Tenant.V1.TenantBrandingResponse'
+        tenantAccess:
+          type: string
+          description: "Addendum A (A6): \"derived\" and the granting partnership id on an entry a partnership derives\r\n(SearchUserMeTenants with includeDerived); unset for a direct membership."
+          nullable: true
+        tenantAccessSource:
+          type: string
+          nullable: true
       additionalProperties: false
     IdentityApi.User.V2.UserExtension:
       type: object
@@ -68119,6 +68191,9 @@ components:
           nullable: true
         grantedRole:
           type: string
+          nullable: true
+        grantsSubscribedApplicationAdminRoles:
+          type: boolean
           nullable: true
       additionalProperties: false
     TenantApi.Partnership.V1.TenantType:
