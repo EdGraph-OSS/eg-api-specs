@@ -43537,6 +43537,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IdentityApi.User.V1.UserUpdatedResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
         '400':
           description: Bad Request. The request was invalid and cannot be completed. See the response body for specific validation errors. This will typically be an issue with the query parameters or the request body values.
           content:
