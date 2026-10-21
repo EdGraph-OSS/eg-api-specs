@@ -6873,212 +6873,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
-  '/tenants/{tenantId}/enrollmentadmin/accessconfiguration/personas':
-    get:
-      tags:
-        - Enrollment Admin / AccessConfiguration
-      summary: Lists the personas available to the tenant.
-      operationId: GetEnrollmentAdminPersonas
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-      responses:
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '200':
-          description: The requested resource was successfully retrieved.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.PersonaResponseDto'
-        '404':
-          description: The tenant's configuration could not be found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-    post:
-      tags:
-        - Enrollment Admin / AccessConfiguration
-      summary: Adds a persona to the tenant's available personas.
-      operationId: AddEnrollmentAdminPersona
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: ''
-        content:
-          application/json-patch+json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddAvailablePersonaRequestDto'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddAvailablePersonaRequestDto'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddAvailablePersonaRequestDto'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddAvailablePersonaRequestDto'
-      responses:
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '200':
-          description: The persona was added or was already up to date.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.AccessConfigurationUpdatedResultDto'
-        '400':
-          description: Bad Request. The request was invalid and cannot be completed. See the response body for specific validation errors.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
-  '/tenants/{tenantId}/enrollmentadmin/accessconfiguration/rolepersonas':
-    get:
-      tags:
-        - Enrollment Admin / AccessConfiguration
-      summary: 'Gets the role-to-persona assignments of the tenant, grouped by role namespace.'
-      operationId: GetEnrollmentAdminRolePersonas
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-      responses:
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '200':
-          description: The requested resource was successfully retrieved.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RolePersonasSettingsResponseDto'
-        '404':
-          description: The tenant's configuration could not be found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-    post:
-      tags:
-        - Enrollment Admin / AccessConfiguration
-      summary: Sets the personas assigned to a role for the tenant.
-      operationId: SetEnrollmentAdminRolePersonas
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: ''
-        content:
-          application/json-patch+json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetRolePersonasRequestDto'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetRolePersonasRequestDto'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetRolePersonasRequestDto'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetRolePersonasRequestDto'
-      responses:
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '200':
-          description: The role's personas were set or were already up to date.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.AccessConfigurationUpdatedResultDto'
-        '400':
-          description: Bad Request. The request was invalid and cannot be completed. See the response body for specific validation errors.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/applicationrounds/{id}/duplicate':
     post:
       tags:
@@ -7793,38 +7587,32 @@ paths:
           schema:
             type: integer
             format: int32
-            default: 50
         - name: pageIndex
           in: query
           description: ''
           schema:
             type: integer
             format: int32
-            default: 0
         - name: orderBy
           in: query
           description: ''
           schema:
             type: string
-            default: ''
         - name: filter
           in: query
           description: ''
           schema:
             type: string
-            default: ''
         - name: schoolYear
           in: query
           description: 'Exact match, e.g. 2026-2027.'
           schema:
             type: string
-            default: ''
         - name: code
           in: query
           description: Exact match.
           schema:
             type: string
-            default: ''
       responses:
         '401':
           description: Unauthorized
@@ -7925,7 +7713,7 @@ paths:
       tags:
         - Enrollment Admin / Contacts
       summary: "Reads every lifecycle event for a contact - create, update, delete, overrides and sign-in\r\nunlocks - newest first."
-      description: "<br>\r\n            Eventually consistent, on the same terms as M:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentContactOverrides(System.String,System.Guid,System.Int32,System.Int32,System.String,System.Threading.CancellationToken).\r\n            \r\n<br>\r\n  `EventType` on `GetAllChangesRequest` is a single optional string, so it cannot\r\n            express \"any of these event types\" on its own. The filter is built through `Filter`\r\n            instead - a raw Elasticsearch `query_string` - while `EntityType` and\r\n            `EntityId` stay the typed fields M:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentContactOverrides(System.String,System.Guid,System.Int32,System.Int32,System.String,System.Threading.CancellationToken) already uses.\r\n            The change log applies the typed fields as `filter` clauses and `Filter` as a\r\n            `must` clause on the same bool query, so the two combine as an AND: this call still never\r\n            leaves this contact's own entity scope.\r\n            \r\n<br>\r\n            The event types covered are EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactOverrideHistoryExtensions.ContactEventTypes,\r\n            which tracks what the Enrollment outbox publishes against a contact.\r\n            "
+      description: "<br>\r\n            Eventually consistent, on the same terms as M:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentContactOverrides(System.String,System.Guid,System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.Threading.CancellationToken).\r\n            \r\n<br>\r\n  `EventType` on `GetAllChangesRequest` is a single optional string, so it cannot\r\n            express \"any of these event types\" on its own. The filter is built through `Filter`\r\n            instead - a raw Elasticsearch `query_string` - while `EntityType` and\r\n            `EntityId` stay the typed fields M:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentContactOverrides(System.String,System.Guid,System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.Threading.CancellationToken) already uses.\r\n            The change log applies the typed fields as `filter` clauses and `Filter` as a\r\n            `must` clause on the same bool query, so the two combine as an AND: this call still never\r\n            leaves this contact's own entity scope.\r\n            \r\n<br>\r\n            The event types covered are EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactOverrideHistoryExtensions.ContactEventTypes,\r\n            which tracks what the Enrollment outbox publishes against a contact.\r\n            "
       operationId: GetEnrollmentContactChangelogs
       parameters:
         - name: tenantId
@@ -7947,20 +7735,17 @@ paths:
           schema:
             type: integer
             format: int32
-            default: 20
         - name: pageIndex
           in: query
           description: ''
           schema:
             type: integer
             format: int32
-            default: 0
         - name: studentId
           in: query
           description: Narrows to changes affecting one linked student.
           schema:
             type: string
-            default: ''
       responses:
         '401':
           description: Unauthorized
@@ -8391,20 +8176,17 @@ paths:
           schema:
             type: integer
             format: int32
-            default: 20
         - name: pageIndex
           in: query
           description: ''
           schema:
             type: integer
             format: int32
-            default: 0
         - name: studentId
           in: query
           description: Narrows to changes affecting one linked student.
           schema:
             type: string
-            default: ''
       responses:
         '401':
           description: Unauthorized
@@ -9070,32 +8852,27 @@ paths:
           schema:
             type: integer
             format: int32
-            default: 50
         - name: pageIndex
           in: query
           description: ''
           schema:
             type: integer
             format: int32
-            default: 0
         - name: orderBy
           in: query
           description: ''
           schema:
             type: string
-            default: ''
         - name: filter
           in: query
           description: "A predicate over the contact's fields, e.g. `externalDataSourceContactId == \"21138538\"` - the\r\nway to find a contact's EdGraph record id from its SIS id."
           schema:
             type: string
-            default: ''
         - name: search
           in: query
           description: 'Free-text match on contact name, email, or phone.'
           schema:
             type: string
-            default: ''
         - name: nextSchoolStateShortCode
           in: query
           description: Narrows to contacts with at least one linked student whose next school has this state short code.
@@ -9469,32 +9246,27 @@ paths:
           schema:
             type: integer
             format: int32
-            default: 50
         - name: pageIndex
           in: query
           description: ''
           schema:
             type: integer
             format: int32
-            default: 0
         - name: orderBy
           in: query
           description: ''
           schema:
             type: string
-            default: ''
         - name: filter
           in: query
           description: ''
           schema:
             type: string
-            default: ''
         - name: search
           in: query
           description: Free-text match on feederPattern/highSchool/middleSchool/elementary.
           schema:
             type: string
-            default: ''
       responses:
         '401':
           description: Unauthorized
@@ -9824,32 +9596,27 @@ paths:
           schema:
             type: integer
             format: int32
-            default: 50
         - name: pageIndex
           in: query
           description: ''
           schema:
             type: integer
             format: int32
-            default: 0
         - name: orderBy
           in: query
           description: ''
           schema:
             type: string
-            default: ''
         - name: filter
           in: query
           description: ''
           schema:
             type: string
-            default: ''
         - name: search
           in: query
           description: Free-text match on program name/code.
           schema:
             type: string
-            default: ''
         - name: schoolLocalCode
           in: query
           description: Narrows to programs offered at this school. Not a security boundary.
@@ -12068,32 +11835,27 @@ paths:
           schema:
             type: integer
             format: int32
-            default: 50
         - name: pageIndex
           in: query
           description: ''
           schema:
             type: integer
             format: int32
-            default: 0
         - name: orderBy
           in: query
           description: ''
           schema:
             type: string
-            default: ''
         - name: filter
           in: query
           description: ''
           schema:
             type: string
-            default: ''
         - name: search
           in: query
           description: Free-text match on school name or school code.
           schema:
             type: string
-            default: ''
       responses:
         '401':
           description: Unauthorized
@@ -12772,26 +12534,22 @@ paths:
           schema:
             type: integer
             format: int32
-            default: 50
         - name: pageIndex
           in: query
           description: ''
           schema:
             type: integer
             format: int32
-            default: 0
         - name: orderBy
           in: query
           description: ''
           schema:
             type: string
-            default: ''
         - name: filter
           in: query
           description: ''
           schema:
             type: string
-            default: ''
       responses:
         '401':
           description: Unauthorized
@@ -29112,6 +28870,184 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/validations/jobs/{jobId}/executions/{jobExecutionId}/logs':
+    get:
+      tags:
+        - Jobs
+      summary: Retrieves a list of Job Execution Logs.
+      description: "The log of one run of a Validations job, read through Validations (see M:EdGraph.Platform.HttpAggregators.Tenant.Api.Controllers.v1.ValidationsController.GetJobExecutions(System.String,System.String,System.Int32,System.Int32,System.String,System.String)), with the\r\nDataSync route's query parameters and response."
+      operationId: GetJobExecutionLogs
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: jobId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: jobExecutionId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: pageSize
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+            default: 10
+        - name: pageIndex
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: orderBy
+          in: query
+          description: ''
+          schema:
+            type: string
+            default: ''
+        - name: filter
+          in: query
+          description: ''
+          schema:
+            type: string
+            default: ''
+        - name: search
+          in: query
+          description: ''
+          schema:
+            type: string
+            default: ''
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationsApi.Jobs.V1.JobExecutionLogEntryPaginatedItemsViewModel'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed. See the response body for specific validation errors. This will typically be an issue with the query parameters or the request body values.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/validations/jobs/{jobId}/executions':
+    get:
+      tags:
+        - Jobs
+      summary: Retrieves a list of Job Executions.
+      description: "A Validations job runs on the Jobs Framework without DataSync input, so the DataSync execution routes do not find it;\r\nthis route reads it through Validations, with the DataSync route's query parameters and response."
+      operationId: GetJobExecutions
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: jobId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: pageSize
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+            default: 10
+        - name: pageIndex
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: orderBy
+          in: query
+          description: ''
+          schema:
+            type: string
+            default: ''
+        - name: filter
+          in: query
+          description: ''
+          schema:
+            type: string
+            default: ''
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationsApi.Jobs.V1.JobExecutionListResponsePaginatedItemsViewModel'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed. See the response body for specific validation errors. This will typically be an issue with the query parameters or the request body values.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/validations/jobs/{jobId}/restart':
     post:
       tags:
@@ -41103,380 +41039,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
-  '/tenants/{tenantId}/jobs/enrollmentadminaccess/execute':
-    post:
-      tags:
-        - Tenant / Jobs / Enrollment Admin Access
-      summary: Executes an Enrollment Admin Access Sync Job
-      operationId: ExecuteEnrollmentAdminAccessSyncJob
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '401':
-          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: An unhandled error occurred on the server.See the response body for details.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '202':
-          description: The job execution was successfully requested.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.EnrollmentAdminAccessSyncJobExecutedResponse'
-        '400':
-          description: Bad Request. The request was invalid and cannot be completed. See the response body for specific validation errors. This will typically be an issue with the query parameters or the request body values.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
-  '/tenants/{tenantId}/jobs/enrollmentadminaccess/executions/{executionId}/logs':
-    get:
-      tags:
-        - Tenant / Jobs / Enrollment Admin Access
-      summary: Searches Enrollment Admin Access Sync Job Execution Logs for a given tenant and execution
-      operationId: SearchEnrollmentAdminAccessSyncJobExecutionLogs
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: executionId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: jobId
-          in: query
-          description: ''
-          schema:
-            type: string
-            default: ''
-        - name: pageIndex
-          in: query
-          description: ''
-          schema:
-            type: integer
-            format: int32
-            default: 0
-        - name: pageSize
-          in: query
-          description: ''
-          schema:
-            type: integer
-            format: int32
-            default: 10
-        - name: orderBy
-          in: query
-          description: ''
-          schema:
-            type: string
-            default: ''
-        - name: level
-          in: query
-          description: ''
-          schema:
-            type: string
-            default: ''
-        - name: message
-          in: query
-          description: ''
-          schema:
-            type: string
-            default: ''
-      responses:
-        '401':
-          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: An unhandled error occurred on the server.See the response body for details.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '200':
-          description: The requested resource was successfully retrieved.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.SearchEnrollmentAdminAccessSyncJobExecutionLogsResponse'
-        '400':
-          description: Bad Request. The request was invalid and cannot be completed. See the response body for specific validation errors. This will typically be an issue with the query parameters or the request body values.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
-  '/tenants/{tenantId}/jobs/enrollmentadminaccess/executions':
-    get:
-      tags:
-        - Tenant / Jobs / Enrollment Admin Access
-      summary: Searches Enrollment Admin Access Sync Job Executions for a given tenant
-      operationId: SearchEnrollmentAdminAccessSyncJobExecutions
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: jobId
-          in: query
-          description: ''
-          schema:
-            type: string
-            default: ''
-        - name: pageIndex
-          in: query
-          description: ''
-          schema:
-            type: integer
-            format: int32
-            default: 0
-        - name: pageSize
-          in: query
-          description: ''
-          schema:
-            type: integer
-            format: int32
-            default: 10
-        - name: orderBy
-          in: query
-          description: ''
-          schema:
-            type: string
-            default: ''
-        - name: filter
-          in: query
-          description: ''
-          schema:
-            type: string
-            default: ''
-      responses:
-        '401':
-          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: An unhandled error occurred on the server.See the response body for details.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '200':
-          description: The requested resource was successfully retrieved.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.SearchEnrollmentAdminAccessSyncJobExecutionsResponse'
-        '400':
-          description: Bad Request. The request was invalid and cannot be completed. See the response body for specific validation errors. This will typically be an issue with the query parameters or the request body values.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
-  '/tenants/{tenantId}/jobs/enrollmentadminaccess':
-    get:
-      tags:
-        - Tenant / Jobs / Enrollment Admin Access
-      summary: Retrieves an Enrollment Admin Access Sync Job for a given tenant
-      operationId: GetEnrollmentAdminAccessSyncJob
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '401':
-          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: An unhandled error occurred on the server.See the response body for details.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '200':
-          description: The requested resource was successfully retrieved.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.EnrollmentAdminAccessSyncJobResponse'
-        '400':
-          description: Bad Request. The request was invalid and cannot be completed. See the response body for specific validation errors. This will typically be an issue with the query parameters or the request body values.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
-    post:
-      tags:
-        - Tenant / Jobs / Enrollment Admin Access
-      summary: Creates an Enrollment Admin Access Sync Job for a given tenant
-      operationId: CreateEnrollmentAdminAccessSyncJob
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: ''
-        content:
-          application/json-patch+json:
-            schema:
-              $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.CreateEnrollmentAdminAccessSyncJobRequest'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.CreateEnrollmentAdminAccessSyncJobRequest'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.CreateEnrollmentAdminAccessSyncJobRequest'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.CreateEnrollmentAdminAccessSyncJobRequest'
-      responses:
-        '401':
-          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: An unhandled error occurred on the server.See the response body for details.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '200':
-          description: The requested resource was successfully retrieved.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.EnrollmentAdminAccessSyncJobCreatedResponse'
-        '400':
-          description: Bad Request. The request was invalid and cannot be completed. See the response body for specific validation errors. This will typically be an issue with the query parameters or the request body values.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
-    put:
-      tags:
-        - Tenant / Jobs / Enrollment Admin Access
-      summary: Updates an Enrollment Admin Access Sync Job for a given tenant
-      operationId: UpdateEnrollmentAdminAccessSyncJob
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        description: ''
-        content:
-          application/json-patch+json:
-            schema:
-              $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.UpdateEnrollmentAdminAccessSyncJobRequest'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.UpdateEnrollmentAdminAccessSyncJobRequest'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.UpdateEnrollmentAdminAccessSyncJobRequest'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.UpdateEnrollmentAdminAccessSyncJobRequest'
-      responses:
-        '401':
-          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: An unhandled error occurred on the server.See the response body for details.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '204':
-          description: The resource was successfully updated.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.NoContentResult'
-        '400':
-          description: Bad Request. The request was invalid and cannot be completed. See the response body for specific validation errors. This will typically be an issue with the query parameters or the request body values.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
   '/tenants/{tenantId}/jobs/instructionalinsights/execute':
     post:
       tags:
@@ -44184,45 +43746,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
-  '/tenants/{tenantId}/assignable-platform-role':
-    get:
-      tags:
-        - Users
-      summary: 'The platform role this tenant allows its users to hold (Platform.Support in the EdGraph tenant, Platform.Partner in a live partner tenant), or null when it allows none'
-      operationId: GetAssignablePlatformRoleAsync
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '401':
-          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: An unhandled error occurred on the server.See the response body for details.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '200':
-          description: The requested resource was successfully retrieved.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/IdentityApi.User.V1.GetAssignablePlatformRoleResponse'
   '/tenants/{tenantId}/users/{email}/status':
     get:
       tags:
@@ -44823,7 +44346,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
         '403':
-          description: 'A platform role was sent by a partnership-derived tenant administrator, or for a tenant whose administrators cannot assign one.'
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
           content:
             application/json:
               schema:
@@ -49158,22 +48681,6 @@ components:
             type: string
           nullable: true
       additionalProperties: false
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddAvailablePersonaRequestDto:
-      type: object
-      properties:
-        name:
-          type: string
-          nullable: true
-        description:
-          type: string
-          nullable: true
-        identifier:
-          type: string
-          nullable: true
-        isDefault:
-          type: boolean
-      additionalProperties: false
-      description: 'Adds (or updates, by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddAvailablePersonaRequestDto.Identifier) a persona in the tenant''s available personas.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddContactStudentRequestDto:
       required:
         - firstName
@@ -49864,21 +49371,6 @@ components:
           format: uuid
       additionalProperties: false
       description: The body of a Registration submit call. Submit only ever sets Status; the ids must match the route.
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetRolePersonasRequestDto:
-      type: object
-      properties:
-        role:
-          type: string
-          nullable: true
-        assignedPersonaIdentifiers:
-          type: array
-          items:
-            type: string
-          nullable: true
-        ignoreOrganization:
-          type: boolean
-      additionalProperties: false
-      description: Sets the personas assigned to a role for the tenant in the route.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.StartContactImpersonationRequestDto:
       required:
         - channel
@@ -51420,10 +50912,6 @@ components:
           maxLength: 12
           minLength: 1
           type: string
-        platformRole:
-          type: string
-          description: "Optional. The platform role on this tenant's membership of the user: \"None\" removes it, \"Platform.Support\" or \"Platform.Partner\" grants the one the tenant allows\r\n(Identity refuses any other). Omit (null) to leave it unchanged - send it only when the admin changed it. \"Platform.Admin\" is never accepted here."
-          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.UpdateUserPreferenceRequest:
       type: object
@@ -51534,12 +51022,6 @@ components:
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.DomainListResponseDto'
           nullable: true
-      additionalProperties: false
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.AccessConfigurationUpdatedResultDto:
-      type: object
-      properties:
-        tenantId:
-          type: string
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRequirementsDto:
       type: object
@@ -52135,6 +51617,9 @@ components:
         studentLastName:
           type: string
           nullable: true
+        externalDataSourceStudentId:
+          type: string
+          nullable: true
       additionalProperties: false
       description: "One student linked to a contact, identified by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactStudentResponseDto.StudentId: the student record id.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactStudentResponseDto.StudentLocalCode is the SIS code."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactVerifiedResultDto:
@@ -52359,19 +51844,6 @@ components:
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.GeoPositionDto'
       additionalProperties: false
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.PersonaResponseDto:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        identifier:
-          type: string
-        isDefault:
-          type: boolean
-      additionalProperties: false
-      description: "A persona available to the tenant that roles can be assigned. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.PersonaResponseDto.Identifier is the\r\nstable key role configurations refer to."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.PolygonDto:
       type: object
       properties:
@@ -52957,41 +52429,6 @@ components:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementResponseDto'
           nullable: true
       additionalProperties: false
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RolePersonasNamespaceDto:
-      type: object
-      properties:
-        namespace:
-          type: string
-        roles:
-          type: array
-          items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RolePersonasRoleDto'
-      additionalProperties: false
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RolePersonasRoleDto:
-      type: object
-      properties:
-        role:
-          type: string
-        description:
-          type: string
-        assignedPersonaIdentifiers:
-          type: array
-          items:
-            type: string
-        ignoreOrganization:
-          type: boolean
-      additionalProperties: false
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RolePersonasSettingsResponseDto:
-      type: object
-      properties:
-        tenantId:
-          type: string
-        namespaces:
-          type: array
-          items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RolePersonasNamespaceDto'
-      additionalProperties: false
-      description: "A tenant's role-to-persona assignments, grouped by role namespace, in the same shape as Observations'\r\nstaff classification settings. Driven by the tenant's staff classification catalog: every role in it is\r\nlisted, with its persona assignment when one is configured."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolEnabledResponseDto:
       type: object
       properties:
@@ -53318,12 +52755,18 @@ components:
           type: string
           format: uuid
           nullable: true
+        externalDataSourceContactId:
+          type: string
+          nullable: true
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
         priority:
           type: integer
           format: int32
-          nullable: true
-        fullName:
-          type: string
           nullable: true
         relationship:
           type: string
@@ -53341,7 +52784,7 @@ components:
           type: boolean
           nullable: true
       additionalProperties: false
-      description: 'One contact link on a student, identified by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentContactResponseDto.ContactId: the contact record it links to.'
+      description: "One contact link on a student, identified by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentContactResponseDto.ContactId: the contact record it links to. Carries\r\nthe contact's ref - the same fields every copy of a contact holds (contactId, externalDataSourceContactId,\r\nfirstName, lastName) - and the link's own attributes."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentListItemResponseDto:
       type: object
       properties:
@@ -56673,14 +56116,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.Platform.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.UserTenantLicense'
-          nullable: true
-        tenantAccess:
-          type: string
-          description: 'Spec 2026-10-17 Addendum A (A6): "derived" on a tenant a partnership derives; null for a direct membership.'
-          nullable: true
-        tenantAccessSource:
-          type: string
-          description: 'Spec 2026-10-17 Addendum A (A6): the granting partnership''s id on a derived tenant; null for a direct membership.'
           nullable: true
       additionalProperties: false
     EdGraph.Platform.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.UserLicense:
@@ -62007,6 +61442,9 @@ components:
         studentBirthDate:
           type: string
           nullable: true
+        studentMiddleName:
+          type: string
+          nullable: true
       additionalProperties: false
       description: "The student a registration is for. studentId is the EnrollmentStudent record id, all zeros until\r\nthe registration is linked; the local/state/external ids, names and birthdate are denormalized\r\nfrom the student or supplied by the registration flow. No id of its own."
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationUpdatedResponse:
@@ -64663,335 +64101,6 @@ components:
           readOnly: true
           deprecated: true
       additionalProperties: false
-    IdentityApi.EnrollmentAdminAccessSyncJobs.V1.CallbackNotificationMessage:
-      type: object
-      properties:
-        notificationType:
-          type: string
-          nullable: true
-        value:
-          type: string
-          nullable: true
-      additionalProperties: false
-    IdentityApi.EnrollmentAdminAccessSyncJobs.V1.CreateEnrollmentAdminAccessSyncJobRequest:
-      type: object
-      properties:
-        tenantId:
-          type: string
-          nullable: true
-        jobId:
-          type: string
-          nullable: true
-        name:
-          type: string
-          nullable: true
-        input:
-          $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.EnrollmentAdminAccessSyncJobInputMessage'
-        schedule:
-          $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.ScheduleMessage'
-        retryPolicy:
-          $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.RetryPolicyMessage'
-        callbackNotifications:
-          type: array
-          items:
-            $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.CallbackNotificationMessage'
-          nullable: true
-          readOnly: true
-      additionalProperties: false
-    IdentityApi.EnrollmentAdminAccessSyncJobs.V1.EnrollmentAdminAccessSyncJobCreatedResponse:
-      type: object
-      properties:
-        jobId:
-          type: string
-          nullable: true
-      additionalProperties: false
-    IdentityApi.EnrollmentAdminAccessSyncJobs.V1.EnrollmentAdminAccessSyncJobExecutedResponse:
-      type: object
-      properties:
-        jobId:
-          type: string
-          nullable: true
-        executionId:
-          type: string
-          nullable: true
-      additionalProperties: false
-    IdentityApi.EnrollmentAdminAccessSyncJobs.V1.EnrollmentAdminAccessSyncJobExecutionLogMessage:
-      type: object
-      properties:
-        tenantId:
-          type: string
-          nullable: true
-        jobId:
-          type: string
-          nullable: true
-        executionId:
-          type: string
-          nullable: true
-        loggedDateTime:
-          type: string
-          nullable: true
-        level:
-          type: string
-          nullable: true
-        message:
-          type: string
-          nullable: true
-      additionalProperties: false
-    IdentityApi.EnrollmentAdminAccessSyncJobs.V1.EnrollmentAdminAccessSyncJobExecutionMessage:
-      type: object
-      properties:
-        executionId:
-          type: string
-          nullable: true
-        tenantId:
-          type: string
-          nullable: true
-        jobId:
-          type: string
-          nullable: true
-        status:
-          type: string
-          nullable: true
-        queuedDateTime:
-          type: string
-          nullable: true
-        startDateTime:
-          type: string
-          nullable: true
-        cancelDateTime:
-          type: string
-          nullable: true
-        endDateTime:
-          type: string
-          nullable: true
-        input:
-          type: string
-          nullable: true
-        output:
-          type: string
-          nullable: true
-        metrics:
-          type: array
-          items:
-            $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.EnrollmentAdminAccessSyncJobExecutionMetricMessage'
-          nullable: true
-          readOnly: true
-      additionalProperties: false
-    IdentityApi.EnrollmentAdminAccessSyncJobs.V1.EnrollmentAdminAccessSyncJobExecutionMetricMessage:
-      type: object
-      properties:
-        entity:
-          type: string
-          nullable: true
-        processed:
-          type: integer
-          format: int32
-        success:
-          type: integer
-          format: int32
-        errors:
-          type: integer
-          format: int32
-      additionalProperties: false
-    IdentityApi.EnrollmentAdminAccessSyncJobs.V1.EnrollmentAdminAccessSyncJobInputMessage:
-      type: object
-      properties:
-        tenant:
-          type: string
-          nullable: true
-        pageSize:
-          type: integer
-          format: int32
-          nullable: true
-        orderBy:
-          type: string
-          nullable: true
-        filter:
-          type: string
-          nullable: true
-        loadBatchSize:
-          type: integer
-          format: int32
-          nullable: true
-        loadBatchThrottle:
-          type: string
-          nullable: true
-      additionalProperties: false
-    IdentityApi.EnrollmentAdminAccessSyncJobs.V1.EnrollmentAdminAccessSyncJobResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          nullable: true
-        createdBy:
-          type: string
-          nullable: true
-        createdDateTime:
-          type: string
-          nullable: true
-        lastModifiedBy:
-          type: string
-          nullable: true
-        lastModifiedDateTime:
-          type: string
-          nullable: true
-        isDeleted:
-          type: boolean
-        tenantId:
-          type: string
-          nullable: true
-        jobTypeId:
-          type: string
-          nullable: true
-        jobTypeName:
-          type: string
-          nullable: true
-        name:
-          type: string
-          nullable: true
-        input:
-          type: string
-          nullable: true
-        active:
-          type: boolean
-        schedule:
-          $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.ScheduleMessage'
-        retryPolicy:
-          $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.RetryPolicyMessage'
-        callbackNotifications:
-          type: array
-          items:
-            $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.CallbackNotificationMessage'
-          nullable: true
-          readOnly: true
-        lastExecution:
-          $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.JobExecutionMessage'
-      additionalProperties: false
-    IdentityApi.EnrollmentAdminAccessSyncJobs.V1.JobExecutionMessage:
-      type: object
-      properties:
-        executionId:
-          type: string
-          nullable: true
-        status:
-          type: string
-          nullable: true
-        queueDateTime:
-          type: string
-          nullable: true
-        startDateTime:
-          type: string
-          nullable: true
-        endDateTime:
-          type: string
-          nullable: true
-        input:
-          type: string
-          nullable: true
-        output:
-          type: string
-          nullable: true
-      additionalProperties: false
-    IdentityApi.EnrollmentAdminAccessSyncJobs.V1.RetryPolicyMessage:
-      type: object
-      properties:
-        backoffMultiplier:
-          type: number
-          format: float
-        initialDelay:
-          type: string
-          nullable: true
-        maxAttempts:
-          type: integer
-          format: int32
-        maxBackoff:
-          type: string
-          nullable: true
-        timeout:
-          type: string
-          nullable: true
-      additionalProperties: false
-    IdentityApi.EnrollmentAdminAccessSyncJobs.V1.ScheduleMessage:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-        beginDate:
-          type: string
-          nullable: true
-        endDate:
-          type: string
-          nullable: true
-        cronExpression:
-          type: string
-          nullable: true
-        timeZone:
-          type: string
-          nullable: true
-      additionalProperties: false
-    IdentityApi.EnrollmentAdminAccessSyncJobs.V1.SearchEnrollmentAdminAccessSyncJobExecutionLogsResponse:
-      type: object
-      properties:
-        pageIndex:
-          type: integer
-          format: int32
-        pageSize:
-          type: integer
-          format: int32
-        count:
-          type: integer
-          format: int64
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.EnrollmentAdminAccessSyncJobExecutionLogMessage'
-          nullable: true
-          readOnly: true
-      additionalProperties: false
-    IdentityApi.EnrollmentAdminAccessSyncJobs.V1.SearchEnrollmentAdminAccessSyncJobExecutionsResponse:
-      type: object
-      properties:
-        pageIndex:
-          type: integer
-          format: int32
-        pageSize:
-          type: integer
-          format: int32
-        count:
-          type: integer
-          format: int64
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.EnrollmentAdminAccessSyncJobExecutionMessage'
-          nullable: true
-          readOnly: true
-      additionalProperties: false
-    IdentityApi.EnrollmentAdminAccessSyncJobs.V1.UpdateEnrollmentAdminAccessSyncJobRequest:
-      type: object
-      properties:
-        jobId:
-          type: string
-          nullable: true
-        tenantId:
-          type: string
-          nullable: true
-        name:
-          type: string
-          nullable: true
-        input:
-          $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.EnrollmentAdminAccessSyncJobInputMessage'
-        schedule:
-          $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.ScheduleMessage'
-        retryPolicy:
-          $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.RetryPolicyMessage'
-        callbackNotifications:
-          type: array
-          items:
-            $ref: '#/components/schemas/IdentityApi.EnrollmentAdminAccessSyncJobs.V1.CallbackNotificationMessage'
-          nullable: true
-          readOnly: true
-      additionalProperties: false
     IdentityApi.InstructionalInsights.V1.CallbackNotificationMessage:
       type: object
       properties:
@@ -65927,13 +65036,6 @@ components:
         name:
           $ref: '#/components/schemas/IdentityApi.User.V1.ExternalSignInNameMessage'
       additionalProperties: false
-    IdentityApi.User.V1.GetAssignablePlatformRoleResponse:
-      type: object
-      properties:
-        platformRole:
-          type: string
-          nullable: true
-      additionalProperties: false
     IdentityApi.User.V1.GetSEOAAsResponse:
       type: object
       properties:
@@ -66750,13 +65852,6 @@ components:
         tenantType:
           type: string
           nullable: true
-        tenantAccess:
-          type: string
-          description: 'S5d spec 4.1: set only on entries that came back through includeDerived: "derived" and the granting partnership id.'
-          nullable: true
-        tenantAccessSource:
-          type: string
-          nullable: true
       additionalProperties: false
     IdentityApi.User.V1.UserTenantProfile+Types+UserTenantEducationOrganizationProfile:
       type: object
@@ -66914,13 +66009,6 @@ components:
           nullable: true
         branding:
           $ref: '#/components/schemas/TenantApi.Tenant.V1.TenantBrandingResponse'
-        tenantAccess:
-          type: string
-          description: "Addendum A (A6): \"derived\" and the granting partnership id on an entry a partnership derives\r\n(SearchUserMeTenants with includeDerived); unset for a direct membership."
-          nullable: true
-        tenantAccessSource:
-          type: string
-          nullable: true
       additionalProperties: false
     IdentityApi.User.V2.UserExtension:
       type: object
@@ -68191,9 +67279,6 @@ components:
           nullable: true
         grantedRole:
           type: string
-          nullable: true
-        grantsSubscribedApplicationAdminRoles:
-          type: boolean
           nullable: true
       additionalProperties: false
     TenantApi.Partnership.V1.TenantType:
@@ -70632,6 +69717,102 @@ components:
         - Deltasincelastjobexecution
         - Deltasincespecificdatetime
       type: string
+    ValidationsApi.Jobs.V1.JobExecutionListResponse:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          nullable: true
+        jobId:
+          type: string
+          nullable: true
+        applicationId:
+          type: string
+          nullable: true
+        jobExecutionId:
+          type: string
+          nullable: true
+        jobExecutionStatus:
+          $ref: '#/components/schemas/ValidationsApi.Jobs.V1.JobExecutionStatus'
+        jobExecutionStartDateTime:
+          type: string
+          nullable: true
+        jobExecutionEndDateTime:
+          type: string
+          nullable: true
+        childJobs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationsApi.Jobs.V1.ChildJob'
+          nullable: true
+          readOnly: true
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationsApi.Jobs.V1.Metric'
+          nullable: true
+          readOnly: true
+      additionalProperties: false
+    ValidationsApi.Jobs.V1.JobExecutionListResponsePaginatedItemsViewModel:
+      type: object
+      properties:
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationsApi.Jobs.V1.JobExecutionListResponse'
+          nullable: true
+      additionalProperties: false
+    ValidationsApi.Jobs.V1.JobExecutionLogEntry:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          nullable: true
+        jobId:
+          type: string
+          nullable: true
+        jobExecutionId:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        messageType:
+          $ref: '#/components/schemas/ValidationsApi.Jobs.V1.MessageType'
+        loggedDateTime:
+          type: string
+          nullable: true
+        errorCode:
+          type: string
+          nullable: true
+      additionalProperties: false
+    ValidationsApi.Jobs.V1.JobExecutionLogEntryPaginatedItemsViewModel:
+      type: object
+      properties:
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationsApi.Jobs.V1.JobExecutionLogEntry'
+          nullable: true
+      additionalProperties: false
     ValidationsApi.Jobs.V1.JobExecutionStatus:
       enum:
         - Unknown
@@ -70842,6 +70023,14 @@ components:
         - Deactivated
         - QueuedForDelete
         - QueuedForScheduleRestart
+      type: string
+    ValidationsApi.Jobs.V1.MessageType:
+      enum:
+        - Information
+        - Warning
+        - SyncError
+        - FatalError
+        - Exception
       type: string
     ValidationsApi.Jobs.V1.Metric:
       type: object
