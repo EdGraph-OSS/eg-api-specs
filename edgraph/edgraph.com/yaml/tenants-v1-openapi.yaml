@@ -13105,8 +13105,8 @@ components:
     TenantApi.Webhook.V1.WebhookSchema:
       enum:
         - Unknown
-        - Edgraph
-        - Cloudeventsv1
+        - EdGraph
+        - CloudEventsV1
       type: string
     TenantApi.Webhook.V1.WebhookSubscriberResponse:
       type: object
