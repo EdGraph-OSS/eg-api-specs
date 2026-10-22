@@ -10768,7 +10768,7 @@ paths:
     post:
       tags:
         - Enrollment Admin / Registrations
-      summary: Rejects a Submitted document of a Registration. Takes no body; the reason is left empty.
+      summary: "Rejects a Submitted document of a Registration. The body is optional: `{ \"reason\": \"...\" }` records\r\nwhy, and the family is shown it."
       operationId: RejectEnrollmentRegistrationDocument
       parameters:
         - name: tenantId
@@ -10789,6 +10789,21 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RejectRegistrationDocumentRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RejectRegistrationDocumentRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RejectRegistrationDocumentRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RejectRegistrationDocumentRequestDto'
       responses:
         '401':
           description: Unauthorized
@@ -10814,6 +10829,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
         '404':
           description: 'The resource could not be found, or it belongs to another registration.'
           content:
@@ -50005,6 +50026,16 @@ components:
           format: uuid
       additionalProperties: false
       description: The body of a Registration submit call. Submit only ever sets Status; the ids must match the route.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RejectRegistrationDocumentRequestDto:
+      type: object
+      properties:
+        reason:
+          maxLength: 2000
+          type: string
+          description: 'Why the document was rejected, at most 2,000 characters; the family is shown it. Omit or leave empty for none.'
+          nullable: true
+      additionalProperties: false
+      description: The optional body of a document rejection.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetRolePersonasRequestDto:
       type: object
       properties:
