@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.0.4",
   "info": {
     "title": "Ed-Fi Operational Data Store API",
     "description": "The Ed-Fi ODS / API enables applications to read and write education data stored in an Ed-Fi ODS through a secure REST interface. \n***\n > *Note: Consumers of ODS / API information should sanitize all data for display and storage. The ODS / API provides reasonable safeguards against cross-site scripting attacks and other malicious content, but the platform does not and cannot guarantee that the data it contains is free of all potentially harmful content.* \n***\n",
@@ -2237,13 +2237,6 @@
             "description": "A school or agency providing free public elementary or secondary education to eligible students under a specific charter granted by the state legislature or other appropriate authority and designated by such authority to be a charter school.",
             "x-nullable": true
           },
-          "identificationCodes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/localEducationAgency_educationOrganizationIdentificationCode"
-            },
-            "description": "An unordered collection of educationOrganizationIdentificationCodes. "
-          },
           "institutionTelephones": {
             "type": "array",
             "items": {
@@ -2340,26 +2333,6 @@
           }
         }
       },
-      "localEducationAgency_educationOrganizationIdentificationCode": {
-        "required": [
-          "educationOrganizationIdentificationSystemDescriptor",
-          "identificationCode"
-        ],
-        "type": "object",
-        "properties": {
-          "educationOrganizationIdentificationSystemDescriptor": {
-            "maxLength": 306,
-            "type": "string",
-            "description": "The school system, state, or agency assigning the identification code.",
-            "x-Ed-Fi-isIdentity": true
-          },
-          "identificationCode": {
-            "maxLength": 60,
-            "type": "string",
-            "description": "A unique number or alphanumeric code that is assigned to an education organization by a school, school system, state, or other agency or entity."
-          }
-        }
-      },
       "localEducationAgency_educationOrganizationInstitutionTelephone": {
         "required": [
           "institutionTelephoneNumberTypeDescriptor",
@@ -2419,13 +2392,6 @@
               "$ref": "#/components/schemas/school_educationOrganizationAddress"
             },
             "description": "An unordered collection of educationOrganizationAddresses. "
-          },
-          "identificationCodes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/school_educationOrganizationIdentificationCode"
-            },
-            "description": "An unordered collection of educationOrganizationIdentificationCodes. "
           },
           "institutionTelephones": {
             "type": "array",
@@ -2539,26 +2505,6 @@
             "type": "string",
             "description": "The classification of the education agency within the geographic boundaries of a state according to the level of administrative and operational control granted by the state.",
             "x-Ed-Fi-isIdentity": true
-          }
-        }
-      },
-      "school_educationOrganizationIdentificationCode": {
-        "required": [
-          "educationOrganizationIdentificationSystemDescriptor",
-          "identificationCode"
-        ],
-        "type": "object",
-        "properties": {
-          "educationOrganizationIdentificationSystemDescriptor": {
-            "maxLength": 306,
-            "type": "string",
-            "description": "The school system, state, or agency assigning the identification code.",
-            "x-Ed-Fi-isIdentity": true
-          },
-          "identificationCode": {
-            "maxLength": 60,
-            "type": "string",
-            "description": "A unique number or alphanumeric code that is assigned to an education organization by a school, school system, state, or other agency or entity."
           }
         }
       },
@@ -2890,36 +2836,10 @@
             },
             "description": "An unordered collection of staffEducationOrganizationAssignmentAssociations. "
           },
-          "electronicMails": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/staff_staffElectronicMail"
-            },
-            "description": "An unordered collection of staffElectronicMails. "
-          },
           "firstName": {
             "maxLength": 75,
             "type": "string",
             "description": "A name given to an individual at birth, baptism, or during another naming ceremony, or through legal change."
-          },
-          "hispanicLatinoEthnicity": {
-            "type": "boolean",
-            "description": "An indication that the individual traces his or her origin or descent to Mexico, Puerto Rico, Cuba, Central, and South America, and other Spanish cultures, regardless of race. The term, \"Spanish origin,\" can be used in addition to \"Hispanic or Latino.\"",
-            "x-nullable": true
-          },
-          "identificationCodes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/staff_staffIdentificationCode"
-            },
-            "description": "An unordered collection of staffIdentificationCodes. "
-          },
-          "languages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/staff_staffLanguage"
-            },
-            "description": "An unordered collection of staffLanguages. "
           },
           "lastSurname": {
             "maxLength": 75,
@@ -2938,30 +2858,10 @@
             "description": "A prefix used to denote the title, degree, position, or seniority of the individual.",
             "x-nullable": true
           },
-          "races": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/staff_staffRace"
-            },
-            "description": "An unordered collection of staffRaces. "
-          },
-          "sexDescriptor": {
-            "maxLength": 306,
-            "type": "string",
-            "description": "The birth sex of the staff member.",
-            "x-nullable": true
-          },
           "staffUniqueId": {
             "maxLength": 32,
             "type": "string",
             "description": "A unique alphanumeric code assigned to a staff."
-          },
-          "telephones": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/staff_staffTelephone"
-            },
-            "description": "An unordered collection of staffTelephones. "
           },
           "_etag": {
             "type": "string",
@@ -2997,104 +2897,6 @@
             "type": "integer",
             "description": "The identifier assigned to an education organization.",
             "format": "int64",
-            "x-Ed-Fi-isIdentity": true
-          }
-        }
-      },
-      "staff_staffElectronicMail": {
-        "required": [
-          "electronicMailTypeDescriptor",
-          "electronicMailAddress"
-        ],
-        "type": "object",
-        "properties": {
-          "electronicMailTypeDescriptor": {
-            "maxLength": 306,
-            "type": "string",
-            "description": "The type of email listed for an individual or organization. For example: Home/Personal, Work, etc.)",
-            "x-Ed-Fi-isIdentity": true
-          },
-          "electronicMailAddress": {
-            "maxLength": 128,
-            "minLength": 7,
-            "type": "string",
-            "description": "The electronic mail (e-mail) address listed for an individual or organization.",
-            "x-Ed-Fi-isIdentity": true
-          }
-        }
-      },
-      "staff_staffIdentificationCode": {
-        "required": [
-          "staffIdentificationSystemDescriptor",
-          "identificationCode"
-        ],
-        "type": "object",
-        "properties": {
-          "staffIdentificationSystemDescriptor": {
-            "maxLength": 306,
-            "type": "string",
-            "description": "A coding scheme that is used for identification and record-keeping purposes by schools, social services, or other agencies to refer to a staff member.",
-            "x-Ed-Fi-isIdentity": true
-          },
-          "identificationCode": {
-            "maxLength": 60,
-            "type": "string",
-            "description": "A unique number or alphanumeric code assigned to a staff member by a school, school system, a state, or other agency or entity."
-          }
-        }
-      },
-      "staff_staffLanguage": {
-        "required": [
-          "languageDescriptor"
-        ],
-        "type": "object",
-        "properties": {
-          "languageDescriptor": {
-            "maxLength": 306,
-            "type": "string",
-            "description": "A specification of which written or spoken communication is being used.",
-            "x-Ed-Fi-isIdentity": true
-          }
-        }
-      },
-      "staff_staffRace": {
-        "required": [
-          "raceDescriptor"
-        ],
-        "type": "object",
-        "properties": {
-          "raceDescriptor": {
-            "maxLength": 306,
-            "type": "string",
-            "description": "The general racial category which most clearly reflects the individual's recognition of his or her community or with which the individual most identifies. The way this data element is listed, it must allow for multiple entries so that each individual can specify all appropriate races.",
-            "x-Ed-Fi-isIdentity": true
-          }
-        }
-      },
-      "staff_staffTelephone": {
-        "required": [
-          "telephoneNumberTypeDescriptor",
-          "telephoneNumber"
-        ],
-        "type": "object",
-        "properties": {
-          "telephoneNumberTypeDescriptor": {
-            "maxLength": 306,
-            "type": "string",
-            "description": "The type of communication number listed for an individual or organization.",
-            "x-Ed-Fi-isIdentity": true
-          },
-          "orderOfPriority": {
-            "minimum": 1,
-            "type": "integer",
-            "description": "The order of priority assigned to telephone numbers to define which number to attempt first, second, etc.",
-            "format": "int32",
-            "x-nullable": true
-          },
-          "telephoneNumber": {
-            "maxLength": 24,
-            "type": "string",
-            "description": "The telephone number including the area code, and extension, if applicable.",
             "x-Ed-Fi-isIdentity": true
           }
         }
@@ -3181,17 +2983,6 @@
             "description": "The login ID for the user; used for security access control interface.",
             "x-nullable": true
           },
-          "sexDescriptor": {
-            "maxLength": 306,
-            "type": "string",
-            "description": "The student's birth sex as reported to the education organization.",
-            "x-nullable": true
-          },
-          "hispanicLatinoEthnicity": {
-            "type": "boolean",
-            "description": "An indication that the individual traces his or her origin or descent to Mexico, Puerto Rico, Cuba, Central, and South America, and other Spanish cultures, regardless of race, as last reported to the education organization. The term, \"Spanish origin,\" can be used in addition to \"Hispanic or Latino.\"",
-            "x-nullable": true
-          },
           "educationOrganizationType": {
             "maxLength": 128,
             "type": "string",
@@ -3202,48 +2993,6 @@
             "type": "integer",
             "description": "The identifier assigned to an education organization.",
             "format": "int64",
-            "x-Ed-Fi-isIdentity": true
-          },
-          "languages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/student_studentEducationOrganizationAssociation_studentEducationOrganizationAssociationLanguage"
-            },
-            "description": "An unordered collection of studentEducationOrganizationAssociationLanguages. "
-          },
-          "races": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/student_studentEducationOrganizationAssociation_studentEducationOrganizationAssociationRace"
-            },
-            "description": "An unordered collection of studentEducationOrganizationAssociationRaces. "
-          }
-        }
-      },
-      "student_studentEducationOrganizationAssociation_studentEducationOrganizationAssociationLanguage": {
-        "required": [
-          "languageDescriptor"
-        ],
-        "type": "object",
-        "properties": {
-          "languageDescriptor": {
-            "maxLength": 306,
-            "type": "string",
-            "description": "A specification of which written or spoken communication is being used.",
-            "x-Ed-Fi-isIdentity": true
-          }
-        }
-      },
-      "student_studentEducationOrganizationAssociation_studentEducationOrganizationAssociationRace": {
-        "required": [
-          "raceDescriptor"
-        ],
-        "type": "object",
-        "properties": {
-          "raceDescriptor": {
-            "maxLength": 306,
-            "type": "string",
-            "description": "The general racial category which most clearly reflects the individual's recognition of his or her community or with which the individual most identifies as last reported to the education organization. The data model allows for multiple entries so that each individual can specify all appropriate races.",
             "x-Ed-Fi-isIdentity": true
           }
         }
