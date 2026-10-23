@@ -49621,7 +49621,6 @@ components:
             - en
             - es
             - vi
-            - sw
             - zh
             - Unknown
           type: string
