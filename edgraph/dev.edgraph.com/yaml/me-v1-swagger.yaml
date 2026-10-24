@@ -987,6 +987,14 @@ components:
           items:
             $ref: '#/components/schemas/EdGraph.Platform.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.UserTenantLicense'
           nullable: true
+        tenantAccess:
+          type: string
+          description: 'Spec 2026-10-17 Addendum A (A6): "derived" on a tenant a partnership derives; null for a direct membership.'
+          nullable: true
+        tenantAccessSource:
+          type: string
+          description: 'Spec 2026-10-17 Addendum A (A6): the granting partnership''s id on a derived tenant; null for a direct membership.'
+          nullable: true
       additionalProperties: false
     EdGraph.Platform.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.UserTenantLicense:
       type: object
@@ -1251,6 +1259,13 @@ components:
         mfaCompleted:
           type: boolean
         tenantType:
+          type: string
+          nullable: true
+        tenantAccess:
+          type: string
+          description: 'S5d spec 4.1: set only on entries that came back through includeDerived: "derived" and the granting partnership id.'
+          nullable: true
+        tenantAccessSource:
           type: string
           nullable: true
       additionalProperties: false
