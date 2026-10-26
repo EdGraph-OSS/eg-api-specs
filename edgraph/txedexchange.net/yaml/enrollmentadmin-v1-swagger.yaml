@@ -195,7 +195,7 @@ paths:
     post:
       tags:
         - Enrollment Admin / AccessConfiguration
-      summary: Sets the personas assigned to a role for the tenant.
+      summary: Sets the persona assigned to a role for the tenant. A role holds at most one persona; an empty list removes it.
       operationId: SetEnrollmentAdminRolePersonas
       parameters:
         - name: tenantId
@@ -6798,7 +6798,7 @@ components:
         ignoreOrganization:
           type: boolean
       additionalProperties: false
-      description: Sets the personas assigned to a role for the tenant in the route.
+      description: 'Sets the persona assigned to a role for the tenant in the route: at most one identifier, none to remove it.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.StartContactImpersonationRequestDto:
       required:
         - channel
