@@ -6574,6 +6574,11 @@ components:
         color:
           type: string
           nullable: true
+        gradeOverrides:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.GradeOverrideRequestDto'
+          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.GeoPositionRequestDto:
       type: object
@@ -6617,6 +6622,28 @@ components:
           nullable: true
       additionalProperties: false
       description: "One grade's seats. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.GradeCapacityRequestDto.SeatsAvailable, EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.GradeCapacityRequestDto.LotteryEligible and\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.GradeCapacityRequestDto.SchoolYear are what the lottery reads; the Salesforce sync normally supplies\r\nthem, and an admin edit may leave them null to keep whatever the row already has unset."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.GradeOverrideRequestDto:
+      required:
+        - schoolNum
+      type: object
+      properties:
+        grades:
+          type: array
+          items:
+            type: string
+          nullable: true
+        schoolNum:
+          minimum: 0
+          type: integer
+          format: int32
+        schoolName:
+          type: string
+          nullable: true
+        dataPage:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: "A school that takes the listed grades inside the polygon instead of the stage's school. Leave\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.FeederPatternPropertiesRequestDto.GradeOverrides out of an update to keep the stored\r\nones; send an empty list to clear them."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.LinearRingRequestDto:
       type: object
       properties:
@@ -8467,6 +8494,11 @@ components:
         color:
           type: string
           nullable: true
+        gradeOverrides:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.GradeOverrideDto'
+          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.GeoPositionDto:
       type: object
@@ -8502,6 +8534,23 @@ components:
           type: boolean
           nullable: true
         schoolYear:
+          type: string
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.GradeOverrideDto:
+      type: object
+      properties:
+        grades:
+          type: array
+          items:
+            type: string
+        schoolNum:
+          type: integer
+          format: int32
+        schoolName:
+          type: string
+          nullable: true
+        dataPage:
           type: string
           nullable: true
       additionalProperties: false
