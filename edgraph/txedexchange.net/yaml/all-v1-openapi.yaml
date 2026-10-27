@@ -10514,7 +10514,7 @@ paths:
       tags:
         - Enrollment Admin / Registrations
       summary: Approves a Registration - sets its status to Approved. Takes no body.
-      description: "Only the status changes and an `EnrollmentRegistrationApprovedEvent` is published; the student\r\nand contacts are provisioned afterwards by `POST .../registrations/{id}/consolidate`. A Rejected\r\nregistration cannot be approved. Terminal: a later Update/UpdateScreen/StartOver progress recompute\r\ndoes not revert it. Returns the identity only. A request with a body is refused with a 400, so a\r\ncaller still sending the former student/contacts/applications payload is not approved without them."
+      description: "Only the status changes and an `EnrollmentRegistrationApprovedEvent` is published; the student\r\nand contacts are provisioned beforehand, while the registration is Submitted, by\r\n`POST .../registrations/{id}/consolidate`. A Rejected\r\nregistration cannot be approved. Terminal: a later Update/UpdateScreen/StartOver progress recompute\r\ndoes not revert it. Returns the identity only. A request with a body is refused with a 400, so a\r\ncaller still sending the former student/contacts/applications payload is not approved without them."
       operationId: ApproveEnrollmentRegistration
       parameters:
         - name: tenantId
@@ -10576,8 +10576,8 @@ paths:
     post:
       tags:
         - Enrollment Admin / Registrations
-      summary: "Consolidates an Approved Registration - provisions its Student, links its Contacts and sets its\r\nApplications' statuses."
-      description: "The registration must already be Approved (412 otherwise); its status is not changed. An\r\n`EnrollmentRegistrationConsolidatedEvent` is published.\r\nThe body's `tenantId` and `id` must match the route.\r\n`student` is required. The student record is matched by `studentId`, else\r\n`externalDataSourceStudentId`, else `studentLocalCode`, and updated; when none matches it\r\nis created from these fields plus the registration's screens (birth date, grade, address), which\r\nneeds `studentLocalCode`. Consolidating again with the returned `studentId` updates\r\nthe same student.\r\nThe `contacts` array merges into the Registration's existing Contacts collection, matched by\r\n`contactId`, else `externalDataSourceContactId` (upsert semantics); each contact that\r\nresolves to a contact record is linked to the student.\r\nThe `applications` array sets the status of the Registration's Applications.\r\nThe registration's `school` (`schoolId`, `schoolLocalCode`, `schoolName`) becomes the\r\nschool of the top-ranked Accepted application, replacing the zoned school, and `languageCode`, while still `Unknown`, from the\r\nprimary-language screen answer.\r\nReturns the registration's identity and the `studentId` it provisioned or linked; re-read\r\nthe registration for its state."
+      summary: "Consolidates a Submitted Registration - provisions its Student, links its Contacts and sets its\r\nApplications' statuses."
+      description: "The registration must be Submitted (412 otherwise); its status is not changed - approve it afterwards.\r\nAn `EnrollmentRegistrationConsolidatedEvent` is published.\r\nThe body's `tenantId` and `id` must match the route. The body carries no student or contact\r\nrecord ids: they are generated when the records are created, and written onto the registration.\r\n`student` is required. The student record is matched by `externalDataSourceStudentId`, else\r\n`studentLocalCode`, and updated; when none matches it is created from these fields plus the\r\nregistration's screens (birth date, grade, address), which needs `studentLocalCode`.\r\nEach entry of the `contacts` array needs a `contactEmail`, `contactPhone` or\r\n`externalDataSourceContactId`. The contact record is matched by `externalDataSourceContactId`,\r\nelse by email or phone, and created (Unverified, named from the registration's contact screens) when\r\nnone matches; it is linked to the student, and its id is set on the Registration's matching contact\r\nentry (matched by that id, else the external id, else email or phone), or a new entry is appended.\r\nThe `applications` array sets the status of the Registration's Applications.\r\nThe registration's `school` (`schoolId`, `schoolLocalCode`, `schoolName`) becomes the\r\nschool of the top-ranked Accepted application, replacing the zoned school, and `languageCode`, while still `Unknown`, from the\r\nprimary-language screen answer.\r\nReturns the registration's identity and the `studentId` it provisioned or linked; re-read\r\nthe registration for its state."
       operationId: ConsolidateEnrollmentRegistration
       parameters:
         - name: tenantId
@@ -10645,7 +10645,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
         '412':
-          description: The registration is not Approved.
+          description: The registration is not Submitted.
           content:
             application/json:
               schema:
@@ -49826,6 +49826,11 @@ components:
         color:
           type: string
           nullable: true
+        gradeOverrides:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.GradeOverrideRequestDto'
+          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.GeoPositionRequestDto:
       type: object
@@ -49869,6 +49874,28 @@ components:
           nullable: true
       additionalProperties: false
       description: "One grade's seats. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.GradeCapacityRequestDto.SeatsAvailable, EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.GradeCapacityRequestDto.LotteryEligible and\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.GradeCapacityRequestDto.SchoolYear are what the lottery reads; the Salesforce sync normally supplies\r\nthem, and an admin edit may leave them null to keep whatever the row already has unset."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.GradeOverrideRequestDto:
+      required:
+        - schoolNum
+      type: object
+      properties:
+        grades:
+          type: array
+          items:
+            type: string
+          nullable: true
+        schoolNum:
+          minimum: 0
+          type: integer
+          format: int32
+        schoolName:
+          type: string
+          nullable: true
+        dataPage:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: "A school that takes the listed grades inside the polygon instead of the stage's school. Leave\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.FeederPatternPropertiesRequestDto.GradeOverrides out of an update to keep the stored\r\nones; send an empty list to clear them."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.LinearRingRequestDto:
       type: object
       properties:
@@ -49923,9 +49950,6 @@ components:
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateContactDto:
       type: object
       properties:
-        contactId:
-          type: string
-          nullable: true
         contactEmail:
           type: string
           nullable: true
@@ -49936,9 +49960,10 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-      description: "One contact to upsert into the Registration's Contacts collection as part of a consolidate call,\r\nmatched by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateContactDto.ContactId - the EnrollmentContact record id - else by\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateContactDto.ExternalDataSourceContactId. An entry matching neither is appended as a new contact."
+      description: "One contact to link as part of a consolidate call. The EnrollmentContact is matched by\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateContactDto.ExternalDataSourceContactId, else by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateContactDto.ContactEmail/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateContactDto.ContactPhone,\r\nand created when none matches; its record id is written onto the Registration's matching contact entry."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateRequestDto:
       required:
+        - contacts
         - student
       type: object
       properties:
@@ -49969,10 +49994,6 @@ components:
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateStudentDto:
       type: object
       properties:
-        studentId:
-          type: string
-          format: uuid
-          nullable: true
         studentLocalCode:
           type: string
           nullable: true
@@ -49989,7 +50010,7 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-      description: "The student a consolidate call provisions. Matched by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateStudentDto.StudentId (the student record id),\r\nelse EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateStudentDto.ExternalDataSourceStudentId, else EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateStudentDto.StudentLocalCode; created when none\r\nmatches, which needs EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateStudentDto.StudentLocalCode."
+      description: "The student a consolidate call provisions. Matched by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateStudentDto.ExternalDataSourceStudentId, else\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateStudentDto.StudentLocalCode; created when none matches, which needs EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateStudentDto.StudentLocalCode.\r\nIts record id is generated on creation and written onto the Registration."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationContactRequestDto:
       type: object
       properties:
@@ -52483,6 +52504,11 @@ components:
         color:
           type: string
           nullable: true
+        gradeOverrides:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.GradeOverrideDto'
+          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.GeoPositionDto:
       type: object
@@ -52518,6 +52544,23 @@ components:
           type: boolean
           nullable: true
         schoolYear:
+          type: string
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.GradeOverrideDto:
+      type: object
+      properties:
+        grades:
+          type: array
+          items:
+            type: string
+        schoolNum:
+          type: integer
+          format: int32
+        schoolName:
+          type: string
+          nullable: true
+        dataPage:
           type: string
           nullable: true
       additionalProperties: false
