@@ -278,13 +278,6 @@ components:
           nullable: true
         branding:
           $ref: '#/components/schemas/TenantApi.Tenant.V1.TenantBrandingResponse'
-        tenantAccess:
-          type: string
-          description: "Addendum A (A6): \"derived\" and the granting partnership id on an entry a partnership derives\r\n(SearchUserMeTenants with includeDerived); unset for a direct membership."
-          nullable: true
-        tenantAccessSource:
-          type: string
-          nullable: true
       additionalProperties: false
     IdentityApi.User.V2.UserExtension:
       type: object

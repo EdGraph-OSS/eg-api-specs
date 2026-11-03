@@ -3444,8 +3444,6 @@ components:
         requiresSchoolYearSelection:
           type: boolean
           nullable: true
-        dms:
-          $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.InstanceDms'
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceApiClientProfileResponse:
       type: object
@@ -3579,72 +3577,6 @@ components:
             $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.InstanceOdsDatabase'
           nullable: true
           readOnly: true
-      additionalProperties: false
-    EdfiAdminApi.EdfiAdmin.V1.InstanceDms:
-      type: object
-      properties:
-        surfaceId:
-          type: string
-          nullable: true
-        cmsTenant:
-          type: string
-          nullable: true
-        status:
-          type: string
-          nullable: true
-        years:
-          type: array
-          items:
-            $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.InstanceDmsYear'
-          nullable: true
-          readOnly: true
-        activeOperationKind:
-          type: string
-          nullable: true
-        lastOperationKind:
-          type: string
-          nullable: true
-        lastOperationStatus:
-          type: string
-          nullable: true
-        lastJobId:
-          type: string
-          nullable: true
-        lastExecutionId:
-          type: string
-          nullable: true
-      additionalProperties: false
-    EdfiAdminApi.EdfiAdmin.V1.InstanceDmsYear:
-      type: object
-      properties:
-        schoolYear:
-          type: integer
-          format: int32
-        databaseName:
-          type: string
-          nullable: true
-        dataStoreId:
-          type: integer
-          format: int32
-          nullable: true
-        seed:
-          type: string
-          nullable: true
-        status:
-          type: string
-          nullable: true
-        tier:
-          type: string
-          nullable: true
-        resetOrdinal:
-          type: integer
-          format: int32
-        lastStep:
-          type: string
-          nullable: true
-        lastStepStatus:
-          type: string
-          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceOdsDatabase:
       type: object

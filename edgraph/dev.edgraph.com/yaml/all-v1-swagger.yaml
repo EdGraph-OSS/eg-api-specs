@@ -25032,58 +25032,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-  '/tenants/{tenantId}/edfiadmin/instances/{instanceId}/retry':
-    post:
-      tags:
-        - Instances
-      summary: Retries the last failed operation of an Ed-Fi v8 instance from its persisted parameters.
-      operationId: RetryInstanceOperationAsync
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-        - name: instanceId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-      responses:
-        '401':
-          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: An unhandled error occurred on the server.See the response body for details.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '200':
-          description: The operation was resubmitted.
-        '400':
-          description: Bad Request. The request was invalid and cannot be completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
-        '404':
-          description: The resource could not be found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/edfiadmin/instances/{instanceId}/testconnection':
     post:
       tags:
@@ -25307,10 +25255,6 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: seed
-          in: query
-          schema:
-            type: string
       responses:
         '401':
           description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
@@ -44441,45 +44385,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
-  '/tenants/{tenantId}/assignable-platform-role':
-    get:
-      tags:
-        - Users
-      summary: 'The platform role this tenant allows its users to hold (Platform.Support in the EdGraph tenant, Platform.Partner in a live partner tenant), or null when it allows none'
-      operationId: GetAssignablePlatformRoleAsync
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '401':
-          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: An unhandled error occurred on the server.See the response body for details.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '200':
-          description: The requested resource was successfully retrieved.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/IdentityApi.User.V1.GetAssignablePlatformRoleResponse'
   '/tenants/{tenantId}/users/{email}/status':
     get:
       tags:
@@ -45080,7 +44985,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
         '403':
-          description: 'A platform role was sent by a partnership-derived tenant administrator, or for a tenant whose administrators cannot assign one.'
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
           content:
             application/json:
               schema:
@@ -51707,10 +51612,6 @@ components:
           maxLength: 12
           minLength: 1
           type: string
-        platformRole:
-          type: string
-          description: "Optional. The platform role on this tenant's membership of the user: \"None\" removes it, \"Platform.Support\" or \"Platform.Partner\" grants the one the tenant allows\r\n(Identity refuses any other). Omit (null) to leave it unchanged - send it only when the admin changed it. \"Platform.Admin\" is never accepted here."
-          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.UpdateUserPreferenceRequest:
       type: object
@@ -57022,14 +56923,6 @@ components:
           items:
             $ref: '#/components/schemas/EdGraph.Platform.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.UserTenantLicense'
           nullable: true
-        tenantAccess:
-          type: string
-          description: 'Spec 2026-10-17 Addendum A (A6): "derived" on a tenant a partnership derives; null for a direct membership.'
-          nullable: true
-        tenantAccessSource:
-          type: string
-          description: 'Spec 2026-10-17 Addendum A (A6): the granting partnership''s id on a derived tenant; null for a direct membership.'
-          nullable: true
       additionalProperties: false
     EdGraph.Platform.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.UserLicense:
       type: object
@@ -58908,10 +58801,6 @@ components:
             format: int32
           nullable: true
           readOnly: true
-        seed:
-          type: string
-          description: 'Ed-Fi v8 only: None, Descriptors or GrandBend; unset means None.'
-          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.ApplicationEndpoint:
       type: object
@@ -59285,10 +59174,6 @@ components:
         state:
           type: string
           nullable: true
-        cmsTenant:
-          type: string
-          description: 'Ed-Fi v8 only: the CMS tenant name; unset derives it from instanceName.'
-          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.CreateInstanceRequestSchoolYear:
       type: object
@@ -59301,10 +59186,6 @@ components:
           nullable: true
         odsBackupCode:
           type: string
-          nullable: true
-        seed:
-          type: string
-          description: 'Ed-Fi v8 only: None, Descriptors or GrandBend; unset means None.'
           nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.CreateLocalEducationAgencyRequest:
@@ -60285,8 +60166,6 @@ components:
         requiresSchoolYearSelection:
           type: boolean
           nullable: true
-        dms:
-          $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.InstanceDms'
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceApiClientCreatedResponse:
       type: object
@@ -60596,72 +60475,6 @@ components:
             $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.InstanceOdsDatabase'
           nullable: true
           readOnly: true
-      additionalProperties: false
-    EdfiAdminApi.EdfiAdmin.V1.InstanceDms:
-      type: object
-      properties:
-        surfaceId:
-          type: string
-          nullable: true
-        cmsTenant:
-          type: string
-          nullable: true
-        status:
-          type: string
-          nullable: true
-        years:
-          type: array
-          items:
-            $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.InstanceDmsYear'
-          nullable: true
-          readOnly: true
-        activeOperationKind:
-          type: string
-          nullable: true
-        lastOperationKind:
-          type: string
-          nullable: true
-        lastOperationStatus:
-          type: string
-          nullable: true
-        lastJobId:
-          type: string
-          nullable: true
-        lastExecutionId:
-          type: string
-          nullable: true
-      additionalProperties: false
-    EdfiAdminApi.EdfiAdmin.V1.InstanceDmsYear:
-      type: object
-      properties:
-        schoolYear:
-          type: integer
-          format: int32
-        databaseName:
-          type: string
-          nullable: true
-        dataStoreId:
-          type: integer
-          format: int32
-          nullable: true
-        seed:
-          type: string
-          nullable: true
-        status:
-          type: string
-          nullable: true
-        tier:
-          type: string
-          nullable: true
-        resetOrdinal:
-          type: integer
-          format: int32
-        lastStep:
-          type: string
-          nullable: true
-        lastStepStatus:
-          type: string
-          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceEndpointsResponse:
       type: object
@@ -66358,13 +66171,6 @@ components:
         name:
           $ref: '#/components/schemas/IdentityApi.User.V1.ExternalSignInNameMessage'
       additionalProperties: false
-    IdentityApi.User.V1.GetAssignablePlatformRoleResponse:
-      type: object
-      properties:
-        platformRole:
-          type: string
-          nullable: true
-      additionalProperties: false
     IdentityApi.User.V1.GetSEOAAsResponse:
       type: object
       properties:
@@ -67181,13 +66987,6 @@ components:
         tenantType:
           type: string
           nullable: true
-        tenantAccess:
-          type: string
-          description: 'S5d spec 4.1: set only on entries that came back through includeDerived: "derived" and the granting partnership id.'
-          nullable: true
-        tenantAccessSource:
-          type: string
-          nullable: true
       additionalProperties: false
     IdentityApi.User.V1.UserTenantProfile+Types+UserTenantEducationOrganizationProfile:
       type: object
@@ -67345,13 +67144,6 @@ components:
           nullable: true
         branding:
           $ref: '#/components/schemas/TenantApi.Tenant.V1.TenantBrandingResponse'
-        tenantAccess:
-          type: string
-          description: "Addendum A (A6): \"derived\" and the granting partnership id on an entry a partnership derives\r\n(SearchUserMeTenants with includeDerived); unset for a direct membership."
-          nullable: true
-        tenantAccessSource:
-          type: string
-          nullable: true
       additionalProperties: false
     IdentityApi.User.V2.UserExtension:
       type: object
@@ -68622,9 +68414,6 @@ components:
           nullable: true
         grantedRole:
           type: string
-          nullable: true
-        grantsSubscribedApplicationAdminRoles:
-          type: boolean
           nullable: true
       additionalProperties: false
     TenantApi.Partnership.V1.TenantType:
