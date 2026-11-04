@@ -11091,7 +11091,7 @@ paths:
       tags:
         - Enrollment Admin / Registrations
       summary: "Gets a Registration's requirements: the district-wide ones once, and each Application's own\r\nfrom its program, every one with a state derived from its type and the registration's document."
-      description: "`state` is one of `Missing`, `PendingReview`, `Verified`, `Rejected` or\r\n            `NotApplicable`. A requirement that is not a document staff review is `NotApplicable`\r\n            and never `Verified`."
+      description: "`state` is one of `Missing`, `PendingReview`, `Verified`, `Rejected` or\r\n            `NotApplicable`. A requirement that is not a document staff review is `NotApplicable`\r\n            and never `Verified`.\r\n            `immunizationRecords` always holds five slots, `Document #1` to `Document #5`, filled in\r\n            upload order; a slot nothing was uploaded to is `Missing`."
       operationId: GetEnrollmentRegistrationRequirements
       parameters:
         - name: tenantId
@@ -52564,6 +52564,32 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ImmunizationRecordDto:
+      type: object
+      properties:
+        requirementCode:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        requirementType:
+          type: string
+          nullable: true
+        isRequired:
+          type: boolean
+        state:
+          type: string
+          nullable: true
+        reason:
+          type: string
+          nullable: true
+        lastUpdatedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: false
+      description: "One of the five immunization record slots. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ImmunizationRecordDto.RequirementCode is `ImmunizationRecord_1`\r\nto `ImmunizationRecord_5`; the other fields read as on EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.LinearRingDto:
       type: object
       properties:
@@ -53057,8 +53083,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRequirementsDto'
+        immunizationRecords:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ImmunizationRecordDto'
       additionalProperties: false
-      description: "What the registration detail page shows for requirements: the district-wide ones once, and each\r\napplication's own from its program."
+      description: "What the registration detail page shows for requirements: the district-wide ones once, and each\r\napplication's own from its program. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementsResponseDto.ImmunizationRecords always holds five slots,\r\n`Document #1` to `Document #5`, whether or not the parent has uploaded anything."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementMutationResultDto:
       type: object
       properties:
