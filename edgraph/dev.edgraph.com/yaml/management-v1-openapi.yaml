@@ -639,163 +639,6 @@ paths:
                 $ref: '#/components/schemas/AnalyticsApi.Lakehouses.V1.PaginatedLakehouseRecordsResponse'
         '400':
           description: Bad Request. The request was invalid and cannot be completed. See the response body for specific validation errors. This will typically be an issue with the query parameters or the request body values.
-  /analytics/report-sync/approve:
-    post:
-      tags:
-        - Analytics / Report sync
-      summary: 'Approves report sync items, recorded against the calling user.'
-      operationId: ApproveAsync
-      requestBody:
-        content:
-          application/json-patch+json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.ReportSyncApproveRequest'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.ReportSyncApproveRequest'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.ReportSyncApproveRequest'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.ReportSyncApproveRequest'
-      responses:
-        '401':
-          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: An unhandled error occurred on the server. See the response body for details.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '200':
-          description: The items were processed. Each result carries its own outcome.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.ReportSyncApproveResultViewModel'
-        '400':
-          description: Bad Request. See the response body for specific validation errors.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
-  /analytics/report-sync/run:
-    post:
-      tags:
-        - Analytics / Report sync
-      summary: Runs the report reconcile DSL job now.
-      operationId: RunAsync
-      responses:
-        '401':
-          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: An unhandled error occurred on the server. See the response body for details.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '202':
-          description: The job execution was successfully requested.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DataSyncApi.Dsl.V1.DslJobExecutedResponse'
-  /analytics/report-sync:
-    get:
-      tags:
-        - Analytics / Report sync
-      summary: 'Lists report sync statuses, with when the last reconcile run finished.'
-      operationId: GetAsync
-      parameters:
-        - name: workspaceName
-          in: query
-          description: Workspace name filter (contains).
-          schema:
-            type: string
-        - name: kind
-          in: query
-          description: Item kind filter.
-          schema:
-            type: string
-        - name: status
-          in: query
-          description: Status filter. Repeat for several.
-          schema:
-            type: array
-            items:
-              type: string
-        - name: page
-          in: query
-          description: 1-based page number.
-          schema:
-            maximum: 2147483647
-            minimum: 1
-            type: integer
-            format: int32
-            default: 1
-        - name: pageSize
-          in: query
-          description: 'Page size, 1 to 200.'
-          schema:
-            maximum: 200
-            minimum: 1
-            type: integer
-            format: int32
-            default: 50
-      responses:
-        '401':
-          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: An unhandled error occurred on the server. See the response body for details.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '200':
-          description: The requested resource was successfully retrieved.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.ReportSyncPageViewModel'
-        '400':
-          description: Bad Request. See the response body for specific validation errors.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
   '/apiresources/{apiResourceId}':
     delete:
       tags:
@@ -20777,45 +20620,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
-  '/tenants/{tenantId}/assignable-platform-role':
-    get:
-      tags:
-        - Users
-      summary: 'The platform role this tenant allows its users to hold (Platform.Admin in the Global Tenant, Platform.Support in the EdGraph tenant, Platform.Partner in a live partner tenant), or null when it allows none'
-      operationId: GetAssignablePlatformRoleAsync
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '401':
-          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: An unhandled error occurred on the server.See the response body for details.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '200':
-          description: The requested resource was successfully retrieved.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/IdentityApi.User.V1.GetAssignablePlatformRoleResponse'
   '/tenants/{tenantId}/users/{email}/status':
     get:
       tags:
@@ -26376,28 +26180,6 @@ components:
           nullable: true
       additionalProperties: false
       description: "Body for `POST impersonation/start`. The caller's own admin access token is never part of\r\nthis body - it is read from the request's `Authorization` header, exactly as every other\r\nManagement call already works."
-    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.ReportSyncApproveItem:
-      type: object
-      properties:
-        key:
-          type: string
-          nullable: true
-        action:
-          type: string
-          nullable: true
-        targetReportId:
-          type: string
-          nullable: true
-      additionalProperties: false
-    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.ReportSyncApproveRequest:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.ReportSyncApproveItem'
-          nullable: true
-      additionalProperties: false
     EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Requests.Role:
       type: object
       properties:
@@ -27169,151 +26951,6 @@ components:
           nullable: true
       additionalProperties: false
       description: "The success payload for `POST impersonation/start` and `POST impersonation/renew`.\r\nDeliberately carries only what EdGraph.HttpAggregators.Management.Api.Services.Impersonation.ImpersonationTokenResult\r\nitself carries on success - no error detail exists anywhere upstream of this type, so none can\r\nleak through it."
-    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.ReportSyncApproveResultViewModel:
-      type: object
-      properties:
-        key:
-          type: string
-          nullable: true
-        outcome:
-          type: string
-          nullable: true
-        message:
-          type: string
-          nullable: true
-      additionalProperties: false
-    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.ReportSyncCandidateViewModel:
-      type: object
-      properties:
-        reportId:
-          type: string
-          nullable: true
-        name:
-          type: string
-          nullable: true
-      additionalProperties: false
-    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.ReportSyncDatasetStateViewModel:
-      type: object
-      properties:
-        datasetId:
-          type: string
-          nullable: true
-        isEffectiveIdentityRequired:
-          type: boolean
-        isEffectiveIdentityRolesRequired:
-          type: boolean
-      additionalProperties: false
-    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.ReportSyncItemViewModel:
-      type: object
-      properties:
-        key:
-          type: string
-          nullable: true
-        kind:
-          type: string
-          nullable: true
-        tenantId:
-          type: string
-          nullable: true
-        workspaceGroupId:
-          type: string
-          nullable: true
-        workspaceName:
-          type: string
-          nullable: true
-        renamePending:
-          type: boolean
-        configGroupId:
-          type: string
-          nullable: true
-        reportDocId:
-          type: string
-          nullable: true
-        fabricItemId:
-          type: string
-          nullable: true
-        displayName:
-          type: string
-          nullable: true
-        status:
-          type: string
-          nullable: true
-        inMongo:
-          type: boolean
-        current:
-          $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.ReportSyncLinkStateViewModel'
-        proposed:
-          $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.ReportSyncLinkStateViewModel'
-        candidates:
-          type: array
-          items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.ReportSyncCandidateViewModel'
-          nullable: true
-        reportKeys:
-          type: array
-          items:
-            type: string
-          nullable: true
-        firstSeen:
-          type: string
-          nullable: true
-        lastChecked:
-          type: string
-          nullable: true
-        lastApproved:
-          type: string
-          nullable: true
-        approvedBy:
-          type: string
-          nullable: true
-        seenAtOpen:
-          type: boolean
-        allowedActions:
-          type: array
-          items:
-            type: string
-          nullable: true
-      additionalProperties: false
-    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.ReportSyncLinkStateViewModel:
-      type: object
-      properties:
-        groupId:
-          type: string
-          nullable: true
-        reportId:
-          type: string
-          nullable: true
-        reportName:
-          type: string
-          nullable: true
-        datasets:
-          type: array
-          items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.ReportSyncDatasetStateViewModel'
-          nullable: true
-      additionalProperties: false
-    EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.ReportSyncPageViewModel:
-      type: object
-      properties:
-        pageIndex:
-          type: integer
-          format: int32
-        pageSize:
-          type: integer
-          format: int32
-        count:
-          type: integer
-          format: int64
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.ReportSyncItemViewModel'
-          nullable: true
-        lastRunFinishedAt:
-          type: string
-          nullable: true
-      additionalProperties: false
-      description: "One page of report sync statuses. Same paging fields as PaginatedItemsViewModel (pageIndex, pageSize, count, data),\r\nplus when the last reconcile run finished."
     EdGraph.HttpAggregators.Management.Api.Controllers.v1.ViewModels.Responses.Role:
       type: object
       properties:
@@ -32206,13 +31843,6 @@ components:
         name:
           $ref: '#/components/schemas/IdentityApi.User.V1.ExternalSignInNameMessage'
       additionalProperties: false
-    IdentityApi.User.V1.GetAssignablePlatformRoleResponse:
-      type: object
-      properties:
-        platformRole:
-          type: string
-          nullable: true
-      additionalProperties: false
     IdentityApi.User.V1.GetSEOAAsResponse:
       type: object
       properties:
@@ -33020,13 +32650,6 @@ components:
           nullable: true
         branding:
           $ref: '#/components/schemas/TenantApi.Tenant.V1.TenantBrandingResponse'
-        tenantAccess:
-          type: string
-          description: "Addendum A (A6): \"derived\" and the granting partnership id on an entry a partnership derives\r\n(SearchUserMeTenants with includeDerived); unset for a direct membership."
-          nullable: true
-        tenantAccessSource:
-          type: string
-          nullable: true
       additionalProperties: false
     IdentityApi.User.V2.UserExtension:
       type: object
@@ -34979,9 +34602,6 @@ components:
           nullable: true
         grantedRole:
           type: string
-          nullable: true
-        grantsSubscribedApplicationAdminRoles:
-          type: boolean
           nullable: true
       additionalProperties: false
     TenantApi.Partnership.V1.TenantType:
