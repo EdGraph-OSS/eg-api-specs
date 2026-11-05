@@ -11980,14 +11980,14 @@ components:
         - MultiStatus
         - AlreadyReported
         - IMUsed
-        - Ambiguous
-        - Moved
-        - Redirect
-        - RedirectMethod
+        - MultipleChoices
+        - MovedPermanently
+        - Found
+        - SeeOther
         - NotModified
         - UseProxy
         - Unused
-        - TemporaryRedirect
+        - RedirectKeepVerb
         - PermanentRedirect
         - BadRequest
         - Unauthorized

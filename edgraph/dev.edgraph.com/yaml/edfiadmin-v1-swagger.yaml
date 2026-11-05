@@ -8871,6 +8871,8 @@ components:
         metadataJson:
           type: string
           nullable: true
+        dmsSurface:
+          $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDmsSurface'
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDeletedResponse:
       type: object
@@ -8879,6 +8881,31 @@ components:
           type: string
           nullable: true
         tenantId:
+          type: string
+          nullable: true
+      additionalProperties: false
+    EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDmsSurface:
+      type: object
+      properties:
+        surfaceId:
+          type: string
+          nullable: true
+        engine:
+          type: string
+          nullable: true
+        dataStandard:
+          type: string
+          nullable: true
+        extensions:
+          type: array
+          items:
+            type: string
+          nullable: true
+          readOnly: true
+        surfaceStatus:
+          type: string
+          nullable: true
+        dmsPublicBaseUrl:
           type: string
           nullable: true
       additionalProperties: false
@@ -8944,6 +8971,8 @@ components:
         metadataJson:
           type: string
           nullable: true
+        dmsSurface:
+          $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDmsSurface'
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionPaginatedItemsResponse:
       type: object
@@ -9830,6 +9859,8 @@ components:
         requiresSchoolYearSelection:
           type: boolean
           nullable: true
+        dms:
+          $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.InstanceDms'
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceListModelPaginatedItemsViewModel:
       type: object
@@ -11236,14 +11267,14 @@ components:
         - MultiStatus
         - AlreadyReported
         - IMUsed
-        - Ambiguous
-        - Moved
-        - Redirect
-        - RedirectMethod
+        - MultipleChoices
+        - MovedPermanently
+        - Found
+        - SeeOther
         - NotModified
         - UseProxy
         - Unused
-        - TemporaryRedirect
+        - RedirectKeepVerb
         - PermanentRedirect
         - BadRequest
         - Unauthorized
