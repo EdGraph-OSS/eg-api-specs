@@ -10113,6 +10113,9 @@ components:
         secretExpirationDateTime:
           type: string
           nullable: true
+        isTenantAdmin:
+          type: boolean
+          nullable: true
       additionalProperties: false
     IdentityApi.ApiClient.V1.RegenerateApiClientSecretRequest:
       type: object
@@ -10157,6 +10160,9 @@ components:
             $ref: '#/components/schemas/IdentityApi.ApiClient.V1.ApiClaim'
           nullable: true
           readOnly: true
+        isTenantAdmin:
+          type: boolean
+          nullable: true
       additionalProperties: false
     IdentityApi.ClientSettingsType.V1.ClientSettingsTypeResponse:
       type: object
