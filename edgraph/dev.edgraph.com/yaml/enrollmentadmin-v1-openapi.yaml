@@ -3981,6 +3981,63 @@ paths:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/documents/{documentId}':
+    delete:
+      tags:
+        - Enrollment Admin / Registrations
+      summary: "Deletes a document's current file. The file before it, if the document kept one, becomes the current\r\none with the state it had; with none left the requirement is Missing again. Takes no body. Needs Full\r\naccess to the Registrations screen."
+      operationId: DeleteEnrollmentRegistrationDocument
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: documentId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: The caller does not have Full access to the Registrations screen.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '204':
+          description: The file was deleted.
+        '404':
+          description: 'The resource could not be found, or it belongs to another registration.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '412':
+          description: 'The registration is Rejected or Exited, so its documents no longer change.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
     get:
       tags:
         - Enrollment Admin / Registrations
@@ -4032,6 +4089,91 @@ paths:
                 $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto'
         '404':
           description: 'The resource could not be found, or it belongs to another registration.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+    put:
+      tags:
+        - Enrollment Admin / Registrations
+      summary: "Replaces a document's file. Sent as `multipart/form-data` with `file` and an optional\r\n`verifyOnUpload` (default false). The new file becomes the current one, whatever state the document\r\nwas in, and the oldest file is removed once the document holds more than two. Needs Full access to the\r\nRegistrations screen."
+      operationId: ReplaceEnrollmentRegistrationDocument
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: documentId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                File:
+                  type: string
+                  description: The file. Its type and size are checked by the enrollment service.
+                  format: binary
+                VerifyOnUpload:
+                  type: boolean
+                  description: When true the file is Verified at once; otherwise it waits in Pending Review. Defaults to false.
+            encoding:
+              File:
+                style: form
+              VerifyOnUpload:
+                style: form
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: The caller does not have Full access to the Registrations screen.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: 'The document, with the uploaded file as its current one.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto'
+        '400':
+          description: 'Bad Request. The file is not an allowed type or is too large, or it is missing.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: 'The resource could not be found, or it belongs to another registration.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '412':
+          description: 'The registration is Rejected or Exited, so its documents no longer change.'
           content:
             application/json:
               schema:
@@ -4266,6 +4408,97 @@ paths:
                 $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementsResponseDto'
         '404':
           description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/screens/{screenCode}/documents':
+    post:
+      tags:
+        - Enrollment Admin / Registrations
+      summary: "Uploads a document on behalf of the family. Sent as `multipart/form-data` with `requirementCode`,\r\n`file` and an optional `verifyOnUpload` (default false). Unchecked, the file waits in Pending Review;\r\nchecked, it is Verified at once. A document keeps its two most recent files, and only the newest is shown.\r\nNeeds Full access to the Registrations screen."
+      operationId: UploadEnrollmentRegistrationDocument
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: screenCode
+          in: path
+          description: The screen the requirement's document belongs to.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                RequirementCode:
+                  type: string
+                  description: The requirement the document satisfies.
+                File:
+                  type: string
+                  description: The file. Its type and size are checked by the enrollment service.
+                  format: binary
+                VerifyOnUpload:
+                  type: boolean
+                  description: When true the file is Verified at once; otherwise it waits in Pending Review. Defaults to false.
+            encoding:
+              RequirementCode:
+                style: form
+              File:
+                style: form
+              VerifyOnUpload:
+                style: form
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: The caller does not have Full access to the Registrations screen.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: 'The document, with the uploaded file as its current one.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto'
+        '400':
+          description: 'Bad Request. The file is not an allowed type or is too large, or a field is missing.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '412':
+          description: 'The registration is Rejected or Exited, so its documents no longer change.'
           content:
             application/json:
               schema:
@@ -8891,8 +9124,11 @@ components:
           type: string
           format: date-time
           nullable: true
+        updatedBy:
+          type: string
+          nullable: true
       additionalProperties: false
-      description: "A document a family uploaded for a registration. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.State is the stored review state:\r\n`Required`, `Submitted`, `Accepted`, `Rejected` or `Resubmit`.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.FileName and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.ContentType are derived from the stored file's name.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.SizeBytes is the stored file length, absent for a file stored before it was kept.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.CreatedDateTime is when the document was first uploaded; EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.UpdatedDateTime is\r\nits last change, upload or review."
+      description: "A document a family uploaded for a registration. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.State is the stored review state:\r\n`Required`, `Submitted`, `Accepted`, `Rejected` or `Resubmit`.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.FileName and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.ContentType are derived from the stored file's name.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.SizeBytes is the stored file length, absent for a file stored before it was kept.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.CreatedDateTime is when the document was first uploaded; EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.UpdatedDateTime is\r\nits last change, upload or review, and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.UpdatedBy is who made it. Only the document's newest\r\nfile is described; it keeps at most two."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDtoPaginatedItemsViewModel:
       type: object
       properties:
