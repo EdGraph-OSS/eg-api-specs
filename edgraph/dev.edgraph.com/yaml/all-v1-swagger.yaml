@@ -11612,7 +11612,7 @@ paths:
       tags:
         - Enrollment Admin / Registrations
       summary: "Lists Registrations - a parent's enrollment submission requesting a seat in a School/District\r\nProgram - one row per registration, newest update first."
-      description: "`search` matches the student's name, the record id, the student's local code and the school name.\r\n            `pathwayType` is a pathway type name. `status` is a registration status\r\n            (`Pending`, `InProgress`, `Submitted`, `Approved`, `Rejected`, `Exited`) or\r\n            `Deleted`, which lists the deleted registrations that are hidden otherwise. The filters combine with\r\n            `filter`. Rows that tie on the sort keep one order from page to page."
+      description: "`search` matches the student's name, the record id, the student's local code and the school name.\r\n            `pathwayType` is a pathway type name. `status` is a registration status\r\n            (`Pending`, `InProgress`, `Submitted`, `Approved`, `Rejected`, `Exited`) or\r\n            `Deleted`, which lists the deleted registrations that are hidden otherwise. `grade` is a\r\n            comma-separated list of grade codes (`EE`, `PK3`, `PK4`, `PK`, `KG`, `01`..`12`),\r\n            any of which matches; a registration with no grade matches none. The filters combine with\r\n            `filter`. Rows that tie on the sort keep one order from page to page."
       operationId: GetEnrollmentRegistrations
       parameters:
         - name: tenantId
@@ -11654,6 +11654,11 @@ paths:
           schema:
             type: string
         - name: status
+          in: query
+          description: ''
+          schema:
+            type: string
+        - name: grade
           in: query
           description: ''
           schema:
@@ -53429,6 +53434,9 @@ components:
         studentLocalCode:
           type: string
           nullable: true
+        grade:
+          type: string
+          nullable: true
         schoolName:
           type: string
           nullable: true
@@ -53470,7 +53478,7 @@ components:
           format: date-time
           nullable: true
       additionalProperties: false
-      description: "One row of the registrations list. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.Status is a registration status\r\n(`Pending`, `InProgress`, `Submitted`, `Approved`, `Rejected`, `Exited`) or\r\n`Deleted`, which wins over the stored status. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.SchoolName is the consolidated school,\r\nelse the school of the top-ranked application's program. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.LastUpdatedDateTime is the last\r\nwrite, or the creation when there was none. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.Progress is a percentage, absent when the\r\nstored value cannot be read."
+      description: "One row of the registrations list. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.Status is a registration status\r\n(`Pending`, `InProgress`, `Submitted`, `Approved`, `Rejected`, `Exited`) or\r\n`Deleted`, which wins over the stored status. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.Grade is the student's grade code (`KG`,\r\n`01`..), absent until the family answers it. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.SchoolName is the consolidated school,\r\nelse the school of the top-ranked application's program. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.LastUpdatedDateTime is the last\r\nwrite, or the creation when there was none. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.Progress is a percentage, absent when the\r\nstored value cannot be read."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListPageDto:
       type: object
       properties:
