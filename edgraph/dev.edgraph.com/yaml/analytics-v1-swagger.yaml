@@ -3313,6 +3313,10 @@ components:
         metadataJson:
           type: string
           nullable: true
+        dmsSurfaceJson:
+          type: string
+          description: Privileged connection administration; removed from ordinary tenant detail responses.
+          nullable: true
         dmsSurface:
           $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDmsSurface'
       additionalProperties: false

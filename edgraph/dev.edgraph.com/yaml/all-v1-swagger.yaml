@@ -45776,6 +45776,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/edfiadmin/connections/surface-access':
+    get:
+      tags:
+        - v1
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/edfiadmin/instances/{instanceId}/retier':
     post:
       tags:
@@ -59642,6 +59672,9 @@ components:
         adminApiUrl:
           type: string
           nullable: true
+        dmsSurfaceJson:
+          type: string
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.CreateEducationServiceCenterRequest:
       type: object
@@ -60274,6 +60307,10 @@ components:
           nullable: true
         metadataJson:
           type: string
+          nullable: true
+        dmsSurfaceJson:
+          type: string
+          description: Privileged connection administration; removed from ordinary tenant detail responses.
           nullable: true
         dmsSurface:
           $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDmsSurface'
@@ -62325,6 +62362,9 @@ components:
         discoveryDocument:
           $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.OdsApiDiscoveryApi'
         adminApiUrl:
+          type: string
+          nullable: true
+        dmsSurfaceJson:
           type: string
           nullable: true
       additionalProperties: false
