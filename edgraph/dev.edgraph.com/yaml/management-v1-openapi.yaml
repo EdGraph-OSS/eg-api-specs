@@ -22509,6 +22509,195 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/edfiadmin/surfaces/{connectionId}':
+    delete:
+      tags:
+        - v1
+      operationId: DeleteSurface
+      parameters:
+        - name: connectionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+    get:
+      tags:
+        - v1
+      operationId: GetSurface
+      parameters:
+        - name: connectionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+    put:
+      tags:
+        - v1
+      operationId: UpdateSurface
+      parameters:
+        - name: connectionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.UpdateEdFiConnectionRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.UpdateEdFiConnectionRequest'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.UpdateEdFiConnectionRequest'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.UpdateEdFiConnectionRequest'
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  /edfiadmin/surfaces:
+    get:
+      tags:
+        - v1
+      operationId: GetSurfaces
+      parameters:
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 10
+        - name: pageIndex
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: orderBy
+          in: query
+          schema:
+            type: string
+            default: ''
+        - name: filter
+          in: query
+          schema:
+            type: string
+            default: ''
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+    post:
+      tags:
+        - v1
+      operationId: CreateSurface
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.CreateEdFiConnectionRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.CreateEdFiConnectionRequest'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.CreateEdFiConnectionRequest'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.CreateEdFiConnectionRequest'
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/webhooks/{webhookId}/logs':
     get:
       tags:
@@ -28219,6 +28408,59 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    EdfiAdminApi.EdfiAdmin.V1.CreateEdFiConnectionRequest:
+      type: object
+      properties:
+        connectionId:
+          type: string
+          nullable: true
+        tenantId:
+          type: string
+          nullable: true
+        connectionType:
+          type: string
+          nullable: true
+        connectionName:
+          type: string
+          nullable: true
+        edFiVersion:
+          type: string
+          nullable: true
+        edFiExtension:
+          type: string
+          nullable: true
+        metadataUrl:
+          type: string
+          nullable: true
+        clientId:
+          type: string
+          nullable: true
+        clientSecret:
+          type: string
+          nullable: true
+        tokenUrl:
+          type: string
+          nullable: true
+        resourcesUrl:
+          type: string
+          nullable: true
+        instanceType:
+          $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.InstanceType'
+        discoveryUrl:
+          type: string
+          nullable: true
+        metadataJson:
+          type: string
+          nullable: true
+        discoveryDocument:
+          $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.OdsApiDiscoveryApi'
+        adminApiUrl:
+          type: string
+          nullable: true
+        dmsSurfaceJson:
+          type: string
+          nullable: true
+      additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.CreateOnboardingStepRequest:
       type: object
       properties:
@@ -28300,6 +28542,37 @@ components:
         metadataJson:
           type: string
           nullable: true
+        dmsSurfaceJson:
+          type: string
+          description: Privileged connection administration; removed from ordinary tenant detail responses.
+          nullable: true
+        dmsSurface:
+          $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDmsSurface'
+      additionalProperties: false
+    EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDmsSurface:
+      type: object
+      properties:
+        surfaceId:
+          type: string
+          nullable: true
+        engine:
+          type: string
+          nullable: true
+        dataStandard:
+          type: string
+          nullable: true
+        extensions:
+          type: array
+          items:
+            type: string
+          nullable: true
+          readOnly: true
+        surfaceStatus:
+          type: string
+          nullable: true
+        dmsPublicBaseUrl:
+          type: string
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionListModel:
       type: object
@@ -28363,6 +28636,8 @@ components:
         metadataJson:
           type: string
           nullable: true
+        dmsSurface:
+          $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDmsSurface'
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionPaginatedItemsResponse:
       type: object
@@ -29074,6 +29349,56 @@ components:
           type: string
           nullable: true
         azureServerElasticPoolName:
+          type: string
+          nullable: true
+      additionalProperties: false
+    EdfiAdminApi.EdfiAdmin.V1.UpdateEdFiConnectionRequest:
+      type: object
+      properties:
+        connectionId:
+          type: string
+          nullable: true
+        tenantId:
+          type: string
+          nullable: true
+        connectionName:
+          type: string
+          nullable: true
+        edFiVersion:
+          type: string
+          nullable: true
+        edFiExtension:
+          type: string
+          nullable: true
+        metadataUrl:
+          type: string
+          nullable: true
+        clientId:
+          type: string
+          nullable: true
+        clientSecret:
+          type: string
+          nullable: true
+        tokenUrl:
+          type: string
+          nullable: true
+        resourcesUrl:
+          type: string
+          nullable: true
+        instanceType:
+          $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.InstanceType'
+        discoveryUrl:
+          type: string
+          nullable: true
+        metadataJson:
+          type: string
+          nullable: true
+        discoveryDocument:
+          $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.OdsApiDiscoveryApi'
+        adminApiUrl:
+          type: string
+          nullable: true
+        dmsSurfaceJson:
           type: string
           nullable: true
       additionalProperties: false
