@@ -45776,6 +45776,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/edfiadmin/instances/{instanceId}/retier':
+    post:
+      tags:
+        - v1
+      summary: Reconciles the school-year tier placement of a SQL Server Ed-Fi v8 instance.
+      operationId: RetierInstanceAsync
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: Success
   '/tenants/{tenantId}/edfiadmin/jobs/{jobId}/executions/{executionId}/logs':
     get:
       tags:
@@ -55254,6 +55292,10 @@ components:
           type: string
           format: date-time
           nullable: true
+        stages:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobStage'
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobExecutionDmsJobPage:
       type: object
@@ -55309,6 +55351,20 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobLog'
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobStage:
+      type: object
+      properties:
+        id:
+          type: string
+        step:
+          type: string
+        schoolYear:
+          type: integer
+          format: int32
+          nullable: true
+        status:
+          type: string
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.InstanceLog:
       type: object
