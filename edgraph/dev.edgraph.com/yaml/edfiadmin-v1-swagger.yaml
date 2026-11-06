@@ -2881,8 +2881,11 @@ paths:
           description: ''
           required: true
           schema:
-            type: integer
-            format: int32
+            type: string
+        - name: resourcePath
+          in: query
+          schema:
+            type: string
       responses:
         '401':
           description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
@@ -2946,8 +2949,11 @@ paths:
           description: ''
           required: true
           schema:
-            type: integer
-            format: int32
+            type: string
+        - name: resourcePath
+          in: query
+          schema:
+            type: string
       responses:
         '401':
           description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
@@ -3015,8 +3021,7 @@ paths:
           description: ''
           required: true
           schema:
-            type: integer
-            format: int32
+            type: string
       requestBody:
         description: ''
         content:
@@ -8716,6 +8721,12 @@ components:
         descriptorId:
           type: integer
           format: int32
+        resourceId:
+          type: string
+          nullable: true
+        resourcePath:
+          type: string
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.DescriptorMapping:
       type: object
@@ -8837,6 +8848,12 @@ components:
           type: string
           nullable: true
         description:
+          type: string
+          nullable: true
+        resourceId:
+          type: string
+          nullable: true
+        resourcePath:
           type: string
           nullable: true
       additionalProperties: false
