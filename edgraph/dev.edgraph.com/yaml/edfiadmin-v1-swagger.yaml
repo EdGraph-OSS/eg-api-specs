@@ -7723,6 +7723,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/edfiadmin/instances/{instanceId}/jobs':
+    get:
+      tags:
+        - v1
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobHistoryEntry'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobHistoryEntry'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobHistoryEntry'
   '/tenants/{tenantId}/edfiadmin/jobs/{jobId}/executions/{executionId}/logs':
     get:
       tags:
@@ -7978,6 +8014,30 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobExecution'
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobHistoryEntry:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        status:
+          type: string
+          nullable: true
+        queuedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        startDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        endDateTime:
+          type: string
+          format: date-time
+          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobLog:
       type: object
