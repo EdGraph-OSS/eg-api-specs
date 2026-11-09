@@ -3961,6 +3961,12 @@ paths:
           schema:
             type: string
             default: ''
+        - name: includeAdditionalOrganizationTypes
+          in: query
+          description: 'Ed-Fi v8 only: also list schools, community organizations and providers, organization departments and post-secondary institutions.'
+          schema:
+            type: boolean
+            default: false
       responses:
         '401':
           description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
