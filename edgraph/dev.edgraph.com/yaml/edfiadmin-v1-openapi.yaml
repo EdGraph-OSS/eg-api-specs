@@ -8717,6 +8717,10 @@ components:
           type: string
           description: 'Ed-Fi v8 only: the CMS tenant name; unset derives it from instanceName.'
           nullable: true
+        enableKafkaCdc:
+          type: boolean
+          description: 'Ed-Fi v8 only: opt every year into Kafka CDC; unset means false. The server decides admission.'
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.CreateInstanceRequestSchoolYear:
       type: object
@@ -10103,6 +10107,8 @@ components:
         lastExecutionId:
           type: string
           nullable: true
+        enableKafkaCdc:
+          type: boolean
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceDmsYear:
       type: object

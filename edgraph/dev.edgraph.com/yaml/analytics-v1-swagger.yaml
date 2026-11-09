@@ -3644,6 +3644,8 @@ components:
         lastExecutionId:
           type: string
           nullable: true
+        enableKafkaCdc:
+          type: boolean
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceDmsYear:
       type: object
