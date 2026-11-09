@@ -3612,6 +3612,82 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/edfiadmin/instances/{instanceId}/years/{year}/educationorganizations/{resource}/{id}':
+    get:
+      tags:
+        - Instances / Education Organizations / Local Education Agencies
+      summary: "Ed-Fi v8 only: retrieves read-only details of a community organization, community provider, organization department\r\nor post-secondary institution by its resource ID. Schools and other types are rejected."
+      operationId: GetEducationOrganizationDetailsAsync
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: instanceId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: year
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: resource
+          in: path
+          description: 'communityOrganizations, communityProviders, organizationDepartments or postSecondaryInstitutions.'
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: The Ed-Fi resource ID.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.EducationOrganizationDetails'
+        '400':
+          description: The resource type is not supported or the ID is not a valid resource ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/edfiadmin/instances/{instanceId}/years/{year}/localeducationagencies/{localEducationAgencyId}/sync':
     post:
       tags:
@@ -9569,6 +9645,63 @@ components:
           type: string
           nullable: true
         shortDescription:
+          type: string
+          nullable: true
+      additionalProperties: false
+    EdfiAdminApi.EdfiAdmin.V1.EducationOrganizationDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        educationOrganizationId:
+          type: integer
+          format: int64
+        educationOrganizationCategory:
+          type: string
+          nullable: true
+        nameOfInstitution:
+          type: string
+          nullable: true
+        shortNameOfInstitution:
+          type: string
+          nullable: true
+        webSite:
+          type: string
+          nullable: true
+        operationalStatus:
+          type: string
+          nullable: true
+        categories:
+          type: array
+          items:
+            type: string
+          nullable: true
+          readOnly: true
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.EducationOrganizationAddress'
+          nullable: true
+          readOnly: true
+        communityOrganizationId:
+          type: integer
+          format: int64
+          nullable: true
+        parentEducationOrganizationId:
+          type: integer
+          format: int64
+          nullable: true
+        providerCategory:
+          type: string
+          nullable: true
+        providerStatus:
+          type: string
+          nullable: true
+        postSecondaryInstitutionLevel:
+          type: string
+          nullable: true
+        administrativeFundingControl:
           type: string
           nullable: true
       additionalProperties: false
