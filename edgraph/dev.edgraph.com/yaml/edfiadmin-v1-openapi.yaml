@@ -3963,7 +3963,7 @@ paths:
             default: ''
         - name: includeAdditionalOrganizationTypes
           in: query
-          description: 'Ed-Fi v8 only: also list schools, community organizations and providers, organization departments and post-secondary institutions.'
+          description: 'Ed-Fi v8 only: also list community organizations and providers, organization departments and post-secondary institutions. Schools are never listed.'
           schema:
             type: boolean
             default: false
