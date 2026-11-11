@@ -20667,8 +20667,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '204':
-          description: DMS reloaded its claim sets.
+        '200':
+          description: '`reloaded` is true when DMS reloaded; false with reason `management_endpoint_disabled` when this DMS has its management endpoint disabled.'
         '400':
           description: Bad Request. The instance is not an Ed-Fi v8 instance.
           content:
