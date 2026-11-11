@@ -4033,7 +4033,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
         '412':
-          description: 'The registration is Rejected or Exited, so its documents no longer change.'
+          description: "The registration is Rejected or Exited, so its documents no longer change; or the\r\n            current file is not one staff uploaded (see `uploadedByKind`), which staff reject instead."
           content:
             application/json:
               schema:
@@ -9132,8 +9132,11 @@ components:
         updatedBy:
           type: string
           nullable: true
+        uploadedByKind:
+          type: string
+          nullable: true
       additionalProperties: false
-      description: "A document a family uploaded for a registration. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.State is the stored review state:\r\n`Required`, `Submitted`, `Accepted`, `Rejected` or `Resubmit`.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.FileName and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.ContentType are derived from the stored file's name.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.SizeBytes is the stored file length, absent for a file stored before it was kept.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.CreatedDateTime is when the document was first uploaded; EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.UpdatedDateTime is\r\nits last change, upload or review, and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.UpdatedBy is who made it. Only the document's newest\r\nfile is described; it keeps at most two."
+      description: "A document a family uploaded for a registration. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.State is the stored review state:\r\n`Required`, `Submitted`, `Accepted`, `Rejected` or `Resubmit`.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.FileName and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.ContentType are derived from the stored file's name.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.SizeBytes is the stored file length, absent for a file stored before it was kept.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.CreatedDateTime is when the document was first uploaded; EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.UpdatedDateTime is\r\nits last change, upload or review, and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.UpdatedBy is who made it. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.UploadedByKind\r\nis who uploaded the newest file: `Staff`, `Parent` or `System` (a file the parent's screen\r\ndata filed); staff can delete only a `Staff` one. Only the document's newest file is described; it\r\nkeeps at most two."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDtoPaginatedItemsViewModel:
       type: object
       properties:
@@ -9306,8 +9309,11 @@ components:
           type: string
           format: date-time
           nullable: true
+        description:
+          type: string
+          nullable: true
       additionalProperties: false
-      description: "One requirement and where it stands for this registration. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto.State is one of\r\n`Missing`, `PendingReview`, `Verified`, `Rejected` or `NotApplicable`.\r\n`NotApplicable` covers a requirement that is not a document staff review - a link, an event,\r\ninformation, or a document without the review flag - and such a requirement is never\r\n`Verified`. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto.Reason is set when staff rejected the document or asked for a\r\nresubmit. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto.LastUpdatedDateTime is absent while nothing has been uploaded."
+      description: "One requirement and where it stands for this registration. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto.State is one of\r\n`Missing`, `PendingReview`, `Verified`, `Rejected` or `NotApplicable`.\r\n`NotApplicable` covers a requirement that is not a document staff review - a link, an event,\r\ninformation, or a document without the review flag - and such a requirement is never\r\n`Verified`. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto.Reason is set when staff rejected the document or asked for a\r\nresubmit. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto.LastUpdatedDateTime is absent while nothing has been uploaded.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto.Description is the requirement's description as stored, rich text, absent when it has none."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementsResponseDto:
       type: object
       properties:
