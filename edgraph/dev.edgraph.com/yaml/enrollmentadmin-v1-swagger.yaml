@@ -877,7 +877,7 @@ paths:
     put:
       tags:
         - Enrollment Admin / ApplicationRounds
-      summary: "Replaces a round's label, grades and program types. Code and school year never change -\r\nduplicate the round into another school year instead."
+      summary: "Replaces a round's label, grades, program types, pathways and alert. Code and school year never\r\nchange - duplicate the round into another school year instead."
       operationId: UpdateApplicationRound
       parameters:
         - name: tenantId
@@ -1024,7 +1024,7 @@ paths:
     post:
       tags:
         - Enrollment Admin / ApplicationRounds
-      summary: Creates a round. Add its windows afterwards.
+      summary: "Creates a round, with any windows given written in the same call. A window that depends on\r\nanother window is added afterwards."
       operationId: CreateApplicationRound
       parameters:
         - name: tenantId
@@ -6529,8 +6529,21 @@ components:
             type: string
             format: uuid
           nullable: true
+        pathways:
+          type: array
+          items:
+            type: string
+          description: 'NewStudent, AnnualUpdate. Empty means every pathway.'
+          nullable: true
+        alert:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundAlertRequestDto'
+        windows:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto'
+          nullable: true
       additionalProperties: false
-      description: 'Creates a round. Windows are added afterwards, one at a time.'
+      description: "Creates a round. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateApplicationRoundRequestDto.Windows are written in the same call, so the round never exists\r\nwithout the dates it was created with; none of them may depend on another window - a gated window\r\nis added afterwards."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateContactRequestDto:
       required:
         - externalDataSourceContactId
@@ -7045,6 +7058,22 @@ components:
           description: 'Why the document was rejected, required and at most 2,000 characters; the family is shown it.'
       additionalProperties: false
       description: The body of a document rejection.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundAlertRequestDto:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        text:
+          type: string
+          nullable: true
+        startDate:
+          type: string
+          nullable: true
+        endDate:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: "A round's message to parents. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundAlertRequestDto.StartDate and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundAlertRequestDto.EndDate are yyyy-MM-dd\r\ncalendar days. The Enrollment Service requires the text and both dates only while the alert is enabled."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetRolePersonasRequestDto:
       type: object
       properties:
@@ -7132,8 +7161,15 @@ components:
             type: string
             format: uuid
           nullable: true
+        pathways:
+          type: array
+          items:
+            type: string
+          nullable: true
+        alert:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundAlertRequestDto'
       additionalProperties: false
-      description: "Replaces label, grades and program types. Code and school year are the round's identity and\r\ncannot change - duplicate the round into another school year instead."
+      description: "Replaces label, grades, program types, pathways and alert. Code and school year are the round's\r\nidentity and cannot change - duplicate the round into another school year instead."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateContactRequestDto:
       required:
         - firstName
@@ -8040,6 +8076,12 @@ components:
           nullable: true
         isDeleted:
           type: boolean
+        pathways:
+          type: array
+          items:
+            type: string
+        alert:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundAlertDto'
       additionalProperties: false
       description: "An application round: a named enrollment period in a school year, identified by\r\n(EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.Code, EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.SchoolYear). EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.State and each window's state are\r\nderived by the service at the moment of the read - NotYetOpen, Open or Closed - and never stored."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDtoPaginatedItemsViewModel:
@@ -9477,6 +9519,22 @@ components:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RolePersonasNamespaceDto'
       additionalProperties: false
       description: "A tenant's role-to-persona assignments, grouped by role namespace, in the same shape as Observations'\r\nstaff classification settings. Driven by the tenant's staff classification catalog: every role in it is\r\nlisted, with its persona assignment when one is configured."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundAlertDto:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        text:
+          type: string
+          nullable: true
+        startDate:
+          type: string
+          nullable: true
+        endDate:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: "The round's own message to parents. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundAlertDto.StartDate and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundAlertDto.EndDate are\r\nyyyy-MM-dd calendar days. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.Pathways empty means every pathway."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolEnabledResponseDto:
       type: object
       properties:
