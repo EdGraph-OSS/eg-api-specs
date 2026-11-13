@@ -7952,6 +7952,234 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/programs/{programId}/capacities':
+    get:
+      tags:
+        - Enrollment Admin / Capacity
+      summary: 'Reads one program''s capacity by grade for a school year, with totals and the school years it has data for.'
+      operationId: GetProgramCapacities
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: programId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: schoolYear
+          in: query
+          description: Optional. Defaults to the district's current school year.
+          schema:
+            type: string
+            default: ''
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: The program's school is outside the caller's schools.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramCapacityResponseDto'
+        '404':
+          description: The program could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/schools/{schoolLocalCode}/capacities':
+    get:
+      tags:
+        - Enrollment Admin / Capacity
+      summary: "Searches Capacity for one school - one row per program x grade x school year - with totals over every\r\nrow the filters leave."
+      operationId: GetSchoolCapacities
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: schoolLocalCode
+          in: path
+          description: The school's 3-digit short code.
+          required: true
+          schema:
+            type: string
+        - name: pageSize
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+            default: 50
+        - name: pageIndex
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: orderBy
+          in: query
+          description: ''
+          schema:
+            type: string
+            default: ''
+        - name: grade
+          in: query
+          description: Optional exact match.
+          schema:
+            type: string
+            default: ''
+        - name: search
+          in: query
+          description: Free-text match on program name/code.
+          schema:
+            type: string
+            default: ''
+        - name: programTypeId
+          in: query
+          description: Optional exact match on the program type.
+          schema:
+            type: string
+            default: ''
+        - name: currentYear
+          in: query
+          description: Keep rows of the district's current school year.
+          schema:
+            type: boolean
+            default: false
+        - name: futureYear
+          in: query
+          description: Keep rows of the district's next school year.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: The school is outside the caller's schools.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacitySearchResponseDto'
+        '404':
+          description: The school could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+    put:
+      tags:
+        - Enrollment Admin / Capacity
+      summary: 'Saves the Seat Capacity of one school''s program grades for a school year, all or nothing.'
+      description: "Send every row of the school year as the admin saw it, each with the Seat Capacity it was loaded with\r\n(`expectedSeatCapacity`). Only the rows whose value changed are applied. If any changed row has moved\r\nsince it was loaded, nothing is written and the response is 412. A save during a running lottery is allowed\r\nand applies to the next run."
+      operationId: UpdateSchoolCapacities
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: schoolLocalCode
+          in: path
+          description: The school's 3-digit short code.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateCapacityRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateCapacityRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateCapacityRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateCapacityRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: The school is outside the caller's schools.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The changed rows were saved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.UpdateCapacityResponseDto'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '412':
+          description: A changed row was modified by someone else while it was being edited; nothing was written.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/changelogs':
     get:
       tags:
@@ -50193,6 +50421,28 @@ components:
           description: "The target Program's record id (as returned in `ProgramMutationResultDto.Id` /\r\n`ProgramDetailDto.Id`), not its business ProgramId/code - unlike every other\r\n`ProgramId` field on the Programs DTOs."
       additionalProperties: false
       description: "The body of adding one Program-seat choice to an existing Registration. See\r\nEnrollmentAdminController.Registrations.AddEnrollmentRegistrationApplication."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CapacityChangeRequestDto:
+      required:
+        - grade
+        - programId
+      type: object
+      properties:
+        programId:
+          minLength: 1
+          type: string
+        grade:
+          minLength: 1
+          type: string
+        seatCapacity:
+          minimum: 0
+          type: integer
+          format: int32
+        expectedSeatCapacity:
+          type: integer
+          format: int32
+          nullable: true
+      additionalProperties: false
+      description: "One program x grade row of a Seat Capacity save. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CapacityChangeRequestDto.ExpectedSeatCapacity is the value the admin saw\r\nwhen the row was loaded (null when it had none); a row that has moved since is stale and the save is refused."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ContactVerificationStatusValue:
       enum:
         - Unverified
@@ -50875,6 +51125,21 @@ components:
           $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundAlertRequestDto'
       additionalProperties: false
       description: "Replaces label, grades, program types, pathways and alert. Code and school year are the round's\r\nidentity and cannot change - duplicate the round into another school year instead."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateCapacityRequestDto:
+      required:
+        - rows
+        - schoolYear
+      type: object
+      properties:
+        schoolYear:
+          minLength: 1
+          type: string
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CapacityChangeRequestDto'
+      additionalProperties: false
+      description: "Every row of one school year as the admin saw it, changed or not. Only the rows whose Seat Capacity differs from\r\nthe stored value are applied."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateContactRequestDto:
       required:
         - firstName
@@ -52674,6 +52939,115 @@ components:
           nullable: true
       additionalProperties: false
       description: What a window add/update/remove reports back.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityListItemDto:
+      type: object
+      properties:
+        programId:
+          type: string
+          nullable: true
+        programCode:
+          type: string
+          nullable: true
+        programName:
+          type: string
+          nullable: true
+        programTypeName:
+          type: string
+          nullable: true
+        grade:
+          type: string
+          nullable: true
+        schoolYear:
+          type: string
+          nullable: true
+        seatsAvailable:
+          type: integer
+          format: int32
+        submissionAllowed:
+          type: boolean
+        lotteryEligible:
+          type: boolean
+        lastUpdatedBy:
+          type: string
+          nullable: true
+        lastUpdatedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        seatCapacity:
+          type: integer
+          format: int32
+          nullable: true
+        offersSent:
+          type: integer
+          format: int32
+        offersAccepted:
+          type: integer
+          format: int32
+        waitlisted:
+          type: integer
+          format: int32
+        available:
+          type: integer
+          format: int32
+          nullable: true
+        seatStatus:
+          type: string
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacitySchoolYearDto:
+      type: object
+      properties:
+        schoolYear:
+          type: string
+        isCurrent:
+          type: boolean
+        isFuture:
+          type: boolean
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacitySearchResponseDto:
+      type: object
+      properties:
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityListItemDto'
+        totals:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityTotalsDto'
+        lastLotteryRunAt:
+          type: string
+          format: date-time
+          nullable: true
+        lotteryRunInProgress:
+          type: boolean
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityTotalsDto:
+      type: object
+      properties:
+        seatCapacity:
+          type: integer
+          format: int32
+        offersSent:
+          type: integer
+          format: int32
+        offersAccepted:
+          type: integer
+          format: int32
+        waitlisted:
+          type: integer
+          format: int32
+        available:
+          type: integer
+          format: int32
+      additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactEmailOverrideRequestDto:
       required:
         - value
@@ -53374,6 +53748,29 @@ components:
           nullable: true
       additionalProperties: false
       description: "One Registration Application referencing this program - see\r\nEnrollmentAdminController.Programs.GetProgramApplications."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramCapacityResponseDto:
+      type: object
+      properties:
+        schoolYear:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityListItemDto'
+        totals:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityTotalsDto'
+        lastLotteryRunAt:
+          type: string
+          format: date-time
+          nullable: true
+        lotteryRunInProgress:
+          type: boolean
+        schoolYears:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacitySchoolYearDto'
+      additionalProperties: false
+      description: 'One program''s capacity for one school year: every grade row, the totals over them and the years it has data for.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramDetailDto:
       type: object
       properties:
@@ -54601,6 +54998,14 @@ components:
           nullable: true
         isDeleted:
           type: boolean
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.UpdateCapacityResponseDto:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityListItemDto'
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.WindowDependencyDto:
       type: object
