@@ -53308,6 +53308,12 @@ components:
           type: string
           format: date-time
           nullable: true
+        employeeId:
+          type: string
+          nullable: true
+        isDistrictEmployee:
+          type: boolean
+          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactResponseDtoPaginatedItemsViewModel:
       type: object
