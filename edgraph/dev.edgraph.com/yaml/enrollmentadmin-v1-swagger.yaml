@@ -3739,13 +3739,69 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-  '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/applications/{applicationId}/priority':
+  '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/applications/{applicationId}/priorityoverride':
+    delete:
+      tags:
+        - Enrollment Admin / Registrations
+      summary: "Removes an admin's override of one Application's priority (AB#19632), so the calculated\r\n`priority` counts again. Removing an override that is not set changes nothing."
+      description: 'Returns the whole registration, as M:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentRegistration(System.String,System.String,System.Threading.CancellationToken) does.'
+      operationId: DeleteEnrollmentRegistrationApplicationPriorityOverride
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: applicationId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The override was removed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationResponse'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
     put:
       tags:
         - Enrollment Admin / Registrations
-      summary: "Sets one Application's priority tier - an admin's override of the value the priority engine stamps\r\n(AB#19617). Body: `{ \"priority\": 3 }`, a whole number of 1 or more."
-      description: "A later lottery outcome that carries a priority replaces the override. Returns the whole registration,\r\nas M:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentRegistration(System.String,System.String,System.Threading.CancellationToken) does."
-      operationId: UpdateEnrollmentRegistrationApplicationPriority
+      summary: "Sets an admin's override of one Application's priority (AB#19617, AB#19632). Body:\r\n`{ \"priorityOverride\": 3 }`, a whole number from 0 to 9999."
+      description: "The override is kept beside the calculated `priority` and never replaces it; no route writes\r\n`priority`. While an override is set it is the number the lottery uses. Returns the whole\r\nregistration, as M:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentRegistration(System.String,System.String,System.Threading.CancellationToken) does, with both values on the application."
+      operationId: UpdateEnrollmentRegistrationApplicationPriorityOverride
       parameters:
         - name: tenantId
           in: path
@@ -3770,16 +3826,16 @@ paths:
         content:
           application/json-patch+json:
             schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityRequestDto'
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityOverrideRequestDto'
           application/json:
             schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityRequestDto'
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityOverrideRequestDto'
           text/json:
             schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityRequestDto'
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityOverrideRequestDto'
           application/*+json:
             schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityRequestDto'
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityOverrideRequestDto'
       responses:
         '401':
           description: Unauthorized
@@ -3806,7 +3862,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationResponse'
         '400':
-          description: Bad Request. The priority is missing or below 1.
+          description: Bad Request. The override is missing or outside 0 to 9999.
           content:
             application/json:
               schema:
@@ -3906,7 +3962,7 @@ paths:
       tags:
         - Enrollment Admin / Registrations
       summary: "Sets the school's rank for one Application on a Ranking program (AB#19617). Body:\r\n`{ \"schoolBasedRank\": 12 }`, a whole number of 1 or more."
-      description: "Refused with 400 unless the application's program has priority type `Ranking`. Unrelated to\r\nthe application's `rank`, which is the family's own preference order. Returns the whole\r\nregistration, as M:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentRegistration(System.String,System.String,System.Threading.CancellationToken) does."
+      description: "Refused with 400 unless the application's program has priority structure `Ranking`. Unrelated to\r\nthe application's `rank`, which is the family's own preference order. Returns the whole\r\nregistration, as M:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentRegistration(System.String,System.String,System.Threading.CancellationToken) does."
       operationId: UpdateEnrollmentRegistrationApplicationSchoolBasedRank
       parameters:
         - name: tenantId
@@ -7139,11 +7195,11 @@ components:
           type: number
           format: double
           nullable: true
-        priorityType:
+        priorityStructure:
           type: string
           nullable: true
       additionalProperties: false
-      description: "The body of a Program creation. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.SchoolId, EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.ProgramTypeId and\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.RequirementIds are record ids of existing rows; the service copies their display\r\nfields onto the program and rejects an id it cannot find. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.PriorityType is one of\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramPriorityTypes.Names, or null to create the program with none chosen."
+      description: "The body of a Program creation. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.SchoolId, EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.ProgramTypeId and\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.RequirementIds are record ids of existing rows; the service copies their display\r\nfields onto the program and rejects an id it cannot find. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.PriorityStructure is one of\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramPriorityStructures.Names, or null to create the program with none chosen."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateRegistrationRequestDto:
       required:
         - contacts
@@ -7407,19 +7463,19 @@ components:
           nullable: true
       additionalProperties: false
       description: 'The optional body of an Application decision (accept, decline, offer, remove).'
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityRequestDto:
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityOverrideRequestDto:
       required:
-        - priority
+        - priorityOverride
       type: object
       properties:
-        priority:
+        priorityOverride:
+          maximum: 9999
           minimum: 0
-          exclusiveMinimum: true
           type: integer
-          description: 'The priority tier, a whole number of 1 or more.'
+          description: 'The number the lottery uses in place of the calculated priority, a whole number from 0 to 9999.'
           format: int32
       additionalProperties: false
-      description: The body of an Application priority override (AB#19617).
+      description: 'The body of an Application priority override (AB#19617, AB#19632). The override is removed with DELETE, not with a null.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationSchoolBasedRankRequestDto:
       required:
         - schoolBasedRank
@@ -7848,9 +7904,9 @@ components:
           type: number
           format: double
           nullable: true
-        priorityType:
+        priorityStructure:
           type: string
-          description: "Which priority list the program's applicants are ranked by: one of\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramPriorityTypes.Names. Unlike every other field here, leaving it out of\r\nthe body is not the same as sending null:\r\n<list type=\"bullet\"><item>not in the body - the program keeps the priority type it has;</item><item>`null` - the priority type is cleared, the program has none chosen;</item><item>a name - the priority type is replaced.</item></list>"
+          description: "Which priority list the program's applicants are ranked by: one of\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramPriorityStructures.Names. Unlike every other field here, leaving it out of\r\nthe body is not the same as sending null:\r\n<list type=\"bullet\"><item>not in the body - the program keeps the priority structure it has;</item><item>`null` - the priority structure is cleared, the program has none chosen;</item><item>a name - the priority structure is replaced.</item></list>"
           nullable: true
       additionalProperties: false
       description: "The body of a Program update. The school never changes; the program type and the requirement\r\nset are replaced from the ids given here (an empty list clears the requirements)."
@@ -9647,7 +9703,7 @@ components:
           nullable: true
         isDeleted:
           type: boolean
-        priorityType:
+        priorityStructure:
           type: string
           nullable: true
       additionalProperties: false
@@ -9689,7 +9745,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto'
-        priorityType:
+        priorityStructure:
           type: string
           nullable: true
       additionalProperties: false
@@ -9918,8 +9974,12 @@ components:
           type: integer
           format: int32
           nullable: true
+        priorityOverride:
+          type: integer
+          format: int32
+          nullable: true
       additionalProperties: false
-      description: "An application on a list row; the application's own status is one of the application statuses. The program\r\nfields are absent when the program is deleted or unreadable. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.SeatStatus is `Accepting`,\r\n`WaitlistOnly`, `NotAccepting` or `Unavailable`. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.Priority and\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.SchoolBasedRank are as on the record, absent until set."
+      description: "An application on a list row; the application's own status is one of the application statuses. The program\r\nfields are absent when the program is deleted or unreadable. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.SeatStatus is `Accepting`,\r\n`WaitlistOnly`, `NotAccepting` or `Unavailable`. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.Priority is the calculated\r\npriority and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.PriorityOverride an admin's override of it, kept apart. They and\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.SchoolBasedRank are as on the record, absent until set."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto:
       type: object
       properties:
@@ -10957,7 +11017,12 @@ components:
           nullable: true
         schoolBasedRank:
           type: integer
-          description: "The SCHOOL's ordering of this applicant, on a program whose priorityType is RANKING.\r\nUnset until an admin records one. Unrelated to rank, which is the family's own order."
+          description: "The SCHOOL's ordering of this applicant, on a program whose priorityStructure is RANKING.\r\nUnset until an admin records one. Unrelated to rank, which is the family's own order."
+          format: int32
+          nullable: true
+        priorityOverride:
+          type: integer
+          description: "An admin's override of priority, kept beside it. Unset when there is none. While set, it is\r\nthe number the lottery competes with; priority still holds the calculated value."
           format: int32
           nullable: true
       additionalProperties: false
