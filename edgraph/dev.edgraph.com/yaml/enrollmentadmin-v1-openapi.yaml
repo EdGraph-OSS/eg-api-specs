@@ -1382,6 +1382,79 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/employeeverification':
+    put:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: Sets a contact's Employee Verified flag.
+      description: "<br>\r\n            An admin sets it once they have checked the employee id the parent entered. Only the admin personas - District\r\n            Admin, System Admin and Super Admin - and the Enrollment Admin admin role may call this; Campus Admin and Campus\r\n            Admin Plus may not, although they can change the contact otherwise.\r\n            \r\n<br>\r\n            The Enrollment service's UpdateContact requires the name on every call, so the contact is read first and its\r\n            name sent back unchanged with the flag.\r\n            "
+      operationId: SetEnrollmentContactEmployeeVerified
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactEmployeeVerifiedRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactEmployeeVerifiedRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactEmployeeVerifiedRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactEmployeeVerifiedRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The flag was set.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactMutationResultDto'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/impersonation':
     post:
       tags:
@@ -7327,6 +7400,16 @@ components:
           nullable: true
       additionalProperties: false
       description: "A round's message to parents. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundAlertRequestDto.StartDate and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundAlertRequestDto.EndDate are yyyy-MM-dd\r\ncalendar days. The Enrollment Service requires the text and both dates only while the alert is enabled."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactEmployeeVerifiedRequestDto:
+      required:
+        - isEmployeeVerified
+      type: object
+      properties:
+        isEmployeeVerified:
+          type: boolean
+          description: Required. Whether an admin has verified the contact's employee id.
+      additionalProperties: false
+      description: 'The body of `PUT .../contacts/{id}/employeeverification`.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetRolePersonasRequestDto:
       type: object
       properties:
@@ -8851,7 +8934,7 @@ components:
         employeeId:
           type: string
           nullable: true
-        isDistrictEmployee:
+        isEmployeeVerified:
           type: boolean
           nullable: true
       additionalProperties: false
@@ -10590,6 +10673,8 @@ components:
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EnrollmentAdminAccess.EnrollmentAdminAccessItem'
         canImpersonate:
+          type: boolean
+        canVerifyEmployees:
           type: boolean
       additionalProperties: false
       description: 'What the current user may use in the enrollment admin app, calculated from their access token.'
