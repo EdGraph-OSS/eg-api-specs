@@ -11018,6 +11018,8 @@ components:
           type: boolean
         canVerifyMilitaryPeaceOfficers:
           type: boolean
+        canOverridePriority:
+          type: boolean
       additionalProperties: false
       description: 'What the current user may use in the enrollment admin app, calculated from their access token.'
     EdGraph.HttpAggregators.Tenant.Api.Services.EnrollmentAdminAccess.EnrollmentAdminAccessItem:
