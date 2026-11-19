@@ -7121,7 +7121,7 @@ paths:
     post:
       tags:
         - Enrollment Admin / ApplicationRounds
-      summary: "Copies the round's code, label, grades and program types into another school year. Windows\r\nare not copied - their dates belong to this round's school year."
+      summary: "Copies the round's code, label, grades, programs and registration options into another school year. Windows\r\nare not copied - their dates belong to this round's school year."
       operationId: DuplicateApplicationRound
       parameters:
         - name: tenantId
@@ -7744,7 +7744,7 @@ paths:
     put:
       tags:
         - Enrollment Admin / ApplicationRounds
-      summary: "Replaces a round's label, grades, program types, pathways and alert. Code and school year never\r\nchange - duplicate the round into another school year instead."
+      summary: "Replaces a round's label, grades, programs, registration options, pathways and alert. Code and school\r\nyear never change - duplicate the round into another school year instead."
       operationId: UpdateApplicationRound
       parameters:
         - name: tenantId
@@ -7941,7 +7941,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundMutationResultDto'
         '400':
-          description: 'Bad Request. The request was invalid, or named a program type that does not exist.'
+          description: 'Bad Request. The request was invalid, or named a program that does not exist.'
           content:
             application/json:
               schema:
@@ -10335,6 +10335,25 @@ paths:
         - name: programTypeId
           in: query
           description: Narrows to programs of this program type (its record id).
+          schema:
+            type: string
+            default: ''
+        - name: applicationRoundId
+          in: query
+          description: 'Narrows to the programs this application round offers. A round with no programs matches nothing; an unknown round is 404, and a value that is not a Guid is 400.'
+          schema:
+            type: string
+            default: ''
+        - name: grades
+          in: query
+          description: 'Narrows to programs that serve at least one of these grades (PK, KG, 01..12), matched exactly. Repeat the parameter for each grade.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: schoolYear
+          in: query
+          description: 'Narrows to programs offered in this school year: those with a school year whose name is exactly this text, e.g. 2027-2028. A program whose year is spelled differently does not match.'
           schema:
             type: string
             default: ''
@@ -51039,12 +51058,14 @@ components:
           type: array
           items:
             type: string
-        programTypeIds:
+        programIds:
           type: array
           items:
             type: string
             format: uuid
           nullable: true
+        registrationOptions:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundRegistrationOptionsDto'
         pathways:
           type: array
           items:
@@ -51059,7 +51080,7 @@ components:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto'
           nullable: true
       additionalProperties: false
-      description: "Creates a round. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateApplicationRoundRequestDto.Windows are written in the same call, so the round never exists\r\nwithout the dates it was created with; none of them may depend on another window - a gated window\r\nis added afterwards."
+      description: "Creates a round. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateApplicationRoundRequestDto.Windows are written in the same call, so the round never exists\r\nwithout the dates it was created with; none of them may depend on another window - a gated window\r\nis added afterwards. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateApplicationRoundRequestDto.ProgramIds are the programs parents/guardians can apply to in the\r\nround; the service refuses an id it does not know, and a program that serves none of\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateApplicationRoundRequestDto.Grades. Omitted EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateApplicationRoundRequestDto.RegistrationOptions means all four off."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateContactRequestDto:
       required:
         - externalDataSourceContactId
@@ -51635,6 +51656,23 @@ components:
           nullable: true
       additionalProperties: false
       description: "A round's message to parents. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundAlertRequestDto.StartDate and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundAlertRequestDto.EndDate are yyyy-MM-dd\r\ncalendar days. The Enrollment Service requires the text and both dates only while the alert is enabled."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundRegistrationOptionsDto:
+      type: object
+      properties:
+        enrollInZonedSchool:
+          type: boolean
+          description: Enroll the student at the school assigned to their home address.
+        applyForInDistrictTransfer:
+          type: boolean
+          description: Request a school outside the student's attendance zone.
+        applyForAdmissionsBasedPrograms:
+          type: boolean
+          description: Apply to programs with an application or admissions process.
+        continueAtCurrentProgram:
+          type: boolean
+          description: A current student stays in the program they are in.
+      additionalProperties: false
+      description: Which ways of registering a round offers. Each is on or off; one left out is off.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactEmployeeVerifiedRequestDto:
       required:
         - isEmployeeVerified
@@ -51741,12 +51779,14 @@ components:
           type: array
           items:
             type: string
-        programTypeIds:
+        programIds:
           type: array
           items:
             type: string
             format: uuid
           nullable: true
+        registrationOptions:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundRegistrationOptionsDto'
         pathways:
           type: array
           items:
@@ -51755,7 +51795,7 @@ components:
         alert:
           $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundAlertRequestDto'
       additionalProperties: false
-      description: "Replaces label, grades, program types, pathways and alert. Code and school year are the round's\r\nidentity and cannot change - duplicate the round into another school year instead."
+      description: "Replaces label, grades, programs, registration options, pathways and alert: the round's programs\r\nbecome exactly EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateApplicationRoundRequestDto.ProgramIds, so a program left out is removed, and omitted\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateApplicationRoundRequestDto.RegistrationOptions turns all four off. Code and school year are the round's identity\r\nand cannot change - duplicate the round into another school year instead."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateCapacityRequestDto:
       required:
         - rows
@@ -53423,10 +53463,12 @@ components:
           type: array
           items:
             type: string
-        programTypes:
+        programs:
           type: array
           items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramTypeRefDto'
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundProgramRefDto'
+        registrationOptions:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundRegistrationOptionsResponseDto'
         windows:
           type: array
           items:
@@ -53457,7 +53499,7 @@ components:
         alert:
           $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundAlertDto'
       additionalProperties: false
-      description: "An application round: a named enrollment period in a school year, identified by\r\n(EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.Code, EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.SchoolYear). EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.State and each window's state are\r\nderived by the service at the moment of the read - NotYetOpen, Open or Closed - and never stored."
+      description: "An application round: a named enrollment period in a school year, identified by\r\n(EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.Code, EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.SchoolYear). EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.State and each window's state are\r\nderived by the service at the moment of the read - NotYetOpen, Open or Closed - and never stored.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.Programs are the programs parents/guardians can apply to in the round, in the order they\r\nwere saved; page GET programs?applicationRoundId= for their program type, school and grades."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDtoPaginatedItemsViewModel:
       type: object
       properties:
@@ -55185,6 +55227,34 @@ components:
           nullable: true
       additionalProperties: false
       description: "The round's own message to parents. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundAlertDto.StartDate and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundAlertDto.EndDate are\r\nyyyy-MM-dd calendar days. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.Pathways empty means every pathway."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundProgramRefDto:
+      type: object
+      properties:
+        programId:
+          type: string
+          format: uuid
+          nullable: true
+        programCode:
+          type: string
+          nullable: true
+        programName:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: 'One program a round offers: the program''s record id with the service''s copy of its code and name.'
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundRegistrationOptionsResponseDto:
+      type: object
+      properties:
+        enrollInZonedSchool:
+          type: boolean
+        applyForInDistrictTransfer:
+          type: boolean
+        applyForAdmissionsBasedPrograms:
+          type: boolean
+        continueAtCurrentProgram:
+          type: boolean
+      additionalProperties: false
+      description: Which ways of registering the round offers. A round saved before the options existed reads as all four off.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolEnabledResponseDto:
       type: object
       properties:
