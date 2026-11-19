@@ -10273,6 +10273,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '412':
+          description: The priority structure cannot change while an application on an approved registration names the program (code program_priority_structure_locked).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/programs':
     get:
       tags:
@@ -54433,6 +54439,9 @@ components:
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramSchoolYearDto'
           nullable: true
+        approvedApplicationCount:
+          type: integer
+          format: int32
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramListItemDto:
       type: object
