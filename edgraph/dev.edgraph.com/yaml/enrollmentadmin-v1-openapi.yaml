@@ -3045,7 +3045,8 @@ paths:
     get:
       tags:
         - Enrollment Admin / Programs
-      summary: Gets the Registration Applications referencing a Program.
+      summary: 'Lists the Registration Applications referencing a Program, ordered by student last name then first name.'
+      description: "`search` matches the student's name or local code, up to 100 characters. `status` is a\r\n            RegistrationApplicationStatus name, matched without regard to case.\r\n            `count` is the number of applications matching the search and status."
       operationId: GetProgramApplications
       parameters:
         - name: tenantId
@@ -3061,6 +3062,28 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: pageIndex
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+        - name: pageSize
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+        - name: search
+          in: query
+          description: ''
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: ''
+          schema:
+            type: string
       responses:
         '401':
           description: Unauthorized
@@ -3085,9 +3108,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramApplicationDto'
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramApplicationsPageDto'
+        '400':
+          description: Bad Request. The status is not a RegistrationApplicationStatus name or the search is longer than 100 characters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
         '404':
           description: The resource could not be found.
           content:
@@ -7674,6 +7701,9 @@ components:
         - Declined
         - Waitlisted
         - NotProcessed
+        - Offered
+        - Removed
+        - Expired
       type: string
       description: "The status of one Application on a Registration. Mirrors the Enrollment service's\r\nRegistrationApplicationStatus; sent over gRPC by name."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateApplicationDto:
@@ -9828,8 +9858,35 @@ components:
         applicationStatus:
           type: string
           nullable: true
+        studentFirstName:
+          type: string
+          nullable: true
+        studentLastName:
+          type: string
+          nullable: true
+        studentLocalCode:
+          type: string
+          nullable: true
       additionalProperties: false
       description: "One Registration Application referencing this program - see\r\nEnrollmentAdminController.Programs.GetProgramApplications."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramApplicationsPageDto:
+      type: object
+      properties:
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramApplicationDto'
+      additionalProperties: false
+      description: One page of a program's applications. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramApplicationsPageDto.Count is the number matching the search and status.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramCapacityResponseDto:
       type: object
       properties:
