@@ -54917,8 +54917,14 @@ components:
           type: integer
           format: int32
           nullable: true
+        qualifiedPriorities:
+          type: array
+          items:
+            type: integer
+            format: int32
+          nullable: true
       additionalProperties: false
-      description: "An application on a list row; the application's own status is one of the application statuses. The program\r\nfields are absent when the program is deleted or unreadable. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.SeatStatus is `Accepting`,\r\n`WaitlistOnly`, `NotAccepting` or `Unavailable`. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.Priority is the calculated\r\npriority and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.PriorityOverride an admin's override of it, kept apart. They and\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.SchoolBasedRank are as on the record, absent until set."
+      description: "An application on a list row; the application's own status is one of the application statuses. The program\r\nfields are absent when the program is deleted or unreadable. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.SeatStatus is `Accepting`,\r\n`WaitlistOnly`, `NotAccepting` or `Unavailable`. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.Priority is the calculated\r\npriority and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.PriorityOverride an admin's override of it, kept apart. They and\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.SchoolBasedRank are as on the record, absent until set.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.QualifiedPriorities is every priority the application qualifies for, lowest first; it is\r\nempty until the priority check has run, and when the application qualifies for none. Read-only."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto:
       type: object
       properties:
@@ -64420,6 +64426,14 @@ components:
           description: "An admin's override of priority, kept beside it. Unset when there is none. While set, it is\r\nthe number the lottery competes with; priority still holds the calculated value."
           format: int32
           nullable: true
+        qualifiedPriorities:
+          type: array
+          items:
+            type: integer
+            format: int32
+          description: "Every priority the application qualifies for, lowest first: [3, 4] for a district employee's\r\nchild (3) with a sibling at the campus (4). Read-only: the priority check stamps it and no\r\nrequest carries it. Empty until the check has run, and when it ran and the application\r\nqualifies for none. priority stays the one number the application competes with."
+          nullable: true
+          readOnly: true
       additionalProperties: false
       description: "One Program-seat choice on a Registration - zero-to-many, independently accepted or declined. See\r\nAcceptRegistrationApplication / DeclineRegistrationApplication / GetRegistrationApplications."
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationApplicationsListResponse:
