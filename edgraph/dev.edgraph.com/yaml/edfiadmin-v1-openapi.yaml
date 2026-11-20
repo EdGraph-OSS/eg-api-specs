@@ -9407,6 +9407,14 @@ components:
           nullable: true
         dmsSurface:
           $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDmsSurface'
+        surfaceSetupStatus:
+          type: string
+          description: "The surface's setup job (EdGraphManagedDms): Running, Succeeded, Failed or SubmitFailed; unset for a surface set\r\nup by hand."
+          nullable: true
+        surfaceSetupAttempt:
+          type: integer
+          format: int32
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDeletedResponse:
       type: object
@@ -9507,6 +9515,13 @@ components:
           nullable: true
         dmsSurface:
           $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDmsSurface'
+        surfaceSetupStatus:
+          type: string
+          nullable: true
+        surfaceSetupAttempt:
+          type: integer
+          format: int32
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionPaginatedItemsResponse:
       type: object

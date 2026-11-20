@@ -8398,79 +8398,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Infrastructure.ExceptionResponse'
-  '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/militarypeaceofficerverification':
-    put:
-      tags:
-        - Enrollment Admin / Contacts
-      summary: Sets a contact's Military/Peace Officer Verified flag.
-      description: "<br>\r\n            An admin sets it once they have checked the documentation the parent uploaded when they said their student is\r\n            a dependent of an active military member or peace officer. Only the admin personas - District Admin, System\r\n            Admin and Super Admin - and the Enrollment Admin admin role may call this; Campus Admin and Campus Admin Plus may\r\n            not, although they can change the contact otherwise.\r\n            \r\n<br>\r\n            The Enrollment service's UpdateContact requires the name on every call, so the contact is read first and its\r\n            name sent back unchanged with the flag.\r\n            "
-      operationId: SetEnrollmentContactMilitaryPeaceOfficerVerified
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-        - name: id
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        description: ''
-        content:
-          application/json-patch+json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactMilitaryPeaceOfficerVerifiedRequestDto'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactMilitaryPeaceOfficerVerifiedRequestDto'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactMilitaryPeaceOfficerVerifiedRequestDto'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactMilitaryPeaceOfficerVerifiedRequestDto'
-      responses:
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '200':
-          description: The flag was set.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactMutationResultDto'
-        '400':
-          description: Bad Request. The request was invalid and cannot be completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
-        '404':
-          description: The resource could not be found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/overrides/emails':
     delete:
       tags:
@@ -9282,7 +9209,6 @@ paths:
       tags:
         - Enrollment Admin / Contacts
       summary: Verifies a contact.
-      description: "`registrationId` names the registration the contact was verified from, when it was: the verification is\r\n            then also listed in that registration's activity. It always reaches the contact's own activity."
       operationId: VerifyEnrollmentContact
       parameters:
         - name: tenantId
@@ -9295,12 +9221,6 @@ paths:
           in: path
           description: ''
           required: true
-          schema:
-            type: string
-            format: uuid
-        - name: registrationId
-          in: query
-          description: ''
           schema:
             type: string
             format: uuid
@@ -10537,56 +10457,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramTypeResponseDto'
-  '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/activity':
-    get:
-      tags:
-        - Enrollment Admin / Registrations
-      summary: "Lists a Registration's activity - who did what and when, newest first: the parent starting, submitting and\r\nre-submitting it, and staff reopening it, verifying or rejecting its documents, and verifying or acting as\r\nits contacts."
-      operationId: GetEnrollmentRegistrationActivity
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-        - name: id
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-      responses:
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '500':
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '200':
-          description: The registration's activity; an empty list when nothing has been logged yet.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationActivityResponseDto'
-        '404':
-          description: The resource could not be found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/applications/{applicationId}/accept':
     post:
       tags:
@@ -10899,7 +10769,7 @@ paths:
     put:
       tags:
         - Enrollment Admin / Registrations
-      summary: "Sets an admin's override of one Application's priority (AB#19617, AB#19632, AB#19694). Body:\r\n`{ \"priorityOverride\": 3 }`, a whole number from 1 to 9999."
+      summary: "Sets an admin's override of one Application's priority (AB#19617, AB#19632). Body:\r\n`{ \"priorityOverride\": 3 }`, a whole number from 0 to 9999."
       description: "The override is kept beside the calculated `priority` and never replaces it; no route writes\r\n`priority`. While an override is set it is the number the lottery uses. Returns the whole\r\nregistration, as M:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentRegistration(System.String,System.String,System.Threading.CancellationToken) does, with both values on the application."
       operationId: UpdateEnrollmentRegistrationApplicationPriorityOverride
       parameters:
@@ -10962,7 +10832,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationResponse'
         '400':
-          description: Bad Request. The override is missing or outside 1 to 9999.
+          description: Bad Request. The override is missing or outside 0 to 9999.
           content:
             application/json:
               schema:
@@ -11979,7 +11849,7 @@ paths:
       tags:
         - Enrollment Admin / Registrations
       summary: "Gets a Registration's requirements: the district-wide ones once, and each Application's own\r\nfrom its program, every one with a state derived from its type and the registration's document."
-      description: "`state` is one of `Missing`, `PendingReview`, `Verified`, `Rejected` or\r\n            `NotApplicable`. A requirement that is not a document staff review is `NotApplicable`\r\n            and never `Verified`.\r\n            `immunizationRecords` always holds five slots, `Document #1` to `Document #5`, filled in\r\n            upload order; a slot nothing was uploaded to is `Missing`.\r\n            `militaryPeaceOfficerProofs` holds the two Military / Peace Officer proof slots, `Document #1` and\r\n            `Document #2`, in the same shape; it is empty unless the parent answered Yes to the Military / Peace\r\n            Officer question."
+      description: "`state` is one of `Missing`, `PendingReview`, `Verified`, `Rejected` or\r\n            `NotApplicable`. A requirement that is not a document staff review is `NotApplicable`\r\n            and never `Verified`.\r\n            `immunizationRecords` always holds five slots, `Document #1` to `Document #5`, filled in\r\n            upload order; a slot nothing was uploaded to is `Missing`."
       operationId: GetEnrollmentRegistrationRequirements
       parameters:
         - name: tenantId
@@ -38242,59 +38112,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
-  '/tenants/{tenantId}/analytics/reports/{reportId}/refresh-dates':
-    get:
-      tags:
-        - Reports
-      summary: 'Retrieves when the data behind a report was last refreshed: the semantic model and the data warehouse.'
-      description: "Both dates are UTC ISO-8601 and are left out when unknown. Kept apart from the report itself so loading\r\nthe dates never delays or breaks the embed."
-      operationId: GetReportRefreshDatesAsync
-      parameters:
-        - name: tenantId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-        - name: reportId
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: string
-      responses:
-        '401':
-          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
-        '403':
-          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
-        '500':
-          description: An unhandled error occurred on the server.See the response body for details.
-        '200':
-          description: The requested resource was successfully retrieved.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AnalyticsApi.Reports.V1.ReportRefreshDatesResponse'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
-        '400':
-          description: Bad Request. The request was invalid and cannot be completed. See the response body for specific validation errors. This will typically be an issue with the query parameters or the request body values.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
   '/tenants/{tenantId}/analytics/reports/{reportId}':
     delete:
       tags:
@@ -48940,18 +48757,6 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-    AnalyticsApi.Reports.V1.ReportRefreshDatesResponse:
-      type: object
-      properties:
-        semanticModelRefreshedDateTime:
-          type: string
-          description: UTC ISO-8601 end time of the latest completed Power BI semantic model refresh. Absent when unknown.
-          nullable: true
-        dataWarehouseRefreshedDateTime:
-          type: string
-          description: UTC ISO-8601 time the report tenant's data warehouse last finished loading. Absent when unknown.
-          nullable: true
-      additionalProperties: false
     AnalyticsApi.Reports.V1.ReportResponse:
       type: object
       properties:
@@ -51488,12 +51293,12 @@ components:
       properties:
         priorityOverride:
           maximum: 9999
-          minimum: 1
+          minimum: 0
           type: integer
-          description: 'The number the lottery uses in place of the calculated priority, a whole number from 1 to 9999.'
+          description: 'The number the lottery uses in place of the calculated priority, a whole number from 0 to 9999.'
           format: int32
       additionalProperties: false
-      description: 'The body of an Application priority override (AB#19617, AB#19632, AB#19694). The override is removed with DELETE, not with a null.'
+      description: 'The body of an Application priority override (AB#19617, AB#19632). The override is removed with DELETE, not with a null.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationSchoolBasedRankRequestDto:
       required:
         - schoolBasedRank
@@ -51683,16 +51488,6 @@ components:
           description: Required. Whether an admin has verified the contact's employee id.
       additionalProperties: false
       description: 'The body of `PUT .../contacts/{id}/employeeverification`.'
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactMilitaryPeaceOfficerVerifiedRequestDto:
-      required:
-        - isMilitaryPeaceOfficerVerified
-      type: object
-      properties:
-        isMilitaryPeaceOfficerVerified:
-          type: boolean
-          description: Required. Whether an admin has verified the contact's military or peace officer documentation.
-      additionalProperties: false
-      description: 'The body of `PUT .../contacts/{id}/militarypeaceofficerverification`.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetRolePersonasRequestDto:
       type: object
       properties:
@@ -51721,11 +51516,6 @@ components:
           maxLength: 500
           type: string
           description: Required; recorded in Identity's audit.
-          nullable: true
-        registrationId:
-          type: string
-          description: "The registration the admin started from, when they did (US 19544): the impersonation is then also listed in that\r\nregistration's activity. Optional; it never affects whether the session starts."
-          format: uuid
           nullable: true
       additionalProperties: false
       description: 'The body of an "act as contact" start (spec 2026-10-06 contact impersonation, T2).'
@@ -53998,15 +53788,6 @@ components:
         isEmployeeVerified:
           type: boolean
           nullable: true
-        isMilitaryPeaceOfficerVerified:
-          type: boolean
-          nullable: true
-        isEmployeeClaimed:
-          type: boolean
-          nullable: true
-        isMilitaryPeaceOfficerClaimed:
-          type: boolean
-          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactResponseDtoPaginatedItemsViewModel:
       type: object
@@ -54401,7 +54182,7 @@ components:
           format: date-time
           nullable: true
       additionalProperties: false
-      description: "One of the five immunization record slots, or one of the two Military / Peace Officer proof slots.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ImmunizationRecordDto.RequirementCode is `ImmunizationRecord_1` to `ImmunizationRecord_5`, or\r\n`MilitaryPeaceOfficerProof_1` and `MilitaryPeaceOfficerProof_2`; the other fields read as on\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto."
+      description: "One of the five immunization record slots. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ImmunizationRecordDto.RequirementCode is `ImmunizationRecord_1`\r\nto `ImmunizationRecord_5`; the other fields read as on EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.LinearRingDto:
       type: object
       properties:
@@ -54690,88 +54471,6 @@ components:
         success:
           type: boolean
       additionalProperties: false
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationActivityEntryDto:
-      type: object
-      properties:
-        id:
-          type: string
-          nullable: true
-        eventType:
-          type: string
-          nullable: true
-        occurredAt:
-          type: string
-          format: date-time
-          nullable: true
-        actorKind:
-          type: string
-          nullable: true
-        actorId:
-          type: string
-          nullable: true
-        actorName:
-          type: string
-          nullable: true
-        actorRole:
-          type: string
-          nullable: true
-        actorEmail:
-          type: string
-          nullable: true
-        actorPhone:
-          type: string
-          nullable: true
-        registrationFromStatus:
-          type: string
-          nullable: true
-        registrationToStatus:
-          type: string
-          nullable: true
-        contactId:
-          type: string
-          format: uuid
-          nullable: true
-        contactName:
-          type: string
-          nullable: true
-        contactFromStatus:
-          type: string
-          nullable: true
-        contactToStatus:
-          type: string
-          nullable: true
-        documentId:
-          type: string
-          format: uuid
-          nullable: true
-        documentName:
-          type: string
-          nullable: true
-        documentFromStatus:
-          type: string
-          nullable: true
-        documentToStatus:
-          type: string
-          nullable: true
-        rejectReason:
-          type: string
-          nullable: true
-        actedByAdmin:
-          type: boolean
-      additionalProperties: false
-      description: One activity entry.
-    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationActivityResponseDto:
-      type: object
-      properties:
-        count:
-          type: integer
-          format: int32
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationActivityEntryDto'
-      additionalProperties: false
-      description: "A registration's activity log (US 19544): the audited admin and parent actions on it, newest first.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationActivityResponseDto.Count is the number of entries."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationApplicationAddedResultDto:
       type: object
       properties:
@@ -55065,12 +54764,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ImmunizationRecordDto'
-        militaryPeaceOfficerProofs:
-          type: array
-          items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ImmunizationRecordDto'
       additionalProperties: false
-      description: "What the registration detail page shows for requirements: the district-wide ones once, and each\r\napplication's own from its program. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementsResponseDto.ImmunizationRecords always holds five slots,\r\n`Document #1` to `Document #5`, whether or not the parent has uploaded anything.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementsResponseDto.MilitaryPeaceOfficerProofs holds the two Military / Peace Officer proof slots in the same shape,\r\nand is empty unless the parent answered Yes to the Military / Peace Officer question (AB#19654)."
+      description: "What the registration detail page shows for requirements: the district-wide ones once, and each\r\napplication's own from its program. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementsResponseDto.ImmunizationRecords always holds five slots,\r\n`Document #1` to `Document #5`, whether or not the parent has uploaded anything."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementMutationResultDto:
       type: object
       properties:
@@ -55403,6 +55098,15 @@ components:
           nullable: true
         programType:
           type: string
+          nullable: true
+        programId:
+          type: string
+          format: uuid
+          nullable: true
+        schoolYears:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramSchoolYearDto'
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolRefDto:
@@ -57078,10 +56782,6 @@ components:
         canImpersonate:
           type: boolean
         canVerifyEmployees:
-          type: boolean
-        canVerifyMilitaryPeaceOfficers:
-          type: boolean
-        canOverridePriority:
           type: boolean
       additionalProperties: false
       description: 'What the current user may use in the enrollment admin app, calculated from their access token.'
@@ -61934,6 +61634,14 @@ components:
           nullable: true
         dmsSurface:
           $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDmsSurface'
+        surfaceSetupStatus:
+          type: string
+          description: "The surface's setup job (EdGraphManagedDms): Running, Succeeded, Failed or SubmitFailed; unset for a surface set\r\nup by hand."
+          nullable: true
+        surfaceSetupAttempt:
+          type: integer
+          format: int32
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDeletedResponse:
       type: object
@@ -62034,6 +61742,13 @@ components:
           nullable: true
         dmsSurface:
           $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDmsSurface'
+        surfaceSetupStatus:
+          type: string
+          nullable: true
+        surfaceSetupAttempt:
+          type: integer
+          format: int32
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionPaginatedItemsResponse:
       type: object
@@ -67179,9 +66894,6 @@ components:
         secretExpirationDateTime:
           type: string
           nullable: true
-        isTenantAdmin:
-          type: boolean
-          nullable: true
       additionalProperties: false
     IdentityApi.ApiClient.V1.RegenerateApiClientSecretRequest:
       type: object
@@ -67226,9 +66938,6 @@ components:
             $ref: '#/components/schemas/IdentityApi.ApiClient.V1.ApiClaim'
           nullable: true
           readOnly: true
-        isTenantAdmin:
-          type: boolean
-          nullable: true
       additionalProperties: false
     IdentityApi.ClientSettingsType.V1.ClientSettingsTypeResponse:
       type: object
