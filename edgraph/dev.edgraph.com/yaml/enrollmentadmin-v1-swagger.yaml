@@ -1531,6 +1531,79 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Infrastructure.ExceptionResponse'
+  '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/militarypeaceofficerverification':
+    put:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: Sets a contact's Military/Peace Officer Verified flag.
+      description: "<br>\r\n            An admin sets it once they have checked the documentation the parent uploaded when they said their student is\r\n            a dependent of an active military member or peace officer. Only the admin personas - District Admin, System\r\n            Admin and Super Admin - and the Enrollment Admin admin role may call this; Campus Admin and Campus Admin Plus may\r\n            not, although they can change the contact otherwise.\r\n            \r\n<br>\r\n            The Enrollment service's UpdateContact requires the name on every call, so the contact is read first and its\r\n            name sent back unchanged with the flag.\r\n            "
+      operationId: SetEnrollmentContactMilitaryPeaceOfficerVerified
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactMilitaryPeaceOfficerVerifiedRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactMilitaryPeaceOfficerVerifiedRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactMilitaryPeaceOfficerVerifiedRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactMilitaryPeaceOfficerVerifiedRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The flag was set.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactMutationResultDto'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/overrides/emails':
     delete:
       tags:
@@ -5066,7 +5139,7 @@ paths:
       tags:
         - Enrollment Admin / Registrations
       summary: "Gets a Registration's requirements: the district-wide ones once, and each Application's own\r\nfrom its program, every one with a state derived from its type and the registration's document."
-      description: "`state` is one of `Missing`, `PendingReview`, `Verified`, `Rejected` or\r\n            `NotApplicable`. A requirement that is not a document staff review is `NotApplicable`\r\n            and never `Verified`.\r\n            `immunizationRecords` always holds five slots, `Document #1` to `Document #5`, filled in\r\n            upload order; a slot nothing was uploaded to is `Missing`."
+      description: "`state` is one of `Missing`, `PendingReview`, `Verified`, `Rejected` or\r\n            `NotApplicable`. A requirement that is not a document staff review is `NotApplicable`\r\n            and never `Verified`.\r\n            `immunizationRecords` always holds five slots, `Document #1` to `Document #5`, filled in\r\n            upload order; a slot nothing was uploaded to is `Missing`.\r\n            `militaryPeaceOfficerProofs` holds the two Military / Peace Officer proof slots, `Document #1` and\r\n            `Document #2`, in the same shape; it is empty unless the parent answered Yes to the Military / Peace\r\n            Officer question."
       operationId: GetEnrollmentRegistrationRequirements
       parameters:
         - name: tenantId
@@ -7873,6 +7946,16 @@ components:
           description: Required. Whether an admin has verified the contact's employee id.
       additionalProperties: false
       description: 'The body of `PUT .../contacts/{id}/employeeverification`.'
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactMilitaryPeaceOfficerVerifiedRequestDto:
+      required:
+        - isMilitaryPeaceOfficerVerified
+      type: object
+      properties:
+        isMilitaryPeaceOfficerVerified:
+          type: boolean
+          description: Required. Whether an admin has verified the contact's military or peace officer documentation.
+      additionalProperties: false
+      description: 'The body of `PUT .../contacts/{id}/militarypeaceofficerverification`.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetRolePersonasRequestDto:
       type: object
       properties:
@@ -9420,6 +9503,9 @@ components:
         isEmployeeVerified:
           type: boolean
           nullable: true
+        isMilitaryPeaceOfficerVerified:
+          type: boolean
+          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactResponseDtoPaginatedItemsViewModel:
       type: object
@@ -9814,7 +9900,7 @@ components:
           format: date-time
           nullable: true
       additionalProperties: false
-      description: "One of the five immunization record slots. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ImmunizationRecordDto.RequirementCode is `ImmunizationRecord_1`\r\nto `ImmunizationRecord_5`; the other fields read as on EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto."
+      description: "One of the five immunization record slots, or one of the two Military / Peace Officer proof slots.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ImmunizationRecordDto.RequirementCode is `ImmunizationRecord_1` to `ImmunizationRecord_5`, or\r\n`MilitaryPeaceOfficerProof_1` and `MilitaryPeaceOfficerProof_2`; the other fields read as on\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.LinearRingDto:
       type: object
       properties:
@@ -10505,8 +10591,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ImmunizationRecordDto'
+        militaryPeaceOfficerProofs:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ImmunizationRecordDto'
       additionalProperties: false
-      description: "What the registration detail page shows for requirements: the district-wide ones once, and each\r\napplication's own from its program. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementsResponseDto.ImmunizationRecords always holds five slots,\r\n`Document #1` to `Document #5`, whether or not the parent has uploaded anything."
+      description: "What the registration detail page shows for requirements: the district-wide ones once, and each\r\napplication's own from its program. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementsResponseDto.ImmunizationRecords always holds five slots,\r\n`Document #1` to `Document #5`, whether or not the parent has uploaded anything.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementsResponseDto.MilitaryPeaceOfficerProofs holds the two Military / Peace Officer proof slots in the same shape,\r\nand is empty unless the parent answered Yes to the Military / Peace Officer question (AB#19654)."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementMutationResultDto:
       type: object
       properties:
@@ -11347,6 +11437,8 @@ components:
         canImpersonate:
           type: boolean
         canVerifyEmployees:
+          type: boolean
+        canVerifyMilitaryPeaceOfficers:
           type: boolean
       additionalProperties: false
       description: 'What the current user may use in the enrollment admin app, calculated from their access token.'
