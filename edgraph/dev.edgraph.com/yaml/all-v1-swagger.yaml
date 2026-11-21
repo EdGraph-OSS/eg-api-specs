@@ -10926,7 +10926,7 @@ paths:
     put:
       tags:
         - Enrollment Admin / Registrations
-      summary: "Sets an admin's override of one Application's priority (AB#19617, AB#19632). Body:\r\n`{ \"priorityOverride\": 3 }`, a whole number from 0 to 9999."
+      summary: "Sets an admin's override of one Application's priority (AB#19617, AB#19632, AB#19694). Body:\r\n`{ \"priorityOverride\": 3 }`, a whole number from 1 to 9999."
       description: "The override is kept beside the calculated `priority` and never replaces it; no route writes\r\n`priority`. While an override is set it is the number the lottery uses. Returns the whole\r\nregistration, as M:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentRegistration(System.String,System.String,System.Threading.CancellationToken) does, with both values on the application."
       operationId: UpdateEnrollmentRegistrationApplicationPriorityOverride
       parameters:
@@ -10989,7 +10989,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationResponse'
         '400':
-          description: Bad Request. The override is missing or outside 0 to 9999.
+          description: Bad Request. The override is missing or outside 1 to 9999.
           content:
             application/json:
               schema:
@@ -51450,12 +51450,12 @@ components:
       properties:
         priorityOverride:
           maximum: 9999
-          minimum: 0
+          minimum: 1
           type: integer
-          description: 'The number the lottery uses in place of the calculated priority, a whole number from 0 to 9999.'
+          description: 'The number the lottery uses in place of the calculated priority, a whole number from 1 to 9999.'
           format: int32
       additionalProperties: false
-      description: 'The body of an Application priority override (AB#19617, AB#19632). The override is removed with DELETE, not with a null.'
+      description: 'The body of an Application priority override (AB#19617, AB#19632, AB#19694). The override is removed with DELETE, not with a null.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationSchoolBasedRankRequestDto:
       required:
         - schoolBasedRank
@@ -53964,6 +53964,12 @@ components:
           type: boolean
           nullable: true
         isMilitaryPeaceOfficerVerified:
+          type: boolean
+          nullable: true
+        isEmployeeClaimed:
+          type: boolean
+          nullable: true
+        isMilitaryPeaceOfficerClaimed:
           type: boolean
           nullable: true
       additionalProperties: false
@@ -57075,6 +57081,8 @@ components:
         canVerifyEmployees:
           type: boolean
         canVerifyMilitaryPeaceOfficers:
+          type: boolean
+        canOverridePriority:
           type: boolean
       additionalProperties: false
       description: 'What the current user may use in the enrollment admin app, calculated from their access token.'
