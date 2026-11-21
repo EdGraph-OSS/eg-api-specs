@@ -2188,6 +2188,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/edfiadmin/instances/{instanceId}/claimsets/reload':
+    post:
+      tags:
+        - Instances / ClaimSets
+      summary: Forces the instance's DMS to reload its claim sets now (Ed-Fi v8 instances only).
+      operationId: ReloadClaimSetsAsync
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: instanceId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: '`reloaded` is true when DMS reloaded; false with reason `management_endpoint_disabled` when this DMS has its management endpoint disabled.'
+        '400':
+          description: Bad Request. The instance is not an Ed-Fi v8 instance.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
   '/tenants/{tenantId}/edfiadmin/instances/{instanceId}/claimsets':
     get:
       tags:
@@ -2881,8 +2927,11 @@ paths:
           description: ''
           required: true
           schema:
-            type: integer
-            format: int32
+            type: string
+        - name: resourcePath
+          in: query
+          schema:
+            type: string
       responses:
         '401':
           description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
@@ -2946,8 +2995,11 @@ paths:
           description: ''
           required: true
           schema:
-            type: integer
-            format: int32
+            type: string
+        - name: resourcePath
+          in: query
+          schema:
+            type: string
       responses:
         '401':
           description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
@@ -3015,8 +3067,7 @@ paths:
           description: ''
           required: true
           schema:
-            type: integer
-            format: int32
+            type: string
       requestBody:
         description: ''
         content:
@@ -3607,6 +3658,82 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/edfiadmin/instances/{instanceId}/years/{year}/educationorganizations/{resource}/{id}':
+    get:
+      tags:
+        - Instances / Education Organizations / Local Education Agencies
+      summary: "Ed-Fi v8 only: retrieves read-only details of a community organization, community provider, organization department\r\nor post-secondary institution by its resource ID. Schools and other types are rejected."
+      operationId: GetEducationOrganizationDetailsAsync
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: instanceId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: year
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: resource
+          in: path
+          description: 'communityOrganizations, communityProviders, organizationDepartments or postSecondaryInstitutions.'
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: The Ed-Fi resource ID.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.EducationOrganizationDetails'
+        '400':
+          description: The resource type is not supported or the ID is not a valid resource ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/edfiadmin/instances/{instanceId}/years/{year}/localeducationagencies/{localEducationAgencyId}/sync':
     post:
       tags:
@@ -3956,6 +4083,12 @@ paths:
           schema:
             type: string
             default: ''
+        - name: includeAdditionalOrganizationTypes
+          in: query
+          description: 'Ed-Fi v8 only: also list community organizations and providers, organization departments and post-secondary institutions. Schools are never listed.'
+          schema:
+            type: boolean
+            default: false
       responses:
         '401':
           description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
@@ -6513,6 +6646,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/edfiadmin/instances/{instanceId}/retry':
+    post:
+      tags:
+        - Instances
+      summary: Retries the last failed operation of an Ed-Fi v8 instance from its persisted parameters.
+      operationId: RetryInstanceOperationAsync
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: instanceId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The operation was resubmitted.
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/edfiadmin/instances/{instanceId}/testconnection':
     post:
       tags:
@@ -6736,6 +6921,10 @@ paths:
           schema:
             type: integer
             format: int32
+        - name: seed
+          in: query
+          schema:
+            type: string
       responses:
         '401':
           description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
@@ -7535,6 +7724,267 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/edfiadmin/instances/{instanceId}/retier':
+    post:
+      tags:
+        - v1
+      summary: Reconciles the school-year tier placement of a SQL Server Ed-Fi v8 instance.
+      operationId: RetierInstanceAsync
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: Success
+  '/tenants/{tenantId}/edfiadmin/surfaces/{connectionId}':
+    get:
+      tags:
+        - v1
+      operationId: GetSurfaceById
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: connectionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/edfiadmin/surfaces':
+    get:
+      tags:
+        - v1
+      operationId: GetSurfacesAsync
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 10
+        - name: pageIndex
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: orderBy
+          in: query
+          schema:
+            type: string
+            default: ''
+        - name: filter
+          in: query
+          schema:
+            type: string
+            default: ''
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/edfiadmin/instances/{instanceId}/jobs':
+    get:
+      tags:
+        - v1
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobHistoryEntry'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobHistoryEntry'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobHistoryEntry'
+  '/tenants/{tenantId}/edfiadmin/jobs/{jobId}/executions/{executionId}/logs':
+    get:
+      tags:
+        - v1
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: executionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: pageIndex
+          in: query
+          schema:
+            maximum: 2147483647
+            minimum: 0
+            type: integer
+            format: int32
+            default: 0
+        - name: pageSize
+          in: query
+          schema:
+            maximum: 100
+            minimum: 1
+            type: integer
+            format: int32
+            default: 25
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobLogDmsJobPage'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobLogDmsJobPage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobLogDmsJobPage'
+  '/tenants/{tenantId}/edfiadmin/jobs/{jobId}/executions':
+    get:
+      tags:
+        - v1
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: pageIndex
+          in: query
+          schema:
+            maximum: 2147483647
+            minimum: 0
+            type: integer
+            format: int32
+            default: 0
+        - name: pageSize
+          in: query
+          schema:
+            maximum: 100
+            minimum: 1
+            type: integer
+            format: int32
+            default: 25
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobExecutionDmsJobPage'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobExecutionDmsJobPage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobExecutionDmsJobPage'
 components:
   schemas:
     EdFiAdminApi.ApplicationAccess.V1.ApplicationAccessResponse:
@@ -7646,6 +8096,123 @@ components:
           additionalProperties:
             nullable: true
           readOnly: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobExecution:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        queuedDateTime:
+          type: string
+          format: date-time
+        startDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        endDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        stages:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobStage'
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobExecutionDmsJobPage:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        jobName:
+          type: string
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobExecution'
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobHistoryEntry:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        status:
+          type: string
+          nullable: true
+        queuedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        startDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        endDateTime:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobLog:
+      type: object
+      properties:
+        loggedDateTime:
+          type: string
+          format: date-time
+        level:
+          type: string
+        message:
+          type: string
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobLogDmsJobPage:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        jobName:
+          type: string
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobLog'
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.DmsJobStage:
+      type: object
+      properties:
+        id:
+          type: string
+        step:
+          type: string
+        schoolYear:
+          type: integer
+          format: int32
+          nullable: true
+        status:
+          type: string
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Services.EdFiAdmin.UseCases.InstanceLog:
       type: object
@@ -7894,6 +8461,10 @@ components:
             format: int32
           nullable: true
           readOnly: true
+        seed:
+          type: string
+          description: 'Ed-Fi v8 only: None, Descriptors or GrandBend; unset means None.'
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.ApplicationEndpoint:
       type: object
@@ -8178,6 +8749,9 @@ components:
         adminApiUrl:
           type: string
           nullable: true
+        dmsSurfaceJson:
+          type: string
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.CreateEducationServiceCenterRequest:
       type: object
@@ -8267,6 +8841,14 @@ components:
         state:
           type: string
           nullable: true
+        cmsTenant:
+          type: string
+          description: 'Ed-Fi v8 only: the CMS tenant name; unset derives it from instanceName.'
+          nullable: true
+        enableKafkaCdc:
+          type: boolean
+          description: 'Ed-Fi v8 only: opt every year into Kafka CDC; unset means false. The server decides admission.'
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.CreateInstanceRequestSchoolYear:
       type: object
@@ -8279,6 +8861,10 @@ components:
           nullable: true
         odsBackupCode:
           type: string
+          nullable: true
+        seed:
+          type: string
+          description: 'Ed-Fi v8 only: None, Descriptors or GrandBend; unset means None.'
           nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.CreateLocalEducationAgencyRequest:
@@ -8386,6 +8972,12 @@ components:
         descriptorId:
           type: integer
           format: int32
+        resourceId:
+          type: string
+          nullable: true
+        resourcePath:
+          type: string
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.DescriptorMapping:
       type: object
@@ -8507,6 +9099,12 @@ components:
           type: string
           nullable: true
         description:
+          type: string
+          nullable: true
+        resourceId:
+          type: string
+          nullable: true
+        resourcePath:
           type: string
           nullable: true
       additionalProperties: false
@@ -8803,6 +9401,20 @@ components:
         metadataJson:
           type: string
           nullable: true
+        dmsSurfaceJson:
+          type: string
+          description: Privileged connection administration; removed from ordinary tenant detail responses.
+          nullable: true
+        dmsSurface:
+          $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDmsSurface'
+        surfaceSetupStatus:
+          type: string
+          description: "The surface's setup job (EdGraphManagedDms): Running, Succeeded, Failed or SubmitFailed; unset for a surface set\r\nup by hand."
+          nullable: true
+        surfaceSetupAttempt:
+          type: integer
+          format: int32
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDeletedResponse:
       type: object
@@ -8811,6 +9423,31 @@ components:
           type: string
           nullable: true
         tenantId:
+          type: string
+          nullable: true
+      additionalProperties: false
+    EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDmsSurface:
+      type: object
+      properties:
+        surfaceId:
+          type: string
+          nullable: true
+        engine:
+          type: string
+          nullable: true
+        dataStandard:
+          type: string
+          nullable: true
+        extensions:
+          type: array
+          items:
+            type: string
+          nullable: true
+          readOnly: true
+        surfaceStatus:
+          type: string
+          nullable: true
+        dmsPublicBaseUrl:
           type: string
           nullable: true
       additionalProperties: false
@@ -8875,6 +9512,15 @@ components:
           nullable: true
         metadataJson:
           type: string
+          nullable: true
+        dmsSurface:
+          $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDmsSurface'
+        surfaceSetupStatus:
+          type: string
+          nullable: true
+        surfaceSetupAttempt:
+          type: integer
+          format: int32
           nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionPaginatedItemsResponse:
@@ -9060,6 +9706,63 @@ components:
           type: string
           nullable: true
         shortDescription:
+          type: string
+          nullable: true
+      additionalProperties: false
+    EdfiAdminApi.EdfiAdmin.V1.EducationOrganizationDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        educationOrganizationId:
+          type: integer
+          format: int64
+        educationOrganizationCategory:
+          type: string
+          nullable: true
+        nameOfInstitution:
+          type: string
+          nullable: true
+        shortNameOfInstitution:
+          type: string
+          nullable: true
+        webSite:
+          type: string
+          nullable: true
+        operationalStatus:
+          type: string
+          nullable: true
+        categories:
+          type: array
+          items:
+            type: string
+          nullable: true
+          readOnly: true
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.EducationOrganizationAddress'
+          nullable: true
+          readOnly: true
+        communityOrganizationId:
+          type: integer
+          format: int64
+          nullable: true
+        parentEducationOrganizationId:
+          type: integer
+          format: int64
+          nullable: true
+        providerCategory:
+          type: string
+          nullable: true
+        providerStatus:
+          type: string
+          nullable: true
+        postSecondaryInstitutionLevel:
+          type: string
+          nullable: true
+        administrativeFundingControl:
           type: string
           nullable: true
       additionalProperties: false
@@ -9259,6 +9962,8 @@ components:
         requiresSchoolYearSelection:
           type: boolean
           nullable: true
+        dms:
+          $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.InstanceDms'
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceApiClientCreatedResponse:
       type: object
@@ -9569,6 +10274,74 @@ components:
           nullable: true
           readOnly: true
       additionalProperties: false
+    EdfiAdminApi.EdfiAdmin.V1.InstanceDms:
+      type: object
+      properties:
+        surfaceId:
+          type: string
+          nullable: true
+        cmsTenant:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        years:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.InstanceDmsYear'
+          nullable: true
+          readOnly: true
+        activeOperationKind:
+          type: string
+          nullable: true
+        lastOperationKind:
+          type: string
+          nullable: true
+        lastOperationStatus:
+          type: string
+          nullable: true
+        lastJobId:
+          type: string
+          nullable: true
+        lastExecutionId:
+          type: string
+          nullable: true
+        enableKafkaCdc:
+          type: boolean
+      additionalProperties: false
+    EdfiAdminApi.EdfiAdmin.V1.InstanceDmsYear:
+      type: object
+      properties:
+        schoolYear:
+          type: integer
+          format: int32
+        databaseName:
+          type: string
+          nullable: true
+        dataStoreId:
+          type: integer
+          format: int32
+          nullable: true
+        seed:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        tier:
+          type: string
+          nullable: true
+        resetOrdinal:
+          type: integer
+          format: int32
+        lastStep:
+          type: string
+          nullable: true
+        lastStepStatus:
+          type: string
+          nullable: true
+      additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceEndpointsResponse:
       type: object
       properties:
@@ -9694,6 +10467,8 @@ components:
         requiresSchoolYearSelection:
           type: boolean
           nullable: true
+        dms:
+          $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.InstanceDms'
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceListModelPaginatedItemsViewModel:
       type: object
@@ -10756,6 +11531,9 @@ components:
         adminApiUrl:
           type: string
           nullable: true
+        dmsSurfaceJson:
+          type: string
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.UpdateEducationServiceCenterRequest:
       type: object
@@ -11100,14 +11878,14 @@ components:
         - MultiStatus
         - AlreadyReported
         - IMUsed
-        - Ambiguous
-        - Moved
-        - Redirect
-        - RedirectMethod
+        - MultipleChoices
+        - MovedPermanently
+        - Found
+        - SeeOther
         - NotModified
         - UseProxy
         - Unused
-        - TemporaryRedirect
+        - RedirectKeepVerb
         - PermanentRedirect
         - BadRequest
         - Unauthorized

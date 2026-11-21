@@ -254,7 +254,7 @@ paths:
     post:
       tags:
         - Enrollment Admin / ApplicationRounds
-      summary: "Copies the round's code, label, grades and program types into another school year. Windows\r\nare not copied - their dates belong to this round's school year."
+      summary: "Copies the round's code, label, grades, programs and registration options into another school year. Windows\r\nare not copied - their dates belong to this round's school year."
       operationId: DuplicateApplicationRound
       parameters:
         - name: tenantId
@@ -877,7 +877,7 @@ paths:
     put:
       tags:
         - Enrollment Admin / ApplicationRounds
-      summary: "Replaces a round's label, grades and program types. Code and school year never change -\r\nduplicate the round into another school year instead."
+      summary: "Replaces a round's label, grades, programs, registration options, pathways and alert. Code and school\r\nyear never change - duplicate the round into another school year instead."
       operationId: UpdateApplicationRound
       parameters:
         - name: tenantId
@@ -1024,7 +1024,7 @@ paths:
     post:
       tags:
         - Enrollment Admin / ApplicationRounds
-      summary: Creates a round. Add its windows afterwards.
+      summary: "Creates a round, with any windows given written in the same call. A window that depends on\r\nanother window is added afterwards."
       operationId: CreateApplicationRound
       parameters:
         - name: tenantId
@@ -1074,13 +1074,241 @@ paths:
               schema:
                 $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundMutationResultDto'
         '400':
-          description: 'Bad Request. The request was invalid, or named a program type that does not exist.'
+          description: 'Bad Request. The request was invalid, or named a program that does not exist.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
         '409':
           description: 'The school year already has a round with this code, possibly deleted (recover or purge it first).'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/programs/{programId}/capacities':
+    get:
+      tags:
+        - Enrollment Admin / Capacity
+      summary: 'Reads one program''s capacity by grade for a school year, with totals and the school years it has data for.'
+      operationId: GetProgramCapacities
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: programId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: schoolYear
+          in: query
+          description: Optional. Defaults to the district's current school year.
+          schema:
+            type: string
+            default: ''
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: The program's school is outside the caller's schools.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramCapacityResponseDto'
+        '404':
+          description: The program could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/schools/{schoolLocalCode}/capacities':
+    get:
+      tags:
+        - Enrollment Admin / Capacity
+      summary: "Searches Capacity for one school - one row per program x grade x school year - with totals over every\r\nrow the filters leave."
+      operationId: GetSchoolCapacities
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: schoolLocalCode
+          in: path
+          description: The school's 3-digit short code.
+          required: true
+          schema:
+            type: string
+        - name: pageSize
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+            default: 50
+        - name: pageIndex
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: orderBy
+          in: query
+          description: ''
+          schema:
+            type: string
+            default: ''
+        - name: grade
+          in: query
+          description: Optional exact match.
+          schema:
+            type: string
+            default: ''
+        - name: search
+          in: query
+          description: Free-text match on program name/code.
+          schema:
+            type: string
+            default: ''
+        - name: programTypeId
+          in: query
+          description: Optional exact match on the program type.
+          schema:
+            type: string
+            default: ''
+        - name: currentYear
+          in: query
+          description: Keep rows of the district's current school year.
+          schema:
+            type: boolean
+            default: false
+        - name: futureYear
+          in: query
+          description: Keep rows of the district's next school year.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: The school is outside the caller's schools.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacitySearchResponseDto'
+        '404':
+          description: The school could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+    put:
+      tags:
+        - Enrollment Admin / Capacity
+      summary: 'Saves the Seat Capacity of one school''s program grades for a school year, all or nothing.'
+      description: "Send every row of the school year as the admin saw it, each with the Seat Capacity it was loaded with\r\n(`expectedSeatCapacity`). Only the rows whose value changed are applied. If any changed row has moved\r\nsince it was loaded, nothing is written and the response is 412. A save during a running lottery is allowed\r\nand applies to the next run."
+      operationId: UpdateSchoolCapacities
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: schoolLocalCode
+          in: path
+          description: The school's 3-digit short code.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateCapacityRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateCapacityRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateCapacityRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateCapacityRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: The school is outside the caller's schools.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The changed rows were saved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.UpdateCapacityResponseDto'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '412':
+          description: A changed row was modified by someone else while it was being edited; nothing was written.
           content:
             application/json:
               schema:
@@ -1154,6 +1382,79 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/employeeverification':
+    put:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: Sets a contact's Employee Verified flag.
+      description: "<br>\r\n            An admin sets it once they have checked the employee id the parent entered. Only the admin personas - District\r\n            Admin, System Admin and Super Admin - and the Enrollment Admin admin role may call this; Campus Admin and Campus\r\n            Admin Plus may not, although they can change the contact otherwise.\r\n            \r\n<br>\r\n            The Enrollment service's UpdateContact requires the name on every call, so the contact is read first and its\r\n            name sent back unchanged with the flag.\r\n            "
+      operationId: SetEnrollmentContactEmployeeVerified
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactEmployeeVerifiedRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactEmployeeVerifiedRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactEmployeeVerifiedRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactEmployeeVerifiedRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The flag was set.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactMutationResultDto'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/impersonation':
     post:
       tags:
@@ -1230,6 +1531,79 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Infrastructure.ExceptionResponse'
+  '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/militarypeaceofficerverification':
+    put:
+      tags:
+        - Enrollment Admin / Contacts
+      summary: Sets a contact's Military/Peace Officer Verified flag.
+      description: "<br>\r\n            An admin sets it once they have checked the documentation the parent uploaded when they said their student is\r\n            a dependent of an active military member or peace officer. Only the admin personas - District Admin, System\r\n            Admin and Super Admin - and the Enrollment Admin admin role may call this; Campus Admin and Campus Admin Plus may\r\n            not, although they can change the contact otherwise.\r\n            \r\n<br>\r\n            The Enrollment service's UpdateContact requires the name on every call, so the contact is read first and its\r\n            name sent back unchanged with the flag.\r\n            "
+      operationId: SetEnrollmentContactMilitaryPeaceOfficerVerified
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactMilitaryPeaceOfficerVerifiedRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactMilitaryPeaceOfficerVerifiedRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactMilitaryPeaceOfficerVerifiedRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactMilitaryPeaceOfficerVerifiedRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The flag was set.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactMutationResultDto'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/contacts/{id}/overrides/emails':
     delete:
       tags:
@@ -2737,7 +3111,8 @@ paths:
     get:
       tags:
         - Enrollment Admin / Programs
-      summary: Gets the Registration Applications referencing a Program.
+      summary: 'Lists the Registration Applications referencing a Program, ordered by student last name then first name.'
+      description: "`search` matches the student's name or local code, up to 100 characters. `status` is a\r\n            RegistrationApplicationStatus name, matched without regard to case.\r\n            `count` is the number of applications matching the search and status."
       operationId: GetProgramApplications
       parameters:
         - name: tenantId
@@ -2753,6 +3128,28 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: pageIndex
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+        - name: pageSize
+          in: query
+          description: ''
+          schema:
+            type: integer
+            format: int32
+        - name: search
+          in: query
+          description: ''
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: ''
+          schema:
+            type: string
       responses:
         '401':
           description: Unauthorized
@@ -2777,11 +3174,93 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramApplicationDto'
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramApplicationsPageDto'
+        '400':
+          description: Bad Request. The status is not a RegistrationApplicationStatus name or the search is longer than 100 characters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
         '404':
           description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/programs/{id}/schoolyears':
+    post:
+      tags:
+        - Enrollment Admin / Programs
+      summary: "Saves the school years of a Program. The body is the program's whole list: a year missing from it is removed, a\r\nyear that is new is added and a year that is present with other values is edited, so the same list sent twice\r\nchanges nothing. Send an empty list to clear them all. Names are unique within the program, the dates cannot\r\noverlap, and a year that is already over cannot be added, edited or removed."
+      operationId: UpdateProgramSchoolYears
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateProgramSchoolYearsRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateProgramSchoolYearsRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateProgramSchoolYearsRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateProgramSchoolYearsRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: The program's school is not one of the caller's schools.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The school years were saved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramMutationResultDto'
+        '400':
+          description: Bad Request. The request was invalid and cannot be completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '412':
+          description: 'A year that is already over would be added, edited or removed.'
           content:
             application/json:
               schema:
@@ -2954,6 +3433,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '412':
+          description: The priority structure cannot change while an application on an approved registration names the program (code program_priority_structure_locked).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/programs':
     get:
       tags:
@@ -3003,6 +3488,25 @@ paths:
         - name: programTypeId
           in: query
           description: Narrows to programs of this program type (its record id).
+          schema:
+            type: string
+            default: ''
+        - name: applicationRoundId
+          in: query
+          description: 'Narrows to the programs this application round offers. A round with no programs matches nothing; an unknown round is 404, and a value that is not a Guid is 400.'
+          schema:
+            type: string
+            default: ''
+        - name: grades
+          in: query
+          description: 'Narrows to programs that serve at least one of these grades (PK, KG, 01..12), matched exactly. Repeat the parameter for each grade.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: schoolYear
+          in: query
+          description: 'Narrows to programs offered in this school year: those with a school year whose name is exactly this text, e.g. 2027-2028. A program whose year is spelled differently does not match.'
           schema:
             type: string
             default: ''
@@ -3438,6 +3942,140 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/applications/{applicationId}/priorityoverride':
+    delete:
+      tags:
+        - Enrollment Admin / Registrations
+      summary: "Removes an admin's override of one Application's priority (AB#19632), so the calculated\r\n`priority` counts again. Removing an override that is not set changes nothing."
+      description: 'Returns the whole registration, as M:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentRegistration(System.String,System.String,System.Threading.CancellationToken) does.'
+      operationId: DeleteEnrollmentRegistrationApplicationPriorityOverride
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: applicationId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The override was removed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationResponse'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+    put:
+      tags:
+        - Enrollment Admin / Registrations
+      summary: "Sets an admin's override of one Application's priority (AB#19617, AB#19632, AB#19694). Body:\r\n`{ \"priorityOverride\": 3 }`, a whole number from 1 to 9999."
+      description: "The override is kept beside the calculated `priority` and never replaces it; no route writes\r\n`priority`. While an override is set it is the number the lottery uses. Returns the whole\r\nregistration, as M:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentRegistration(System.String,System.String,System.Threading.CancellationToken) does, with both values on the application."
+      operationId: UpdateEnrollmentRegistrationApplicationPriorityOverride
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: applicationId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityOverrideRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityOverrideRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityOverrideRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityOverrideRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The application was updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationResponse'
+        '400':
+          description: Bad Request. The override is missing or outside 1 to 9999.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/applications/{applicationId}/remove':
     post:
       tags:
@@ -3518,6 +4156,84 @@ paths:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
         '412':
           description: The registration is Rejected or Exited.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/applications/{applicationId}/schoolbasedrank':
+    put:
+      tags:
+        - Enrollment Admin / Registrations
+      summary: "Sets the school's rank for one Application on a Ranking program (AB#19617). Body:\r\n`{ \"schoolBasedRank\": 12 }`, a whole number of 1 or more."
+      description: "Refused with 400 unless the application's program has priority structure `Ranking`. Unrelated to\r\nthe application's `rank`, which is the family's own preference order. Returns the whole\r\nregistration, as M:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentRegistration(System.String,System.String,System.Threading.CancellationToken) does."
+      operationId: UpdateEnrollmentRegistrationApplicationSchoolBasedRank
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: applicationId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationSchoolBasedRankRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationSchoolBasedRankRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationSchoolBasedRankRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationSchoolBasedRankRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The application was updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationResponse'
+        '400':
+          description: 'Bad Request. The rank is missing or below 1, or the program is not a Ranking program.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
           content:
             application/json:
               schema:
@@ -3901,7 +4617,7 @@ paths:
     post:
       tags:
         - Enrollment Admin / Registrations
-      summary: "Rejects a Submitted document of a Registration. The body is optional: `{ \"reason\": \"...\" }` records\r\nwhy, and the family is shown it."
+      summary: "Rejects a Submitted document of a Registration. The body is required: `{ \"reason\": \"...\" }` records\r\nwhy, and the family is shown it."
       operationId: RejectEnrollmentRegistrationDocument
       parameters:
         - name: tenantId
@@ -3963,7 +4679,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto'
         '400':
-          description: Bad Request. The request was invalid and cannot be completed.
+          description: 'Bad Request. The reason is missing, blank or over 2,000 characters.'
           content:
             application/json:
               schema:
@@ -3981,6 +4697,63 @@ paths:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/documents/{documentId}':
+    delete:
+      tags:
+        - Enrollment Admin / Registrations
+      summary: "Deletes a document's current file. The file before it, if the document kept one, becomes the current\r\none with the state it had; with none left the requirement is Missing again. Takes no body. Needs Full\r\naccess to the Registrations screen."
+      operationId: DeleteEnrollmentRegistrationDocument
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: documentId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: The caller does not have Full access to the Registrations screen.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '204':
+          description: The file was deleted.
+        '404':
+          description: 'The resource could not be found, or it belongs to another registration.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '412':
+          description: "The registration is Rejected or Exited, so its documents no longer change; or the\r\n            current file is not one staff uploaded (see `uploadedByKind`), which staff reject instead."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
     get:
       tags:
         - Enrollment Admin / Registrations
@@ -4032,6 +4805,91 @@ paths:
                 $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto'
         '404':
           description: 'The resource could not be found, or it belongs to another registration.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+    put:
+      tags:
+        - Enrollment Admin / Registrations
+      summary: "Replaces a document's file. Sent as `multipart/form-data` with `file` and an optional\r\n`verifyOnUpload` (default false). The new file becomes the current one, whatever state the document\r\nwas in, and the oldest file is removed once the document holds more than two. Needs Full access to the\r\nRegistrations screen."
+      operationId: ReplaceEnrollmentRegistrationDocument
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: documentId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                File:
+                  type: string
+                  description: The file. Its type and size are checked by the enrollment service.
+                  format: binary
+                VerifyOnUpload:
+                  type: boolean
+                  description: When true the file is Verified at once; otherwise it waits in Pending Review. Defaults to false.
+            encoding:
+              File:
+                style: form
+              VerifyOnUpload:
+                style: form
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: The caller does not have Full access to the Registrations screen.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: 'The document, with the uploaded file as its current one.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto'
+        '400':
+          description: 'Bad Request. The file is not an allowed type or is too large, or it is missing.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: 'The resource could not be found, or it belongs to another registration.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '412':
+          description: 'The registration is Rejected or Exited, so its documents no longer change.'
           content:
             application/json:
               schema:
@@ -4224,7 +5082,7 @@ paths:
       tags:
         - Enrollment Admin / Registrations
       summary: "Gets a Registration's requirements: the district-wide ones once, and each Application's own\r\nfrom its program, every one with a state derived from its type and the registration's document."
-      description: "`state` is one of `Missing`, `PendingReview`, `Verified`, `Rejected` or\r\n            `NotApplicable`. A requirement that is not a document staff review is `NotApplicable`\r\n            and never `Verified`."
+      description: "`state` is one of `Missing`, `PendingReview`, `Verified`, `Rejected` or\r\n            `NotApplicable`. A requirement that is not a document staff review is `NotApplicable`\r\n            and never `Verified`.\r\n            `immunizationRecords` always holds five slots, `Document #1` to `Document #5`, filled in\r\n            upload order; a slot nothing was uploaded to is `Missing`.\r\n            `militaryPeaceOfficerProofs` holds the two Military / Peace Officer proof slots, `Document #1` and\r\n            `Document #2`, in the same shape; it is empty unless the parent answered Yes to the Military / Peace\r\n            Officer question."
       operationId: GetEnrollmentRegistrationRequirements
       parameters:
         - name: tenantId
@@ -4266,6 +5124,97 @@ paths:
                 $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementsResponseDto'
         '404':
           description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/screens/{screenCode}/documents':
+    post:
+      tags:
+        - Enrollment Admin / Registrations
+      summary: "Uploads a document on behalf of the family. Sent as `multipart/form-data` with `requirementCode`,\r\n`file` and an optional `verifyOnUpload` (default false). Unchecked, the file waits in Pending Review;\r\nchecked, it is Verified at once. A document keeps its two most recent files, and only the newest is shown.\r\nNeeds Full access to the Registrations screen."
+      operationId: UploadEnrollmentRegistrationDocument
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: screenCode
+          in: path
+          description: The screen the requirement's document belongs to.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                RequirementCode:
+                  type: string
+                  description: The requirement the document satisfies.
+                File:
+                  type: string
+                  description: The file. Its type and size are checked by the enrollment service.
+                  format: binary
+                VerifyOnUpload:
+                  type: boolean
+                  description: When true the file is Verified at once; otherwise it waits in Pending Review. Defaults to false.
+            encoding:
+              RequirementCode:
+                style: form
+              File:
+                style: form
+              VerifyOnUpload:
+                style: form
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: The caller does not have Full access to the Registrations screen.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: 'The document, with the uploaded file as its current one.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto'
+        '400':
+          description: 'Bad Request. The file is not an allowed type or is too large, or a field is missing.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '412':
+          description: 'The registration is Rejected or Exited, so its documents no longer change.'
           content:
             application/json:
               schema:
@@ -4512,7 +5461,7 @@ paths:
       tags:
         - Enrollment Admin / Registrations
       summary: "Lists Registrations - a parent's enrollment submission requesting a seat in a School/District\r\nProgram - one row per registration, newest update first."
-      description: "`search` matches the student's name, the record id, the student's local code and the school name.\r\n            `pathwayType` is a pathway type name. `status` is a registration status\r\n            (`Pending`, `InProgress`, `Submitted`, `Approved`, `Rejected`, `Exited`) or\r\n            `Deleted`, which lists the deleted registrations that are hidden otherwise. The filters combine with\r\n            `filter`. Rows that tie on the sort keep one order from page to page."
+      description: "`search` matches the student's name, the record id, the student's local code and the school name.\r\n            `pathwayType` is a pathway type name. `status` is a registration status\r\n            (`Pending`, `InProgress`, `Submitted`, `Approved`, `Rejected`, `Exited`) or\r\n            `Deleted`, which lists the deleted registrations that are hidden otherwise. `grade` is a\r\n            comma-separated list of grade codes (`EE`, `PK3`, `PK4`, `PK`, `KG`, `01`..`12`),\r\n            any of which matches; a registration with no grade matches none. The filters combine with\r\n            `filter`. Rows that tie on the sort keep one order from page to page."
       operationId: GetEnrollmentRegistrations
       parameters:
         - name: tenantId
@@ -4554,6 +5503,11 @@ paths:
           schema:
             type: string
         - name: status
+          in: query
+          description: ''
+          schema:
+            type: string
+        - name: grade
           in: query
           description: ''
           schema:
@@ -6253,6 +7207,28 @@ components:
           description: "The target Program's record id (as returned in `ProgramMutationResultDto.Id` /\r\n`ProgramDetailDto.Id`), not its business ProgramId/code - unlike every other\r\n`ProgramId` field on the Programs DTOs."
       additionalProperties: false
       description: "The body of adding one Program-seat choice to an existing Registration. See\r\nEnrollmentAdminController.Registrations.AddEnrollmentRegistrationApplication."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CapacityChangeRequestDto:
+      required:
+        - grade
+        - programId
+      type: object
+      properties:
+        programId:
+          minLength: 1
+          type: string
+        grade:
+          minLength: 1
+          type: string
+        seatCapacity:
+          minimum: 0
+          type: integer
+          format: int32
+        expectedSeatCapacity:
+          type: integer
+          format: int32
+          nullable: true
+      additionalProperties: false
+      description: "One program x grade row of a Seat Capacity save. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CapacityChangeRequestDto.ExpectedSeatCapacity is the value the admin saw\r\nwhen the row was loaded (null when it had none); a row that has moved since is stale and the save is refused."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ContactVerificationStatusValue:
       enum:
         - Unverified
@@ -6285,14 +7261,29 @@ components:
           type: array
           items:
             type: string
-        programTypeIds:
+        programIds:
           type: array
           items:
             type: string
             format: uuid
           nullable: true
+        registrationOptions:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundRegistrationOptionsDto'
+        pathways:
+          type: array
+          items:
+            type: string
+          description: 'NewStudent, AnnualUpdate. Empty means every pathway.'
+          nullable: true
+        alert:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundAlertRequestDto'
+        windows:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.EnrollmentWindowRequestDto'
+          nullable: true
       additionalProperties: false
-      description: 'Creates a round. Windows are added afterwards, one at a time.'
+      description: "Creates a round. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateApplicationRoundRequestDto.Windows are written in the same call, so the round never exists\r\nwithout the dates it was created with; none of them may depend on another window - a gated window\r\nis added afterwards. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateApplicationRoundRequestDto.ProgramIds are the programs parents/guardians can apply to in the\r\nround; the service refuses an id it does not know, and a program that serves none of\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateApplicationRoundRequestDto.Grades. Omitted EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateApplicationRoundRequestDto.RegistrationOptions means all four off."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateContactRequestDto:
       required:
         - externalDataSourceContactId
@@ -6409,8 +7400,11 @@ components:
           type: number
           format: double
           nullable: true
+        priorityStructure:
+          type: string
+          nullable: true
       additionalProperties: false
-      description: "The body of a Program creation. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.SchoolId, EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.ProgramTypeId and\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.RequirementIds are record ids of existing rows; the service copies their display\r\nfields onto the program and rejects an id it cannot find."
+      description: "The body of a Program creation. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.SchoolId, EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.ProgramTypeId and\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.RequirementIds are record ids of existing rows; the service copies their display\r\nfields onto the program and rejects an id it cannot find. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.PriorityStructure is one of\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramPriorityStructures.Names, or null to create the program with none chosen."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateRegistrationRequestDto:
       required:
         - contacts
@@ -6664,6 +7658,22 @@ components:
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.LinearRingRequestDto'
       additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramSchoolYearRequestDto:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          minLength: 1
+          type: string
+        startDate:
+          type: string
+          nullable: true
+        endDate:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: 'One school year of a program: a name and a start and end day written as `yyyy-MM-dd`.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationDecisionRequestDto:
       type: object
       properties:
@@ -6674,6 +7684,32 @@ components:
           nullable: true
       additionalProperties: false
       description: 'The optional body of an Application decision (accept, decline, offer, remove).'
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityOverrideRequestDto:
+      required:
+        - priorityOverride
+      type: object
+      properties:
+        priorityOverride:
+          maximum: 9999
+          minimum: 1
+          type: integer
+          description: 'The number the lottery uses in place of the calculated priority, a whole number from 1 to 9999.'
+          format: int32
+      additionalProperties: false
+      description: 'The body of an Application priority override (AB#19617, AB#19632, AB#19694). The override is removed with DELETE, not with a null.'
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationSchoolBasedRankRequestDto:
+      required:
+        - schoolBasedRank
+      type: object
+      properties:
+        schoolBasedRank:
+          minimum: 0
+          exclusiveMinimum: true
+          type: integer
+          description: 'The school''s rank for the applicant, a whole number of 1 or more.'
+          format: int32
+      additionalProperties: false
+      description: The body of an Application school-based rank (AB#19617).
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationStatus:
       enum:
         - Pending
@@ -6681,6 +7717,9 @@ components:
         - Declined
         - Waitlisted
         - NotProcessed
+        - Offered
+        - Removed
+        - Expired
       type: string
       description: "The status of one Application on a Registration. Mirrors the Enrollment service's\r\nRegistrationApplicationStatus; sent over gRPC by name."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationConsolidateApplicationDto:
@@ -6796,15 +7835,70 @@ components:
       additionalProperties: false
       description: The body of a Registration submit call. Submit only ever sets Status; the ids must match the route.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RejectRegistrationDocumentRequestDto:
+      required:
+        - reason
       type: object
       properties:
         reason:
           maxLength: 2000
+          minLength: 1
           type: string
-          description: 'Why the document was rejected, at most 2,000 characters; the family is shown it. Omit or leave empty for none.'
+          description: 'Why the document was rejected, required and at most 2,000 characters; the family is shown it.'
+      additionalProperties: false
+      description: The body of a document rejection.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundAlertRequestDto:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        text:
+          type: string
+          nullable: true
+        startDate:
+          type: string
+          nullable: true
+        endDate:
+          type: string
           nullable: true
       additionalProperties: false
-      description: The optional body of a document rejection.
+      description: "A round's message to parents. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundAlertRequestDto.StartDate and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundAlertRequestDto.EndDate are yyyy-MM-dd\r\ncalendar days. The Enrollment Service requires the text and both dates only while the alert is enabled."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundRegistrationOptionsDto:
+      type: object
+      properties:
+        enrollInZonedSchool:
+          type: boolean
+          description: Enroll the student at the school assigned to their home address.
+        applyForInDistrictTransfer:
+          type: boolean
+          description: Request a school outside the student's attendance zone.
+        applyForAdmissionsBasedPrograms:
+          type: boolean
+          description: Apply to programs with an application or admissions process.
+        continueAtCurrentProgram:
+          type: boolean
+          description: A current student stays in the program they are in.
+      additionalProperties: false
+      description: Which ways of registering a round offers. Each is on or off; one left out is off.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactEmployeeVerifiedRequestDto:
+      required:
+        - isEmployeeVerified
+      type: object
+      properties:
+        isEmployeeVerified:
+          type: boolean
+          description: Required. Whether an admin has verified the contact's employee id.
+      additionalProperties: false
+      description: 'The body of `PUT .../contacts/{id}/employeeverification`.'
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetContactMilitaryPeaceOfficerVerifiedRequestDto:
+      required:
+        - isMilitaryPeaceOfficerVerified
+      type: object
+      properties:
+        isMilitaryPeaceOfficerVerified:
+          type: boolean
+          description: Required. Whether an admin has verified the contact's military or peace officer documentation.
+      additionalProperties: false
+      description: 'The body of `PUT .../contacts/{id}/militarypeaceofficerverification`.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.SetRolePersonasRequestDto:
       type: object
       properties:
@@ -6886,14 +7980,38 @@ components:
           type: array
           items:
             type: string
-        programTypeIds:
+        programIds:
           type: array
           items:
             type: string
             format: uuid
           nullable: true
+        registrationOptions:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundRegistrationOptionsDto'
+        pathways:
+          type: array
+          items:
+            type: string
+          nullable: true
+        alert:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RoundAlertRequestDto'
       additionalProperties: false
-      description: "Replaces label, grades and program types. Code and school year are the round's identity and\r\ncannot change - duplicate the round into another school year instead."
+      description: "Replaces label, grades, programs, registration options, pathways and alert: the round's programs\r\nbecome exactly EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateApplicationRoundRequestDto.ProgramIds, so a program left out is removed, and omitted\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateApplicationRoundRequestDto.RegistrationOptions turns all four off. Code and school year are the round's identity\r\nand cannot change - duplicate the round into another school year instead."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateCapacityRequestDto:
+      required:
+        - rows
+        - schoolYear
+      type: object
+      properties:
+        schoolYear:
+          minLength: 1
+          type: string
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CapacityChangeRequestDto'
+      additionalProperties: false
+      description: "Every row of one school year as the admin saw it, changed or not. Only the rows whose Seat Capacity differs from\r\nthe stored value are applied."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateContactRequestDto:
       required:
         - firstName
@@ -7039,8 +8157,23 @@ components:
           type: number
           format: double
           nullable: true
+        priorityStructure:
+          type: string
+          description: "Which priority list the program's applicants are ranked by: one of\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramPriorityStructures.Names. Unlike every other field here, leaving it out of\r\nthe body is not the same as sending null:\r\n<list type=\"bullet\"><item>not in the body - the program keeps the priority structure it has;</item><item>`null` - the priority structure is cleared, the program has none chosen;</item><item>a name - the priority structure is replaced.</item></list>"
+          nullable: true
       additionalProperties: false
       description: "The body of a Program update. The school never changes; the program type and the requirement\r\nset are replaced from the ids given here (an empty list clears the requirements)."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateProgramSchoolYearsRequestDto:
+      required:
+        - schoolYears
+      type: object
+      properties:
+        schoolYears:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramSchoolYearRequestDto'
+      additionalProperties: false
+      description: "The body of the school years save. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateProgramSchoolYearsRequestDto.SchoolYears is the program's whole list: a year missing from it is\r\nremoved, a year that is new is added and a year that is present with other values is edited. Send an empty list to\r\nclear them all. Names are unique within the program and the dates cannot overlap. A year that is already over cannot\r\nbe added, edited or removed."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateRegistrationRequestDto:
       required:
         - currentScreenCode
@@ -7773,10 +8906,12 @@ components:
           type: array
           items:
             type: string
-        programTypes:
+        programs:
           type: array
           items:
-            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramTypeRefDto'
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundProgramRefDto'
+        registrationOptions:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundRegistrationOptionsResponseDto'
         windows:
           type: array
           items:
@@ -7800,8 +8935,14 @@ components:
           nullable: true
         isDeleted:
           type: boolean
+        pathways:
+          type: array
+          items:
+            type: string
+        alert:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundAlertDto'
       additionalProperties: false
-      description: "An application round: a named enrollment period in a school year, identified by\r\n(EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.Code, EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.SchoolYear). EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.State and each window's state are\r\nderived by the service at the moment of the read - NotYetOpen, Open or Closed - and never stored."
+      description: "An application round: a named enrollment period in a school year, identified by\r\n(EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.Code, EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.SchoolYear). EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.State and each window's state are\r\nderived by the service at the moment of the read - NotYetOpen, Open or Closed - and never stored.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.Programs are the programs parents/guardians can apply to in the round, in the order they\r\nwere saved; page GET programs?applicationRoundId= for their program type, school and grades."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDtoPaginatedItemsViewModel:
       type: object
       properties:
@@ -7925,6 +9066,115 @@ components:
           nullable: true
       additionalProperties: false
       description: What a window add/update/remove reports back.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityListItemDto:
+      type: object
+      properties:
+        programId:
+          type: string
+          nullable: true
+        programCode:
+          type: string
+          nullable: true
+        programName:
+          type: string
+          nullable: true
+        programTypeName:
+          type: string
+          nullable: true
+        grade:
+          type: string
+          nullable: true
+        schoolYear:
+          type: string
+          nullable: true
+        seatsAvailable:
+          type: integer
+          format: int32
+        submissionAllowed:
+          type: boolean
+        lotteryEligible:
+          type: boolean
+        lastUpdatedBy:
+          type: string
+          nullable: true
+        lastUpdatedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        seatCapacity:
+          type: integer
+          format: int32
+          nullable: true
+        offersSent:
+          type: integer
+          format: int32
+        offersAccepted:
+          type: integer
+          format: int32
+        waitlisted:
+          type: integer
+          format: int32
+        available:
+          type: integer
+          format: int32
+          nullable: true
+        seatStatus:
+          type: string
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacitySchoolYearDto:
+      type: object
+      properties:
+        schoolYear:
+          type: string
+        isCurrent:
+          type: boolean
+        isFuture:
+          type: boolean
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacitySearchResponseDto:
+      type: object
+      properties:
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityListItemDto'
+        totals:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityTotalsDto'
+        lastLotteryRunAt:
+          type: string
+          format: date-time
+          nullable: true
+        lotteryRunInProgress:
+          type: boolean
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityTotalsDto:
+      type: object
+      properties:
+        seatCapacity:
+          type: integer
+          format: int32
+        offersSent:
+          type: integer
+          format: int32
+        offersAccepted:
+          type: integer
+          format: int32
+        waitlisted:
+          type: integer
+          format: int32
+        available:
+          type: integer
+          format: int32
+      additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactEmailOverrideRequestDto:
       required:
         - value
@@ -8184,6 +9434,21 @@ components:
         lastSignInDateTime:
           type: string
           format: date-time
+          nullable: true
+        employeeId:
+          type: string
+          nullable: true
+        isEmployeeVerified:
+          type: boolean
+          nullable: true
+        isMilitaryPeaceOfficerVerified:
+          type: boolean
+          nullable: true
+        isEmployeeClaimed:
+          type: boolean
+          nullable: true
+        isMilitaryPeaceOfficerClaimed:
+          type: boolean
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ContactResponseDtoPaginatedItemsViewModel:
@@ -8554,6 +9819,32 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ImmunizationRecordDto:
+      type: object
+      properties:
+        requirementCode:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        requirementType:
+          type: string
+          nullable: true
+        isRequired:
+          type: boolean
+        state:
+          type: string
+          nullable: true
+        reason:
+          type: string
+          nullable: true
+        lastUpdatedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: false
+      description: "One of the five immunization record slots, or one of the two Military / Peace Officer proof slots.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ImmunizationRecordDto.RequirementCode is `ImmunizationRecord_1` to `ImmunizationRecord_5`, or\r\n`MilitaryPeaceOfficerProof_1` and `MilitaryPeaceOfficerProof_2`; the other fields read as on\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.LinearRingDto:
       type: object
       properties:
@@ -8597,8 +9888,58 @@ components:
         applicationStatus:
           type: string
           nullable: true
+        studentFirstName:
+          type: string
+          nullable: true
+        studentLastName:
+          type: string
+          nullable: true
+        studentLocalCode:
+          type: string
+          nullable: true
       additionalProperties: false
       description: "One Registration Application referencing this program - see\r\nEnrollmentAdminController.Programs.GetProgramApplications."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramApplicationsPageDto:
+      type: object
+      properties:
+        pageIndex:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        count:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramApplicationDto'
+      additionalProperties: false
+      description: One page of a program's applications. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramApplicationsPageDto.Count is the number matching the search and status.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramCapacityResponseDto:
+      type: object
+      properties:
+        schoolYear:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityListItemDto'
+        totals:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityTotalsDto'
+        lastLotteryRunAt:
+          type: string
+          format: date-time
+          nullable: true
+        lotteryRunInProgress:
+          type: boolean
+        schoolYears:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacitySchoolYearDto'
+      additionalProperties: false
+      description: 'One program''s capacity for one school year: every grade row, the totals over them and the years it has data for.'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramDetailDto:
       type: object
       properties:
@@ -8664,6 +10005,17 @@ components:
           nullable: true
         isDeleted:
           type: boolean
+        priorityStructure:
+          type: string
+          nullable: true
+        schoolYears:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramSchoolYearDto'
+          nullable: true
+        approvedApplicationCount:
+          type: integer
+          format: int32
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramListItemDto:
       type: object
@@ -8703,6 +10055,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementRefDto'
+        priorityStructure:
+          type: string
+          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramListItemDtoPaginatedItemsViewModel:
       type: object
@@ -8735,6 +10090,23 @@ components:
           nullable: true
       additionalProperties: false
       description: "What a program create/update/delete reports back - just the identity, not the row. Compare\r\nContactMutationResultDto: a client that needs the saved state re-reads the program."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramSchoolYearDto:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        startDate:
+          type: string
+          nullable: true
+        endDate:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: "One school year of a program. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramSchoolYearDto.Status is Past, Current or Future, worked out on every read from the two\r\ndays against today's UTC date; it is never stored."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramTypeRefDto:
       type: object
       properties:
@@ -8863,8 +10235,14 @@ components:
           type: string
           format: date-time
           nullable: true
+        updatedBy:
+          type: string
+          nullable: true
+        uploadedByKind:
+          type: string
+          nullable: true
       additionalProperties: false
-      description: "A document a family uploaded for a registration. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.State is the stored review state:\r\n`Required`, `Submitted`, `Accepted`, `Rejected` or `Resubmit`.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.FileName and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.ContentType are derived from the stored file's name.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.SizeBytes is the stored file length, absent for a file stored before it was kept.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.CreatedDateTime is when the document was first uploaded; EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.UpdatedDateTime is\r\nits last change, upload or review."
+      description: "A document a family uploaded for a registration. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.State is the stored review state:\r\n`Required`, `Submitted`, `Accepted`, `Rejected` or `Resubmit`.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.FileName and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.ContentType are derived from the stored file's name.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.SizeBytes is the stored file length, absent for a file stored before it was kept.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.CreatedDateTime is when the document was first uploaded; EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.UpdatedDateTime is\r\nits last change, upload or review, and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.UpdatedBy is who made it. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDto.UploadedByKind\r\nis who uploaded the newest file: `Staff`, `Parent` or `System` (a file the parent's screen\r\ndata filed); staff can delete only a `Staff` one. Only the document's newest file is described; it\r\nkeeps at most two."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationDocumentDtoPaginatedItemsViewModel:
       type: object
       properties:
@@ -8915,8 +10293,26 @@ components:
         seatStatus:
           type: string
           nullable: true
+        priority:
+          type: integer
+          format: int32
+          nullable: true
+        schoolBasedRank:
+          type: integer
+          format: int32
+          nullable: true
+        priorityOverride:
+          type: integer
+          format: int32
+          nullable: true
+        qualifiedPriorities:
+          type: array
+          items:
+            type: integer
+            format: int32
+          nullable: true
       additionalProperties: false
-      description: "An application on a list row; the application's own status is one of the application statuses. The program\r\nfields are absent when the program is deleted or unreadable. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.SeatStatus is `Accepting`,\r\n`WaitlistOnly`, `NotAccepting` or `Unavailable`."
+      description: "An application on a list row; the application's own status is one of the application statuses. The program\r\nfields are absent when the program is deleted or unreadable. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.SeatStatus is `Accepting`,\r\n`WaitlistOnly`, `NotAccepting` or `Unavailable`. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.Priority is the calculated\r\npriority and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.PriorityOverride an admin's override of it, kept apart. They and\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.SchoolBasedRank are as on the record, absent until set.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.QualifiedPriorities is every priority the application qualifies for, lowest first; it is\r\nempty until the priority check has run, and when the application qualifies for none. Read-only."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto:
       type: object
       properties:
@@ -8931,6 +10327,9 @@ components:
           type: string
           nullable: true
         studentLocalCode:
+          type: string
+          nullable: true
+        grade:
           type: string
           nullable: true
         schoolName:
@@ -8974,7 +10373,7 @@ components:
           format: date-time
           nullable: true
       additionalProperties: false
-      description: "One row of the registrations list. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.Status is a registration status\r\n(`Pending`, `InProgress`, `Submitted`, `Approved`, `Rejected`, `Exited`) or\r\n`Deleted`, which wins over the stored status. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.SchoolName is the consolidated school,\r\nelse the school of the top-ranked application's program. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.LastUpdatedDateTime is the last\r\nwrite, or the creation when there was none. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.Progress is a percentage, absent when the\r\nstored value cannot be read."
+      description: "One row of the registrations list. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.Status is a registration status\r\n(`Pending`, `InProgress`, `Submitted`, `Approved`, `Rejected`, `Exited`) or\r\n`Deleted`, which wins over the stored status. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.Grade is the student's grade code (`KG`,\r\n`01`..), absent until the family answers it. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.SchoolName is the consolidated school,\r\nelse the school of the top-ranked application's program. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.LastUpdatedDateTime is the last\r\nwrite, or the creation when there was none. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto.Progress is a percentage, absent when the\r\nstored value cannot be read."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListPageDto:
       type: object
       properties:
@@ -9034,8 +10433,11 @@ components:
           type: string
           format: date-time
           nullable: true
+        description:
+          type: string
+          nullable: true
       additionalProperties: false
-      description: "One requirement and where it stands for this registration. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto.State is one of\r\n`Missing`, `PendingReview`, `Verified`, `Rejected` or `NotApplicable`.\r\n`NotApplicable` covers a requirement that is not a document staff review - a link, an event,\r\ninformation, or a document without the review flag - and such a requirement is never\r\n`Verified`. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto.Reason is set when staff rejected the document or asked for a\r\nresubmit. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto.LastUpdatedDateTime is absent while nothing has been uploaded."
+      description: "One requirement and where it stands for this registration. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto.State is one of\r\n`Missing`, `PendingReview`, `Verified`, `Rejected` or `NotApplicable`.\r\n`NotApplicable` covers a requirement that is not a document staff review - a link, an event,\r\ninformation, or a document without the review flag - and such a requirement is never\r\n`Verified`. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto.Reason is set when staff rejected the document or asked for a\r\nresubmit. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto.LastUpdatedDateTime is absent while nothing has been uploaded.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementDto.Description is the requirement's description as stored, rich text, absent when it has none."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementsResponseDto:
       type: object
       properties:
@@ -9047,8 +10449,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRequirementsDto'
+        immunizationRecords:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ImmunizationRecordDto'
+        militaryPeaceOfficerProofs:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ImmunizationRecordDto'
       additionalProperties: false
-      description: "What the registration detail page shows for requirements: the district-wide ones once, and each\r\napplication's own from its program."
+      description: "What the registration detail page shows for requirements: the district-wide ones once, and each\r\napplication's own from its program. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementsResponseDto.ImmunizationRecords always holds five slots,\r\n`Document #1` to `Document #5`, whether or not the parent has uploaded anything.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationRequirementsResponseDto.MilitaryPeaceOfficerProofs holds the two Military / Peace Officer proof slots in the same shape,\r\nand is empty unless the parent answered Yes to the Military / Peace Officer question (AB#19654)."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RequirementMutationResultDto:
       type: object
       properties:
@@ -9195,6 +10605,50 @@ components:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RolePersonasNamespaceDto'
       additionalProperties: false
       description: "A tenant's role-to-persona assignments, grouped by role namespace, in the same shape as Observations'\r\nstaff classification settings. Driven by the tenant's staff classification catalog: every role in it is\r\nlisted, with its persona assignment when one is configured."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundAlertDto:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        text:
+          type: string
+          nullable: true
+        startDate:
+          type: string
+          nullable: true
+        endDate:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: "The round's own message to parents. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundAlertDto.StartDate and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundAlertDto.EndDate are\r\nyyyy-MM-dd calendar days. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ApplicationRoundResponseDto.Pathways empty means every pathway."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundProgramRefDto:
+      type: object
+      properties:
+        programId:
+          type: string
+          format: uuid
+          nullable: true
+        programCode:
+          type: string
+          nullable: true
+        programName:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: 'One program a round offers: the program''s record id with the service''s copy of its code and name.'
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RoundRegistrationOptionsResponseDto:
+      type: object
+      properties:
+        enrollInZonedSchool:
+          type: boolean
+        applyForInDistrictTransfer:
+          type: boolean
+        applyForAdmissionsBasedPrograms:
+          type: boolean
+        continueAtCurrentProgram:
+          type: boolean
+      additionalProperties: false
+      description: Which ways of registering the round offers. A round saved before the options existed reads as all four off.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolEnabledResponseDto:
       type: object
       properties:
@@ -9337,6 +10791,15 @@ components:
           nullable: true
         programType:
           type: string
+          nullable: true
+        programId:
+          type: string
+          format: uuid
+          nullable: true
+        schoolYears:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramSchoolYearDto'
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.SchoolRefDto:
@@ -9789,6 +11252,14 @@ components:
         isDeleted:
           type: boolean
       additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.UpdateCapacityResponseDto:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.CapacityListItemDto'
+      additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.WindowDependencyDto:
       type: object
       properties:
@@ -9826,6 +11297,12 @@ components:
           items:
             $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.EnrollmentAdminAccess.EnrollmentAdminAccessItem'
         canImpersonate:
+          type: boolean
+        canVerifyEmployees:
+          type: boolean
+        canVerifyMilitaryPeaceOfficers:
+          type: boolean
+        canOverridePriority:
           type: boolean
       additionalProperties: false
       description: 'What the current user may use in the enrollment admin app, calculated from their access token.'
@@ -9916,6 +11393,24 @@ components:
         eligibilityCriteria:
           type: string
           nullable: true
+        schoolBasedRank:
+          type: integer
+          description: "The SCHOOL's ordering of this applicant, on a program whose priorityStructure is RANKING.\r\nUnset until an admin records one. Unrelated to rank, which is the family's own order."
+          format: int32
+          nullable: true
+        priorityOverride:
+          type: integer
+          description: "An admin's override of priority, kept beside it. Unset when there is none. While set, it is\r\nthe number the lottery competes with; priority still holds the calculated value."
+          format: int32
+          nullable: true
+        qualifiedPriorities:
+          type: array
+          items:
+            type: integer
+            format: int32
+          description: "Every priority the application qualifies for, lowest first: [3, 4] for a district employee's\r\nchild (3) with a sibling at the campus (4). Read-only: the priority check stamps it and no\r\nrequest carries it. Empty until the check has run, and when it ran and the application\r\nqualifies for none. priority stays the one number the application competes with."
+          nullable: true
+          readOnly: true
       additionalProperties: false
       description: "One Program-seat choice on a Registration - zero-to-many, independently accepted or declined. See\r\nAcceptRegistrationApplication / DeclineRegistrationApplication / GetRegistrationApplications."
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationApplicationsListResponse:
@@ -10212,6 +11707,26 @@ components:
         - StructValue
         - ListValue
       type: string
+    Microsoft.AspNetCore.Mvc.ProblemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        status:
+          type: integer
+          format: int32
+          nullable: true
+        detail:
+          type: string
+          nullable: true
+        instance:
+          type: string
+          nullable: true
+      additionalProperties: { }
     Microsoft.AspNetCore.Mvc.ValidationProblemDetails:
       type: object
       properties:

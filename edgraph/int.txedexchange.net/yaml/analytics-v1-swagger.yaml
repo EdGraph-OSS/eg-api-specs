@@ -3313,6 +3313,45 @@ components:
         metadataJson:
           type: string
           nullable: true
+        dmsSurfaceJson:
+          type: string
+          description: Privileged connection administration; removed from ordinary tenant detail responses.
+          nullable: true
+        dmsSurface:
+          $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDmsSurface'
+        surfaceSetupStatus:
+          type: string
+          description: "The surface's setup job (EdGraphManagedDms): Running, Succeeded, Failed or SubmitFailed; unset for a surface set\r\nup by hand."
+          nullable: true
+        surfaceSetupAttempt:
+          type: integer
+          format: int32
+          nullable: true
+      additionalProperties: false
+    EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionDmsSurface:
+      type: object
+      properties:
+        surfaceId:
+          type: string
+          nullable: true
+        engine:
+          type: string
+          nullable: true
+        dataStandard:
+          type: string
+          nullable: true
+        extensions:
+          type: array
+          items:
+            type: string
+          nullable: true
+          readOnly: true
+        surfaceStatus:
+          type: string
+          nullable: true
+        dmsPublicBaseUrl:
+          type: string
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.EdFiConnectionTier:
       type: object
@@ -3444,6 +3483,8 @@ components:
         requiresSchoolYearSelection:
           type: boolean
           nullable: true
+        dms:
+          $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.InstanceDms'
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceApiClientProfileResponse:
       type: object
@@ -3577,6 +3618,74 @@ components:
             $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.InstanceOdsDatabase'
           nullable: true
           readOnly: true
+      additionalProperties: false
+    EdfiAdminApi.EdfiAdmin.V1.InstanceDms:
+      type: object
+      properties:
+        surfaceId:
+          type: string
+          nullable: true
+        cmsTenant:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        years:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdfiAdminApi.EdfiAdmin.V1.InstanceDmsYear'
+          nullable: true
+          readOnly: true
+        activeOperationKind:
+          type: string
+          nullable: true
+        lastOperationKind:
+          type: string
+          nullable: true
+        lastOperationStatus:
+          type: string
+          nullable: true
+        lastJobId:
+          type: string
+          nullable: true
+        lastExecutionId:
+          type: string
+          nullable: true
+        enableKafkaCdc:
+          type: boolean
+      additionalProperties: false
+    EdfiAdminApi.EdfiAdmin.V1.InstanceDmsYear:
+      type: object
+      properties:
+        schoolYear:
+          type: integer
+          format: int32
+        databaseName:
+          type: string
+          nullable: true
+        dataStoreId:
+          type: integer
+          format: int32
+          nullable: true
+        seed:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        tier:
+          type: string
+          nullable: true
+        resetOrdinal:
+          type: integer
+          format: int32
+        lastStep:
+          type: string
+          nullable: true
+        lastStepStatus:
+          type: string
+          nullable: true
       additionalProperties: false
     EdfiAdminApi.EdfiAdmin.V1.InstanceOdsDatabase:
       type: object
