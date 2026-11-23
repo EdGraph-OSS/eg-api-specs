@@ -51961,8 +51961,11 @@ components:
         priorityStructure:
           type: string
           nullable: true
+        isOutOfDistrictNotAllowed:
+          type: boolean
+          nullable: true
       additionalProperties: false
-      description: "The body of a Program creation. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.SchoolId, EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.ProgramTypeId and\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.RequirementIds are record ids of existing rows; the service copies their display\r\nfields onto the program and rejects an id it cannot find. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.PriorityStructure is one of\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramPriorityStructures.Names, or null to create the program with none chosen."
+      description: "The body of a Program creation. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.SchoolId, EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.ProgramTypeId and\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.RequirementIds are record ids of existing rows; the service copies their display\r\nfields onto the program and rejects an id it cannot find. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.PriorityStructure is one of\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramPriorityStructures.Names, or null to create the program with none chosen.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateProgramRequestDto.IsOutOfDistrictNotAllowed true means only students who live in the district may apply;\r\nnull or false creates the program open to everyone."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CreateRegistrationRequestDto:
       required:
         - contacts
@@ -52720,12 +52723,15 @@ components:
           type: number
           format: double
           nullable: true
+        isOutOfDistrictNotAllowed:
+          type: boolean
+          nullable: true
         priorityStructure:
           type: string
           description: "Which priority list the program's applicants are ranked by: one of\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ProgramPriorityStructures.Names. Unlike every other field here, leaving it out of\r\nthe body is not the same as sending null:\r\n<list type=\"bullet\"><item>not in the body - the program keeps the priority structure it has;</item><item>`null` - the priority structure is cleared, the program has none chosen;</item><item>a name - the priority structure is replaced.</item></list>"
           nullable: true
       additionalProperties: false
-      description: "The body of a Program update. The school never changes; the program type and the requirement\r\nset are replaced from the ids given here (an empty list clears the requirements)."
+      description: "The body of a Program update. The school never changes; the program type and the requirement\r\nset are replaced from the ids given here (an empty list clears the requirements).\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateProgramRequestDto.IsOutOfDistrictNotAllowed left out or null keeps the program's stored value, so a\r\ncaller that does not carry it cannot reopen the program to out-of-district applicants by saving it."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpdateProgramSchoolYearsRequestDto:
       required:
         - schoolYears
@@ -55337,6 +55343,8 @@ components:
         approvedApplicationCount:
           type: integer
           format: int32
+        isOutOfDistrictNotAllowed:
+          type: boolean
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramListItemDto:
       type: object
@@ -55379,6 +55387,8 @@ components:
         priorityStructure:
           type: string
           nullable: true
+        isOutOfDistrictNotAllowed:
+          type: boolean
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramListItemDtoPaginatedItemsViewModel:
       type: object
