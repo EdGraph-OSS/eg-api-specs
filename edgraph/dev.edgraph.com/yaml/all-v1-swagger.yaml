@@ -32606,6 +32606,700 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/observations/personas/{personaId}/dashboard/categories':
+    get:
+      tags:
+        - Observations
+      summary: 'Get the average score and the action steps per period, by category or by look-for (top 5 series each)'
+      operationId: GetObservationDashboardCategories
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: personaId
+          in: path
+          description: 'Observer, Evaluee, CampusLeader or DistrictLeader (exact).'
+          required: true
+          schema:
+            type: string
+        - name: From
+          in: query
+          description: 'Required. The first day, `yyyy-MM-dd`, in the years EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardLimits.MinYear to EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardLimits.MaxYear.'
+          schema:
+            type: string
+        - name: To
+          in: query
+          description: 'Required. The last day, `yyyy-MM-dd`; at most EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardLimits.MaxRangeDays days after EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardFilterQuery.From.'
+          schema:
+            type: string
+        - name: Period
+          in: query
+          description: '`Weekly`, `BiWeekly`, `Monthly` (default) or `Quarterly`, by name, ignoring case.'
+          schema:
+            type: string
+        - name: CampusIds
+          in: query
+          description: 'Campus (school) ids, whole numbers.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: DistrictIds
+          in: query
+          description: 'District ids, whole numbers. A filter, never a scope.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: TeacherIds
+          in: query
+          description: 'Teacher user ids, GUIDs.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: GradeLevels
+          in: query
+          description: 'Grade levels, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: ContentAreas
+          in: query
+          description: 'Content areas, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: CategoryIds
+          in: query
+          description: 'Category custom ids, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: LookForIds
+          in: query
+          description: 'Look-for custom ids, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: by
+          in: query
+          description: Category (default) or LookFor.
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardCategoriesResponse'
+        '400':
+          description: Bad Request. observations_dashboard_invalid_request or observations_dashboard_persona_not_supported.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/observations/personas/{personaId}/dashboard/drilldown':
+    get:
+      tags:
+        - Observations
+      summary: 'Get one KPI per member of a dimension (most recent, previous, change, average to date)'
+      operationId: GetObservationDashboardDrilldown
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: personaId
+          in: path
+          description: 'Observer, Evaluee, CampusLeader or DistrictLeader (exact).'
+          required: true
+          schema:
+            type: string
+        - name: From
+          in: query
+          description: 'Required. The first day, `yyyy-MM-dd`, in the years EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardLimits.MinYear to EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardLimits.MaxYear.'
+          schema:
+            type: string
+        - name: To
+          in: query
+          description: 'Required. The last day, `yyyy-MM-dd`; at most EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardLimits.MaxRangeDays days after EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardFilterQuery.From.'
+          schema:
+            type: string
+        - name: Period
+          in: query
+          description: '`Weekly`, `BiWeekly`, `Monthly` (default) or `Quarterly`, by name, ignoring case.'
+          schema:
+            type: string
+        - name: CampusIds
+          in: query
+          description: 'Campus (school) ids, whole numbers.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: DistrictIds
+          in: query
+          description: 'District ids, whole numbers. A filter, never a scope.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: TeacherIds
+          in: query
+          description: 'Teacher user ids, GUIDs.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: GradeLevels
+          in: query
+          description: 'Grade levels, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: ContentAreas
+          in: query
+          description: 'Content areas, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: CategoryIds
+          in: query
+          description: 'Category custom ids, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: LookForIds
+          in: query
+          description: 'Look-for custom ids, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: metric
+          in: query
+          description: Required. A KPI name.
+          schema:
+            type: string
+        - name: dimension
+          in: query
+          description: Required. A dimension of the persona's list.
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDrilldownResponse'
+        '400':
+          description: Bad Request. observations_dashboard_invalid_request or observations_dashboard_persona_not_supported.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/observations/personas/{personaId}/dashboard/filters':
+    get:
+      tags:
+        - Observations
+      summary: 'Get the filter options of a persona''s dashboard, and the earliest and latest observation dates in scope'
+      operationId: GetObservationDashboardFilters
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: personaId
+          in: path
+          description: 'Observer, Evaluee, CampusLeader or DistrictLeader (exact).'
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardFilterOptionsResponse'
+        '400':
+          description: Bad Request. observations_dashboard_persona_not_supported.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/observations/personas/{personaId}/dashboard/metrics':
+    get:
+      tags:
+        - Observations
+      summary: Get the six observation KPIs of a persona's dashboard
+      description: "Most recent period, previous period, change, average to date and the \"(ALL)\" benchmark of every KPI.\r\n`from` and `to` (yyyy-MM-dd) are required; `period` is Weekly, BiWeekly, Monthly (default) or\r\nQuarterly. Lists are repeated parameters (`campusIds=1&campusIds=2`), at most 200 values each."
+      operationId: GetObservationDashboardMetrics
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: personaId
+          in: path
+          description: 'Observer, Evaluee, CampusLeader or DistrictLeader (exact).'
+          required: true
+          schema:
+            type: string
+        - name: From
+          in: query
+          description: 'Required. The first day, `yyyy-MM-dd`, in the years EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardLimits.MinYear to EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardLimits.MaxYear.'
+          schema:
+            type: string
+        - name: To
+          in: query
+          description: 'Required. The last day, `yyyy-MM-dd`; at most EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardLimits.MaxRangeDays days after EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardFilterQuery.From.'
+          schema:
+            type: string
+        - name: Period
+          in: query
+          description: '`Weekly`, `BiWeekly`, `Monthly` (default) or `Quarterly`, by name, ignoring case.'
+          schema:
+            type: string
+        - name: CampusIds
+          in: query
+          description: 'Campus (school) ids, whole numbers.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: DistrictIds
+          in: query
+          description: 'District ids, whole numbers. A filter, never a scope.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: TeacherIds
+          in: query
+          description: 'Teacher user ids, GUIDs.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: GradeLevels
+          in: query
+          description: 'Grade levels, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: ContentAreas
+          in: query
+          description: 'Content areas, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: CategoryIds
+          in: query
+          description: 'Category custom ids, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: LookForIds
+          in: query
+          description: 'Look-for custom ids, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardMetricsResponse'
+        '400':
+          description: Bad Request. observations_dashboard_invalid_request or observations_dashboard_persona_not_supported.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/observations/personas/{personaId}/dashboard/observation-details':
+    get:
+      tags:
+        - Observations
+      summary: Get the teacher's own observations with their category and look-for scores (Evaluee only)
+      operationId: GetObservationDashboardDetails
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: personaId
+          in: path
+          description: Evaluee. Another persona gets 400 observations_dashboard_invalid_request.
+          required: true
+          schema:
+            type: string
+        - name: From
+          in: query
+          description: 'Required. The first day, `yyyy-MM-dd`, in the years EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardLimits.MinYear to EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardLimits.MaxYear.'
+          schema:
+            type: string
+        - name: To
+          in: query
+          description: 'Required. The last day, `yyyy-MM-dd`; at most EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardLimits.MaxRangeDays days after EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardFilterQuery.From.'
+          schema:
+            type: string
+        - name: Period
+          in: query
+          description: '`Weekly`, `BiWeekly`, `Monthly` (default) or `Quarterly`, by name, ignoring case.'
+          schema:
+            type: string
+        - name: CampusIds
+          in: query
+          description: 'Campus (school) ids, whole numbers.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: DistrictIds
+          in: query
+          description: 'District ids, whole numbers. A filter, never a scope.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: TeacherIds
+          in: query
+          description: 'Teacher user ids, GUIDs.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: GradeLevels
+          in: query
+          description: 'Grade levels, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: ContentAreas
+          in: query
+          description: 'Content areas, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: CategoryIds
+          in: query
+          description: 'Category custom ids, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: LookForIds
+          in: query
+          description: 'Look-for custom ids, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardObservationDetailsResponse'
+        '400':
+          description: Bad Request. observations_dashboard_invalid_request or observations_dashboard_persona_not_supported.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/observations/personas/{personaId}/dashboard/trend':
+    get:
+      tags:
+        - Observations
+      summary: 'Get one KPI per period, optionally split by a dimension (top 5 series)'
+      operationId: GetObservationDashboardTrend
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: personaId
+          in: path
+          description: 'Observer, Evaluee, CampusLeader or DistrictLeader (exact).'
+          required: true
+          schema:
+            type: string
+        - name: From
+          in: query
+          description: 'Required. The first day, `yyyy-MM-dd`, in the years EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardLimits.MinYear to EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardLimits.MaxYear.'
+          schema:
+            type: string
+        - name: To
+          in: query
+          description: 'Required. The last day, `yyyy-MM-dd`; at most EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardLimits.MaxRangeDays days after EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardFilterQuery.From.'
+          schema:
+            type: string
+        - name: Period
+          in: query
+          description: '`Weekly`, `BiWeekly`, `Monthly` (default) or `Quarterly`, by name, ignoring case.'
+          schema:
+            type: string
+        - name: CampusIds
+          in: query
+          description: 'Campus (school) ids, whole numbers.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: DistrictIds
+          in: query
+          description: 'District ids, whole numbers. A filter, never a scope.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: TeacherIds
+          in: query
+          description: 'Teacher user ids, GUIDs.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: GradeLevels
+          in: query
+          description: 'Grade levels, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: ContentAreas
+          in: query
+          description: 'Content areas, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: CategoryIds
+          in: query
+          description: 'Category custom ids, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: LookForIds
+          in: query
+          description: 'Look-for custom ids, passed on unchanged.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: metric
+          in: query
+          description: 'Required. ObservationsConducted, UniqueTeachersObserved, AverageScore, PercentHighQuality, ObservationsWithActionStep or PercentTeachersWithActionStep.'
+          schema:
+            type: string
+        - name: view
+          in: query
+          description: Optional (no split when absent). A dimension of the persona's list.
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardTrendResponse'
+        '400':
+          description: Bad Request. observations_dashboard_invalid_request or observations_dashboard_persona_not_supported.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/observations/personas/dashboard-availability':
+    get:
+      tags:
+        - Observations
+      summary: 'Get the signed-in user''s personas that have a native dashboard, with their state (Off, Preview or On)'
+      description: 'Never a 403 for a user without such a persona: the list is empty.'
+      operationId: GetObservationDashboardAvailability
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardAvailabilityItem'
   '/tenants/{tenantId}/observations/{observationId}/available-forms/{formId}/draft':
     get:
       tags:
@@ -33083,6 +33777,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+  '/tenants/{tenantId}/observations/access':
+    get:
+      tags:
+        - Observations
+      summary: Get the signed-in user's observation access for a given tenant
+      description: "Returns the access scope type by name (None, Own, Campus or All), the names of the organizations the user\r\ncan see and the user's persona identifiers. A user without access gets scope None and empty lists, not a 403."
+      operationId: GetObservationAccess
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized. The request requires authentication. The OAuth bearer token was either not provided or is invalid. The operation may succeed once authentication has been successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden. The request cannot be completed in the current authorization context. Contact your administrator if you believe this operation should be allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: An unhandled error occurred on the server.See the response body for details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The requested resource was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.ObservationAccessResponse'
   '/tenants/{tenantId}/observations/available-forms/{formId}/sections/{sectionId}/questions':
     get:
       tags:
@@ -57449,6 +58183,10 @@ components:
         campusClassId:
           type: string
           nullable: true
+        campusId:
+          type: string
+          description: "Optional: the observed school's identifier, as the campus list returns it as `campusId` (a string; a JSON number\r\nis accepted too). It must be a School of the tenant named like `campus` (else 400) that the user may act on\r\n(else 403). Without it the school is worked out from `campus`."
+          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Services.Observations.CreateObservationResponse:
       type: object
@@ -57492,6 +58230,356 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardAvailabilityItem:
+      type: object
+      properties:
+        personaIdentifier:
+          type: string
+          nullable: true
+        state:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.NativeDashboardState'
+      additionalProperties: false
+      description: Whether the native dashboard of one of the user's personas is open to the user.
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardBenchmarkPopulation:
+      type: object
+      properties:
+        kind:
+          type: string
+          nullable: true
+        names:
+          type: array
+          items:
+            type: string
+          nullable: true
+      additionalProperties: false
+      description: 'The "(ALL)" comparison population: `Kind` is "District" or "Campus".'
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardCategoriesResponse:
+      type: object
+      properties:
+        range:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDateRange'
+        periods:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDateRange'
+          nullable: true
+        scoreSeries:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardSeries'
+          nullable: true
+        totalScoreSeries:
+          type: integer
+          format: int32
+        actionStepSeries:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardSeries'
+          nullable: true
+        totalActionStepSeries:
+          type: integer
+          format: int32
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardCategoryOption:
+      type: object
+      properties:
+        customId:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        lookFors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardOption'
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDateRange:
+      type: object
+      properties:
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+      additionalProperties: false
+      description: 'A date range, both ends inclusive.'
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDetailCategory:
+      type: object
+      properties:
+        customId:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        averageScore:
+          type: number
+          format: double
+          nullable: true
+        lookFors:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDetailLookFor'
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDetailLookFor:
+      type: object
+      properties:
+        customId:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        score:
+          type: integer
+          format: int32
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDrilldownResponse:
+      type: object
+      properties:
+        range:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDateRange'
+        mostRecentPeriod:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDateRange'
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDrilldownRow'
+          nullable: true
+        totalRows:
+          type: integer
+          format: int32
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDrilldownRow:
+      type: object
+      properties:
+        key:
+          type: string
+          nullable: true
+        label:
+          type: string
+          nullable: true
+        mostRecent:
+          type: number
+          format: double
+          nullable: true
+        previous:
+          type: number
+          format: double
+          nullable: true
+        change:
+          type: number
+          format: double
+          nullable: true
+        averageToDate:
+          type: number
+          format: double
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardFilterOptionsResponse:
+      type: object
+      properties:
+        minObservedOn:
+          type: string
+          format: date
+          nullable: true
+        maxObservedOn:
+          type: string
+          format: date
+          nullable: true
+        districts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardOption'
+          nullable: true
+        campuses:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardOption'
+          nullable: true
+        teachers:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardOption'
+          nullable: true
+        gradeLevels:
+          type: array
+          items:
+            type: string
+          nullable: true
+        contentAreas:
+          type: array
+          items:
+            type: string
+          nullable: true
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardCategoryOption'
+          nullable: true
+      additionalProperties: false
+      description: '`MinObservedOn` and `MaxObservedOn` are null when the scope has no observation.'
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardMetric:
+      enum:
+        - ObservationsConducted
+        - UniqueTeachersObserved
+        - AverageScore
+        - PercentHighQuality
+        - ObservationsWithActionStep
+        - PercentTeachersWithActionStep
+      type: string
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardMetricValue:
+      type: object
+      properties:
+        metric:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardMetric'
+        mostRecent:
+          type: number
+          format: double
+          nullable: true
+        previous:
+          type: number
+          format: double
+          nullable: true
+        change:
+          type: number
+          format: double
+          nullable: true
+        averageToDate:
+          type: number
+          format: double
+          nullable: true
+        benchmarkMostRecent:
+          type: number
+          format: double
+          nullable: true
+        benchmarkAverageToDate:
+          type: number
+          format: double
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardMetricsResponse:
+      type: object
+      properties:
+        range:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDateRange'
+        mostRecentPeriod:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDateRange'
+        previousPeriod:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDateRange'
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardMetricValue'
+          nullable: true
+        benchmark:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardBenchmarkPopulation'
+      additionalProperties: false
+      description: '`Benchmark` is null when the scope has no benchmark population.'
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardObservationDetail:
+      type: object
+      properties:
+        evaluationId:
+          type: string
+          nullable: true
+        observedOn:
+          type: string
+          format: date
+        observerName:
+          type: string
+          nullable: true
+        schoolName:
+          type: string
+          nullable: true
+        averageScore:
+          type: number
+          format: double
+          nullable: true
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDetailCategory'
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardObservationDetailsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardObservationDetail'
+          nullable: true
+        total:
+          type: integer
+          format: int64
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardOption:
+      type: object
+      properties:
+        key:
+          type: string
+          nullable: true
+        label:
+          type: string
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardPoint:
+      type: object
+      properties:
+        periodStart:
+          type: string
+          format: date
+        value:
+          type: number
+          format: double
+          nullable: true
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardSeries:
+      type: object
+      properties:
+        key:
+          type: string
+          nullable: true
+        label:
+          type: string
+          nullable: true
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardPoint'
+          nullable: true
+      additionalProperties: false
+      description: A group without a value has a null `Key` and the label "Not specified".
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardTrendResponse:
+      type: object
+      properties:
+        range:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDateRange'
+        periods:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardDateRange'
+          nullable: true
+        series:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.DashboardSeries'
+          nullable: true
+        totalSeries:
+          type: integer
+          format: int32
+      additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.Dashboards.NativeDashboardState:
+      enum:
+        - Off
+        - Preview
+        - On
+      type: string
+      description: Whether the signed-in user may open a native dashboard.
     EdGraph.HttpAggregators.Tenant.Api.Services.Observations.DeleteObservationResponse:
       type: object
       properties:
@@ -57778,6 +58866,32 @@ components:
           type: integer
           format: int64
       additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.ObservationAccessResponse:
+      type: object
+      properties:
+        accessScopeType:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Services.Observations.ObservationAccessScopeType'
+        availableOrganizations:
+          type: array
+          items:
+            type: string
+          description: The names of the organizations the user can see.
+          nullable: true
+        availablePersonaIdentifiers:
+          type: array
+          items:
+            type: string
+          description: The persona identifiers of the user.
+          nullable: true
+      additionalProperties: false
+      description: 'The signed-in user''s observation access for a tenant: exactly these three members, nothing else.'
+    EdGraph.HttpAggregators.Tenant.Api.Services.Observations.ObservationAccessScopeType:
+      enum:
+        - None
+        - Own
+        - Campus
+        - All
+      type: string
     EdGraph.HttpAggregators.Tenant.Api.Services.Observations.ObservationDraftResponse:
       type: object
       properties:
@@ -58226,6 +59340,10 @@ components:
           nullable: true
         campusClassId:
           type: string
+          nullable: true
+        campusId:
+          type: string
+          description: "Optional: the observed school's identifier, as the campus list returns it as `campusId` (a string; a JSON number\r\nis accepted too). Another id than the stored one moves the observation to that school, validated as on create; the\r\nsame id, or none, keeps the observation's campus."
           nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Services.Observations.UpdateObservationResponse:
@@ -65013,6 +66131,10 @@ components:
         campusClassId:
           type: string
           nullable: true
+        campusId:
+          type: integer
+          format: int32
+          nullable: true
       additionalProperties: false
     EvaluationApi.Evaluations.V1.EvaluationCountResponse:
       type: object
@@ -65108,6 +66230,10 @@ components:
           nullable: true
         campusClassId:
           type: string
+          nullable: true
+        campusId:
+          type: integer
+          format: int32
           nullable: true
       additionalProperties: false
     EvaluationApi.Evaluations.V1.EvaluationResponsePaginatedItemsViewModel:
@@ -65223,6 +66349,10 @@ components:
           nullable: true
         campusClassId:
           type: string
+          nullable: true
+        campusId:
+          type: integer
+          format: int32
           nullable: true
       additionalProperties: false
     FormApi.FormComponents.V1.FormComponentResponse:

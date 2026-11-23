@@ -1187,6 +1187,10 @@ components:
         campusClassId:
           type: string
           nullable: true
+        campusId:
+          type: integer
+          format: int32
+          nullable: true
       additionalProperties: false
     EvaluationApi.Evaluations.V1.EvaluationCountResponse:
       type: object
@@ -1282,6 +1286,10 @@ components:
           nullable: true
         campusClassId:
           type: string
+          nullable: true
+        campusId:
+          type: integer
+          format: int32
           nullable: true
       additionalProperties: false
     EvaluationApi.Evaluations.V1.EvaluationResponsePaginatedItemsViewModel:
@@ -1397,6 +1405,10 @@ components:
           nullable: true
         campusClassId:
           type: string
+          nullable: true
+        campusId:
+          type: integer
+          format: int32
           nullable: true
       additionalProperties: false
     Microsoft.AspNetCore.Mvc.ValidationProblemDetails:
