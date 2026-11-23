@@ -2415,6 +2415,7 @@ paths:
       tags:
         - Enrollment Admin / Contacts
       summary: Verifies a contact.
+      description: "`registrationId` names the registration the contact was verified from, when it was: the verification is\r\n            then also listed in that registration's activity. It always reaches the contact's own activity."
       operationId: VerifyEnrollmentContact
       parameters:
         - name: tenantId
@@ -2427,6 +2428,12 @@ paths:
           in: path
           description: ''
           required: true
+          schema:
+            type: string
+            format: uuid
+        - name: registrationId
+          in: query
+          description: ''
           schema:
             type: string
             format: uuid
@@ -3690,6 +3697,56 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramTypeResponseDto'
+  '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/activity':
+    get:
+      tags:
+        - Enrollment Admin / Registrations
+      summary: "Lists a Registration's activity - who did what and when, newest first: the parent starting, submitting and\r\nre-submitting it, and staff reopening it, verifying or rejecting its documents, and verifying or acting as\r\nits contacts."
+      operationId: GetEnrollmentRegistrationActivity
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The registration's activity; an empty list when nothing has been logged yet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationActivityResponseDto'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/applications/{applicationId}/accept':
     post:
       tags:
@@ -7928,6 +7985,11 @@ components:
           type: string
           description: Required; recorded in Identity's audit.
           nullable: true
+        registrationId:
+          type: string
+          description: "The registration the admin started from, when they did (US 19544): the impersonation is then also listed in that\r\nregistration's activity. Optional; it never affects whether the session starts."
+          format: uuid
+          nullable: true
       additionalProperties: false
       description: 'The body of an "act as contact" start (spec 2026-10-06 contact impersonation, T2).'
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.StudentContactLinkAttributesDto:
@@ -10160,6 +10222,88 @@ components:
         success:
           type: boolean
       additionalProperties: false
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationActivityEntryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        eventType:
+          type: string
+          nullable: true
+        occurredAt:
+          type: string
+          format: date-time
+          nullable: true
+        actorKind:
+          type: string
+          nullable: true
+        actorId:
+          type: string
+          nullable: true
+        actorName:
+          type: string
+          nullable: true
+        actorRole:
+          type: string
+          nullable: true
+        actorEmail:
+          type: string
+          nullable: true
+        actorPhone:
+          type: string
+          nullable: true
+        registrationFromStatus:
+          type: string
+          nullable: true
+        registrationToStatus:
+          type: string
+          nullable: true
+        contactId:
+          type: string
+          format: uuid
+          nullable: true
+        contactName:
+          type: string
+          nullable: true
+        contactFromStatus:
+          type: string
+          nullable: true
+        contactToStatus:
+          type: string
+          nullable: true
+        documentId:
+          type: string
+          format: uuid
+          nullable: true
+        documentName:
+          type: string
+          nullable: true
+        documentFromStatus:
+          type: string
+          nullable: true
+        documentToStatus:
+          type: string
+          nullable: true
+        rejectReason:
+          type: string
+          nullable: true
+        actedByAdmin:
+          type: boolean
+      additionalProperties: false
+      description: One activity entry.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationActivityResponseDto:
+      type: object
+      properties:
+        count:
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationActivityEntryDto'
+      additionalProperties: false
+      description: "A registration's activity log (US 19544): the audited admin and parent actions on it, newest first.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationActivityResponseDto.Count is the number of entries."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationApplicationAddedResultDto:
       type: object
       properties:
