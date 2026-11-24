@@ -10782,6 +10782,84 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/applications/{applicationId}/eligibility':
+    put:
+      tags:
+        - Enrollment Admin / Registrations
+      summary: "Sets staff's verdict on whether the student meets one Application's program criteria (AB#19812). Body:\r\n`{ \"eligibilityStatus\": \"NotEligible\", \"note\": \"No report card\" }`; the status is NotReviewed, Eligible\r\nor NotEligible, and the note is optional."
+      description: "Only NotEligible keeps the application out of the lottery; one nobody has reviewed goes in. Who set it and\r\nwhen are recorded with it. Returns the whole registration, as M:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentRegistration(System.String,System.String,System.Threading.CancellationToken) does,\r\nwith `eligibilityStatus`, `eligibilityStatusBy`, `eligibilityStatusDateTime` and\r\n`eligibilityNote` on the application."
+      operationId: UpdateEnrollmentRegistrationApplicationEligibility
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: applicationId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationEligibilityRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationEligibilityRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationEligibilityRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationEligibilityRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The application was updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationResponse'
+        '400':
+          description: 'Bad Request. The status is missing or unknown, or the note is longer than 1,000 characters.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/applications/{applicationId}/offer':
     post:
       tags:
@@ -51765,6 +51843,13 @@ components:
           description: "The target Program's record id (as returned in `ProgramMutationResultDto.Id` /\r\n`ProgramDetailDto.Id`), not its business ProgramId/code - unlike every other\r\n`ProgramId` field on the Programs DTOs."
       additionalProperties: false
       description: "The body of adding one Program-seat choice to an existing Registration. See\r\nEnrollmentAdminController.Registrations.AddEnrollmentRegistrationApplication."
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ApplicationEligibilityStatusValue:
+      enum:
+        - NotReviewed
+        - Eligible
+        - NotEligible
+      type: string
+      description: An application's eligibility as a caller sets it (AB#19812). Every application starts NotReviewed.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CapacityChangeRequestDto:
       required:
         - grade
@@ -52245,6 +52330,20 @@ components:
           nullable: true
       additionalProperties: false
       description: 'The optional body of an Application decision (accept, decline, offer, remove).'
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationEligibilityRequestDto:
+      required:
+        - eligibilityStatus
+      type: object
+      properties:
+        eligibilityStatus:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ApplicationEligibilityStatusValue'
+        note:
+          maxLength: 1000
+          type: string
+          description: 'An optional note, such as why the student is not eligible, at most 1,000 characters. It replaces any earlier note.'
+          nullable: true
+      additionalProperties: false
+      description: The body of an Application eligibility verdict (AB#19812).
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityOverrideRequestDto:
       required:
         - priorityOverride
@@ -65557,6 +65656,14 @@ components:
           type: integer
           format: int32
       additionalProperties: false
+    EnrollmentApi.EnrollmentRegistrations.V1.ApplicationEligibilityStatus:
+      enum:
+        - Unspecified
+        - NotReviewed
+        - Eligible
+        - NotEligible
+      type: string
+      description: "Staff's verdict on whether the student meets one program's criteria (AB#19812). Every entry starts\r\nNOT_REVIEWED. UNSPECIFIED is proto3's zero value: the server never sends it and refuses it on a request."
     EnrollmentApi.EnrollmentRegistrations.V1.PathwayMessage:
       type: object
       properties:
@@ -65643,6 +65750,17 @@ components:
           description: "Every priority the application qualifies for, lowest first: [3, 4] for a district employee's\r\nchild (3) with a sibling at the campus (4). Read-only: the priority check stamps it and no\r\nrequest carries it. Empty until the check has run, and when it ran and the application\r\nqualifies for none. priority stays the one number the application competes with."
           nullable: true
           readOnly: true
+        eligibilityStatus:
+          $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.ApplicationEligibilityStatus'
+        eligibilityStatusBy:
+          type: string
+          nullable: true
+        eligibilityStatusDateTime:
+          type: string
+          nullable: true
+        eligibilityNote:
+          type: string
+          nullable: true
       additionalProperties: false
       description: "One Program-seat choice on a Registration - zero-to-many, independently accepted or declined. See\r\nAcceptRegistrationApplication / DeclineRegistrationApplication / GetRegistrationApplications."
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationApplicationsListResponse:
