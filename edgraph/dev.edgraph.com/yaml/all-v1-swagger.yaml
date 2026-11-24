@@ -10944,6 +10944,84 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+  '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/applications/{applicationId}/offerstatus':
+    put:
+      tags:
+        - Enrollment Admin / Registrations
+      summary: "Changes what happened to one Application in the lottery (AB#19813), for example offering a seat to a\r\nwaitlisted student. Body: `{ \"offerStatus\": \"Offered\", \"note\": \"Seat opened up\" }`; the status is\r\nOffered, Waitlisted or NotOffered, and the note is optional."
+      description: "There is no clearing: once an application has a result it is only changed. The waitlist position is left\r\nas it is. Who set it and when are recorded with it. Returns the whole registration, as\r\nM:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentRegistration(System.String,System.String,System.Threading.CancellationToken) does, with `offerStatus`, `offerStatusBy`,\r\n`offerStatusDateTime` and `offerNote` on the application."
+      operationId: UpdateEnrollmentRegistrationApplicationOfferStatus
+      parameters:
+        - name: tenantId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: applicationId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationOfferStatusRequestDto'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationOfferStatusRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationOfferStatusRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationOfferStatusRequestDto'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
+        '200':
+          description: The application was updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationResponse'
+        '400':
+          description: 'Bad Request. The status is missing or unknown, or the note is longer than 1,000 characters.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Microsoft.AspNetCore.Mvc.ValidationProblemDetails'
+        '404':
+          description: The resource could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdGraph.Common.Errors.Core.ProblemDetails'
   '/tenants/{tenantId}/enrollmentadmin/registrations/{id}/applications/{applicationId}/priorityoverride':
     delete:
       tags:
@@ -51850,6 +51928,13 @@ components:
         - NotEligible
       type: string
       description: An application's eligibility as a caller sets it (AB#19812). Every application starts NotReviewed.
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ApplicationOfferStatusValue:
+      enum:
+        - Offered
+        - Waitlisted
+        - NotOffered
+      type: string
+      description: An application's offer status as a caller sets it (AB#19813). NotOffered is shown to parents as "Assigned higher rank".
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CapacityChangeRequestDto:
       required:
         - grade
@@ -52344,6 +52429,20 @@ components:
           nullable: true
       additionalProperties: false
       description: The body of an Application eligibility verdict (AB#19812).
+    EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationOfferStatusRequestDto:
+      required:
+        - offerStatus
+      type: object
+      properties:
+        offerStatus:
+          $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ApplicationOfferStatusValue'
+        note:
+          maxLength: 1000
+          type: string
+          description: 'An optional note, such as why a seat was offered off the waitlist, at most 1,000 characters. It replaces any earlier note.'
+          nullable: true
+      additionalProperties: false
+      description: The body of an Application offer status change (AB#19813). An offer status is never cleared.
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityOverrideRequestDto:
       required:
         - priorityOverride
@@ -65664,6 +65763,14 @@ components:
         - NotEligible
       type: string
       description: "Staff's verdict on whether the student meets one program's criteria (AB#19812). Every entry starts\r\nNOT_REVIEWED. UNSPECIFIED is proto3's zero value: the server never sends it and refuses it on a request."
+    EnrollmentApi.EnrollmentRegistrations.V1.ApplicationOfferStatus:
+      enum:
+        - Unspecified
+        - Offered
+        - Waitlisted
+        - NotOffered
+      type: string
+      description: "What happened to an entry in the lottery (AB#19813). UNSPECIFIED is proto3's zero value: on a response it\r\nmeans no result yet; on a request it is refused, because an offer status is never cleared."
     EnrollmentApi.EnrollmentRegistrations.V1.PathwayMessage:
       type: object
       properties:
@@ -65759,6 +65866,17 @@ components:
           type: string
           nullable: true
         eligibilityNote:
+          type: string
+          nullable: true
+        offerStatus:
+          $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.ApplicationOfferStatus'
+        offerStatusBy:
+          type: string
+          nullable: true
+        offerStatusDateTime:
+          type: string
+          nullable: true
+        offerNote:
           type: string
           nullable: true
       additionalProperties: false
