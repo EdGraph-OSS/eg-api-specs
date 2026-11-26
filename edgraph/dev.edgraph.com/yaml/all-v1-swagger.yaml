@@ -11579,7 +11579,7 @@ paths:
       tags:
         - Enrollment Admin / Registrations
       summary: "Consolidates a Submitted Registration - provisions its Student, links its Contacts and sets its\r\nApplications' statuses."
-      description: "The registration must be Submitted (412 otherwise); its status is not changed - approve it afterwards.\r\nAn `EnrollmentRegistrationConsolidatedEvent` is published.\r\nThe body's `tenantId` and `id` must match the route. The body carries no student or contact\r\nrecord ids: they are generated when the records are created, and written onto the registration.\r\n`student` is required. The student record is matched by `externalDataSourceStudentId`, else\r\n`studentLocalCode`, and updated; when none matches it is created from these fields plus the\r\nregistration's screens (birth date, grade, address), which needs `studentLocalCode`.\r\nEach entry of the `contacts` array needs a `contactEmail`, `contactPhone` or\r\n`externalDataSourceContactId`. The contact record is matched by `externalDataSourceContactId`,\r\nelse by email or phone, and created (Unverified, named from the registration's contact screens) when\r\nnone matches; it is linked to the student, and its id is set on the Registration's matching contact\r\nentry (matched by that id, else the external id, else email or phone), or a new entry is appended.\r\nThe `applications` array sets the status of the Registration's Applications.\r\nThe registration's `school` (`schoolId`, `schoolLocalCode`, `schoolName`) becomes the\r\nschool of the top-ranked Accepted application, replacing the zoned school, and `languageCode`, while still `Unknown`, from the\r\nprimary-language screen answer.\r\nReturns the registration's identity and the `studentId` it provisioned or linked; re-read\r\nthe registration for its state."
+      description: "The registration must be Submitted (412 otherwise); its status is not changed - approve it afterwards.\r\nAn `EnrollmentRegistrationConsolidatedEvent` is published.\r\nThe body's `tenantId` and `id` must match the route. The body carries no student or contact\r\nrecord ids: they are generated when the records are created, and written onto the registration.\r\n`student` is required. The student record is matched by `externalDataSourceStudentId`, else\r\n`studentLocalCode`, and updated; when none matches it is created from these fields plus the\r\nregistration's screens (birth date, grade, address), which needs `studentLocalCode`.\r\nEach entry of the `contacts` array needs a `contactEmail`, `contactPhone` or\r\n`externalDataSourceContactId`. The contact record is matched by `externalDataSourceContactId`,\r\nelse by email or phone, and created (Unverified, named from the registration's contact screens) when\r\nnone matches; it is linked to the student, and its id is set on the Registration's matching contact\r\nentry (matched by that id, else the external id, else email or phone), or a new entry is appended.\r\nThe `applications` array sets the status of the Registration's Applications.\r\nThe registration's `programSchool` becomes the school of the top-ranked Accepted application, with the\r\nprogram's code and name and a zone worked out against the registration's `school`, which is kept as it is\r\n(AB#19864); with no Accepted application the program school is left as it was. The student's `next*`\r\nfields are never written. `languageCode`, while still `Unknown`, is set from the primary-language\r\nscreen answer.\r\nReturns the registration's identity and the `studentId` it provisioned or linked; re-read\r\nthe registration for its state."
       operationId: ConsolidateEnrollmentRegistration
       parameters:
         - name: tenantId
@@ -51917,6 +51917,14 @@ components:
         lastSchoolYearAttended:
           type: string
           nullable: true
+        nextSchoolZone:
+          enum:
+            - InDistrictZoned
+            - InDistrictOutOfZone
+            - OutOfDistrict
+            - Unverified
+          type: string
+          nullable: true
       additionalProperties: false
       description: "The body of `POST .../contacts/{id}/students`: every field of EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertStudentRequestDto\r\n- the student is upserted by EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddContactStudentRequestDto.StudentLocalCode exactly as `POST .../students` does -\r\nplus the link's relationship attributes. The attributes are optional: a new link defaults them\r\n(priority to the next position, the rest to empty/false) and an existing link keeps the ones left out."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.AddOrCreateStudentContactRequestDto:
@@ -53411,6 +53419,14 @@ components:
         lastSchoolYearAttended:
           type: string
           nullable: true
+        nextSchoolZone:
+          enum:
+            - InDistrictZoned
+            - InDistrictOutOfZone
+            - OutOfDistrict
+            - Unverified
+          type: string
+          nullable: true
       additionalProperties: false
       description: "The body of a student update. As EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertStudentRequestDto, contact association is\r\nmanaged exclusively through the `/students/{id}/contacts` sub-resource, not through this call."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.UpsertSchoolRequestDto:
@@ -53677,6 +53693,14 @@ components:
           type: string
           nullable: true
         lastSchoolYearAttended:
+          type: string
+          nullable: true
+        nextSchoolZone:
+          enum:
+            - InDistrictZoned
+            - InDistrictOutOfZone
+            - OutOfDistrict
+            - Unverified
           type: string
           nullable: true
       additionalProperties: false
@@ -56839,6 +56863,9 @@ components:
           nullable: true
         isDeleted:
           type: boolean
+        nextSchoolZone:
+          type: string
+          nullable: true
       additionalProperties: false
       description: "One students roster row. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentListItemResponseDto.StudentId is the student record id, null for a student who so far\r\nexists only on a registration; EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentListItemResponseDto.RegistrationId is that registration, and null on a student record.\r\nBoth are always written, null included."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.StudentListItemResponseDtoPaginatedItemsViewModel:
@@ -56972,6 +56999,9 @@ components:
           nullable: true
         isDeleted:
           type: boolean
+        nextSchoolZone:
+          type: string
+          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.UpdateCapacityResponseDto:
       type: object
@@ -66066,6 +66096,42 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    EnrollmentApi.EnrollmentRegistrations.V1.RegistrationProgramSchoolMessage:
+      type: object
+      properties:
+        schoolId:
+          type: string
+          nullable: true
+        schoolLocalCode:
+          type: string
+          nullable: true
+        schoolName:
+          type: string
+          nullable: true
+        schoolStateShortCode:
+          type: string
+          nullable: true
+        schoolStateCode:
+          type: string
+          nullable: true
+        externalDataSourceSchoolId:
+          type: string
+          nullable: true
+        schoolZone:
+          type: string
+          description: As RegistrationSchoolMessage.schoolZone.
+          nullable: true
+        schoolAddress:
+          type: string
+          nullable: true
+        programCode:
+          type: string
+          nullable: true
+        programName:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: 'The accepted program''s school (AB#19864), kept apart from the zone school; its zone is worked out against it.'
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationResponse:
       type: object
       properties:
@@ -66148,6 +66214,8 @@ components:
         screenCount:
           type: integer
           format: int32
+        programSchool:
+          $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationProgramSchoolMessage'
       additionalProperties: false
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationSchoolMessage:
       type: object
@@ -66170,8 +66238,16 @@ components:
         externalDataSourceSchoolId:
           type: string
           nullable: true
+        schoolZone:
+          type: string
+          description: "How the student stands with this school, by name: InDistrictZoned, InDistrictOutOfZone, OutOfDistrict or\r\nUnverified."
+          nullable: true
+        schoolAddress:
+          type: string
+          description: 'The school record''s address, copied with it.'
+          nullable: true
       additionalProperties: false
-      description: "A registration's next school: a copy of the school's own fields (enrollment-svc-schools), as programs\r\nembed theirs. schoolId is the school record id (unset when no school record matched)."
+      description: "A registration's next school: a copy of the school's own fields (enrollment-svc-schools), as programs\r\nembed theirs. schoolId is the school record id (unset when no school record matched).\r\nThe school the student is zoned or projected to (AB#19864). Always set on a registration: with no school found\r\nonly schoolZone is set."
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationScreenMessage:
       type: object
       properties:
