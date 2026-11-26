@@ -54908,6 +54908,12 @@ components:
           format: int32
         isOutOfDistrictNotAllowed:
           type: boolean
+        programDescription:
+          type: string
+          nullable: true
+        programNextSteps:
+          type: string
+          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramListItemDto:
       type: object
@@ -54952,6 +54958,12 @@ components:
           nullable: true
         isOutOfDistrictNotAllowed:
           type: boolean
+        programDescription:
+          type: string
+          nullable: true
+        programNextSteps:
+          type: string
+          nullable: true
       additionalProperties: false
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramListItemDtoPaginatedItemsViewModel:
       type: object
