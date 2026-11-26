@@ -3119,7 +3119,7 @@ paths:
       tags:
         - Enrollment Admin / Programs
       summary: 'Lists the Registration Applications referencing a Program, ordered by student last name then first name.'
-      description: "`search` matches the student's name or local code, up to 100 characters. The status filters\r\n            (AB#19823) are optional and all hold on the application that names the program, each a name matched\r\n            without regard to case: `eligibilityStatus` NotReviewed, Eligible or NotEligible; `offerStatus`\r\n            Offered, Waitlisted or NotOffered; `decisionStatus` Pending, Accepted, Declined or Expired.\r\n            `count` is the number of applications matching the search and the filters."
+      description: "`search` matches the student's name or local code, up to 100 characters. The status filters\r\n            (AB#19823) are optional and all hold on the application that names the program, each a name matched\r\n            without regard to case: `eligibilityStatus` NotReviewed, Eligible or NotEligible; `offerStatus` Pending,\r\n            Offered, Waitlisted or NotOffered; `decisionStatus` Pending, Accepted, Declined or Expired.\r\n            `count` is the number of applications matching the search and the filters."
       operationId: GetProgramApplications
       parameters:
         - name: tenantId
@@ -4013,7 +4013,7 @@ paths:
     put:
       tags:
         - Enrollment Admin / Registrations
-      summary: "Sets staff's verdict on whether the student meets one Application's program criteria (AB#19812). Body:\r\n`{ \"eligibilityStatus\": \"NotEligible\", \"note\": \"No report card\" }`; the status is NotReviewed, Eligible\r\nor NotEligible, and the note is optional."
+      summary: "Sets staff's verdict on whether the student meets one Application's program criteria (AB#19812). Body:\r\n`{ \"eligibilityStatus\": \"NotEligible\", \"note\": \"No report card\" }`; the status is NotReviewed, Eligible\r\nor NotEligible, and the note is optional. The note replaces any earlier one, so a verdict sent without one\r\nclears it (AB#19843)."
       description: "Only NotEligible keeps the application out of the lottery; one nobody has reviewed goes in. Who set it and\r\nwhen are recorded with it. Returns the whole registration, as M:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentRegistration(System.String,System.String,System.Threading.CancellationToken) does,\r\nwith `eligibilityStatus`, `eligibilityStatusBy`, `eligibilityStatusDateTime` and\r\n`eligibilityNote` on the application."
       operationId: UpdateEnrollmentRegistrationApplicationEligibility
       parameters:
@@ -4091,8 +4091,8 @@ paths:
     put:
       tags:
         - Enrollment Admin / Registrations
-      summary: "Changes what happened to one Application in the lottery (AB#19813), for example offering a seat to a\r\nwaitlisted student. Body: `{ \"offerStatus\": \"Offered\", \"note\": \"Seat opened up\" }`; the status is\r\nOffered, Waitlisted or NotOffered, and the note is optional."
-      description: "There is no clearing: once an application has a result it is only changed. The waitlist position is left\r\nas it is. Who set it and when are recorded with it. Returns the whole registration, as\r\nM:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentRegistration(System.String,System.String,System.Threading.CancellationToken) does, with `offerStatus`, `offerStatusBy`,\r\n`offerStatusDateTime` and `offerNote` on the application."
+      summary: "Changes what happened to one Application in the lottery (AB#19813), for example offering a seat to a\r\nwaitlisted student. Body: `{ \"offerStatus\": \"Offered\" }`; the status is Offered, Waitlisted or\r\nNotOffered. It takes no note (AB#19843)."
+      description: "Every application starts Pending and nothing sets it back (AB#19843): once an application has a result it is\r\nonly changed. The waitlist position is left as it is. Who set it and when are recorded with it. Returns the\r\nwhole registration, as M:EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.EnrollmentAdminController.GetEnrollmentRegistration(System.String,System.String,System.Threading.CancellationToken) does, with `offerStatus`,\r\n`offerStatusBy` and `offerStatusDateTime` on the application."
       operationId: UpdateEnrollmentRegistrationApplicationOfferStatus
       parameters:
         - name: tenantId
@@ -4154,7 +4154,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.RegistrationResponse'
         '400':
-          description: 'Bad Request. The status is missing or unknown, or the note is longer than 1,000 characters.'
+          description: 'Bad Request. The status is missing, unknown or Pending.'
           content:
             application/json:
               schema:
@@ -7513,7 +7513,7 @@ components:
         - Waitlisted
         - NotOffered
       type: string
-      description: An application's offer status as a caller sets it (AB#19813). NotOffered is shown to parents as "Assigned higher rank".
+      description: "An application's offer status as a caller sets it (AB#19813). NotOffered is shown to parents as \"Assigned higher\r\nrank\". Pending is not here: every application starts Pending and nothing sets it back (AB#19843)."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.CapacityChangeRequestDto:
       required:
         - grade
@@ -8028,7 +8028,7 @@ components:
         note:
           maxLength: 1000
           type: string
-          description: 'An optional note, such as why the student is not eligible, at most 1,000 characters. It replaces any earlier note.'
+          description: 'An optional note, such as why the student is not eligible, at most 1,000 characters. It replaces any earlier note, so a verdict sent without one clears it.'
           nullable: true
       additionalProperties: false
       description: The body of an Application eligibility verdict (AB#19812).
@@ -8039,13 +8039,8 @@ components:
       properties:
         offerStatus:
           $ref: '#/components/schemas/EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.ApplicationOfferStatusValue'
-        note:
-          maxLength: 1000
-          type: string
-          description: 'An optional note, such as why a seat was offered off the waitlist, at most 1,000 characters. It replaces any earlier note.'
-          nullable: true
       additionalProperties: false
-      description: The body of an Application offer status change (AB#19813). An offer status is never cleared.
+      description: "The body of an Application offer status change (AB#19813). Nothing sets an application back to Pending, and it\r\ntakes no note (AB#19843)."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Requests.EnrollmentAdmin.RegistrationApplicationPriorityOverrideRequestDto:
       required:
         - priorityOverride
@@ -10263,7 +10258,7 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-      description: "One Registration Application referencing this program - see\r\nEnrollmentAdminController.Programs.GetProgramApplications. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramApplicationDto.OfferStatus is null until a lottery\r\nresult or staff sets one (AB#19823)."
+      description: "One Registration Application referencing this program - see\r\nEnrollmentAdminController.Programs.GetProgramApplications. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramApplicationDto.OfferStatus is Pending until a lottery\r\nresult or staff sets one (AB#19823, AB#19843)."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.ProgramApplicationsPageDto:
       type: object
       properties:
@@ -10779,7 +10774,7 @@ components:
         decisionStatus:
           type: string
       additionalProperties: false
-      description: "An application on a list row. Its EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.EligibilityStatus (NotReviewed, Eligible, NotEligible),\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.OfferStatus (Offered, Waitlisted, NotOffered; null until a result exists) and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.DecisionStatus\r\n(Pending, Accepted, Declined, Expired) replaced the single application status (AB#19823). The program\r\nfields are absent when the program is deleted or unreadable. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.SeatStatus is `Accepting`,\r\n`WaitlistOnly`, `NotAccepting` or `Unavailable`. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.Priority is the calculated\r\npriority and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.PriorityOverride an admin's override of it, kept apart. They and\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.ProgramRank are as on the record, absent until set.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.QualifiedPriorities is every priority the application qualifies for, lowest first; it is\r\nempty until the priority check has run, and when the application qualifies for none. Read-only."
+      description: "An application on a list row. Its EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.EligibilityStatus (NotReviewed, Eligible, NotEligible),\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.OfferStatus (Pending until a result exists - AB#19843 - then Offered, Waitlisted or NotOffered) and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.DecisionStatus\r\n(Pending, Accepted, Declined, Expired) replaced the single application status (AB#19823). The program\r\nfields are absent when the program is deleted or unreadable. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.SeatStatus is `Accepting`,\r\n`WaitlistOnly`, `NotAccepting` or `Unavailable`. EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.Priority is the calculated\r\npriority and EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.PriorityOverride an admin's override of it, kept apart. They and\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.ProgramRank are as on the record, absent until set.\r\nEdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListApplicationDto.QualifiedPriorities is every priority the application qualifies for, lowest first; it is\r\nempty until the priority check has run, and when the application qualifies for none. Read-only."
     EdGraph.HttpAggregators.Tenant.Api.Controllers.v1.ViewModels.Responses.EnrollmentAdmin.RegistrationListItemDto:
       type: object
       properties:
@@ -11815,8 +11810,9 @@ components:
         - Offered
         - Waitlisted
         - NotOffered
+        - Pending
       type: string
-      description: "What happened to an entry in the lottery (AB#19813). UNSPECIFIED is proto3's zero value: on a response it\r\nmeans no result yet; on a request it is refused, because an offer status is never cleared."
+      description: "What happened to an entry in the lottery (AB#19813). Every entry starts PENDING (AB#19843), so UNSPECIFIED\r\nnever appears on a response. On a request UNSPECIFIED and PENDING are refused: nothing sets an entry back to\r\nPENDING. While an entry is PENDING the family may reorder or remove it; after that, neither."
     EnrollmentApi.EnrollmentRegistrations.V1.PathwayMessage:
       type: object
       properties:
@@ -11900,6 +11896,7 @@ components:
           nullable: true
         eligibilityNote:
           type: string
+          description: "Staff's note on the verdict, such as why the student is not eligible. Replaced with each verdict, so it\r\nalways explains the current one; unset when there is none."
           nullable: true
         offerStatus:
           $ref: '#/components/schemas/EnrollmentApi.EnrollmentRegistrations.V1.ApplicationOfferStatus'
@@ -11907,9 +11904,6 @@ components:
           type: string
           nullable: true
         offerStatusDateTime:
-          type: string
-          nullable: true
-        offerNote:
           type: string
           nullable: true
         decisionStatus:
