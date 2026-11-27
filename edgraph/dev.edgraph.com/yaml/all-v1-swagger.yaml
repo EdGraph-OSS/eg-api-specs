@@ -66049,6 +66049,9 @@ components:
           description: "The application's place on the program's waitlist, 1 first. Read-only: no request carries it. Unset when the\r\napplication has no waitlist position."
           format: int32
           nullable: true
+        siblingAttending:
+          type: boolean
+          description: "A sibling is going next year to the school of this application's program (AB#19756): another student linked to\r\none of the registration's contacts has it as their next school. Set when the registration is submitted; false\r\nuntil then and when there is none. Read-only: no request carries it."
       additionalProperties: false
       description: "One Program-seat choice on a Registration - zero-to-many, independently accepted or declined. See\r\nAcceptRegistrationApplication / DeclineRegistrationApplication / GetRegistrationApplications."
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationApplicationsListResponse:
