@@ -7974,7 +7974,7 @@ paths:
             format: uuid
         - name: schoolYear
           in: query
-          description: Optional. Defaults to the district's current school year.
+          description: 'Optional. Defaults to the district''s next school year, the only year capacity is set for.'
           schema:
             type: string
             default: ''
