@@ -66044,6 +66044,11 @@ components:
           type: string
           description: "The family's deadline to answer the offer (AB#19823), ISO 8601: 14 days after offerStatus became OFFERED. Unset\r\nwhile the application is not offered."
           nullable: true
+        waitlistPosition:
+          type: integer
+          description: "The application's place on the program's waitlist, 1 first. Read-only: no request carries it. Unset when the\r\napplication has no waitlist position."
+          format: int32
+          nullable: true
       additionalProperties: false
       description: "One Program-seat choice on a Registration - zero-to-many, independently accepted or declined. See\r\nAcceptRegistrationApplication / DeclineRegistrationApplication / GetRegistrationApplications."
     EnrollmentApi.EnrollmentRegistrations.V1.RegistrationApplicationsListResponse:
